@@ -1,0 +1,11 @@
+<h3>{{ tableName }}</h3>
+<table #rowsContainer>
+  <tr #columnsContainer>
+    <th>Name</th>
+    <button (click)="addNewColumn()">+</button>
+  </tr>
+  <tr>
+    <td>...</td>
+  </tr>
+  <button (click)="addNewRow()">+</button>
+</table>
