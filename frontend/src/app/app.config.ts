@@ -4,10 +4,15 @@ import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 import { provideHttpClient } from '@angular/common/http';
 
+/*
+ * Backend api url prefix
+ */
+export const BASE_URL = 'http://127.0.0.1:8080';
+
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideHttpClient()
-  ]
+  ],
 };
