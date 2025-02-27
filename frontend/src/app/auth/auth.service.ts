@@ -17,12 +17,11 @@ export class AuthService {
   /**
    * Log in the application
    */
-  login(username: string, password: string): Observable<void> {
+  login(email: string, password: string): Observable<void> {
     return this.http.post<void>(
       `${BASE_URL}/api/login`,
-      { username, password },
-      // { withCredentials: true }
-      { responseType: 'json' }
+      { email, password },
+      {responseType: 'json', withCredentials: true }
     );
   }
 
@@ -30,6 +29,6 @@ export class AuthService {
    * Log out from the app
    */
   logout(): Observable<void> {
-    return this.http.post<void>(`/api/logout`, {}, { withCredentials: true });
+    return this.http.post<void>(`${BASE_URL}/api/logout`, {});
   }
 }

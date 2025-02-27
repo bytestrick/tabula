@@ -1,5 +1,14 @@
-<form>
-  <input [(ngModel)]="username" name="username" placeholder="Username">
-  <input [(ngModel)]="password" name="password" type="password" placeholder="Password">
-  <button (click)="login()">Log in</button>
+<form (submit)="login($event)" class="row g-2 needs-validation" novalidate>
+  <div>
+    <label for="email-input" class="form-label">Email address</label>
+    <input id="email-input" class="form-control" type="email" [(ngModel)]="email" name="email"
+      placeholder="john.doe@example.com" required>
+    <div class="invalid-feedback">You must provide a valid email address.</div>
+  </div>
+  <div class="mb-4">
+    <label for="pass-input" class="form-label">Password</label>
+    <input id="pass-input" class="form-control" [(ngModel)]="password" name="password" type="password" required>
+    <div class="invalid-feedback">Password required</div>
+  </div>
+  <button type="submit" class="btn btn-primary">Log in</button>
 </form>

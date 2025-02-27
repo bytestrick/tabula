@@ -14,19 +14,34 @@ export class LoginComponent {
   auth = inject(AuthService);
   router = inject(Router);
 
-  username = '';
+  email = '';
   password = '';
+
+  private static credentialsAreValid(event: Event): boolean {
+    const form = event.target as HTMLFormElement;
+    form.classList.add('was-validated');
+    if (!form.checkValidity()) {
+      event.preventDefault();
+      event.stopPropagation();
+      return false;
+    }
+    return true;
+  }
 
   /**
    * Basic login with credentials, is a proxy for the injected {@link AuthService}
    */
-  login() {
-    this.auth.login(this.username, this.password).subscribe({
-      next: () => {
-        this.router.navigate(["/"]);
-        console.info(`Logged in as ${this.username}`);
-      },
-      error: (err) => console.error(err),
-    });
+  login(event: Event) {
+    if (LoginComponent.credentialsAreValid(event)) {
+      this.auth.login(this.email, this.password).subscribe({
+        next: (res) => {
+          // TODO: begin an HTML session on successful login
+          console.log(res);
+          this.router.navigate(['/']);
+          console.log(`Logged in as ${this.email}`);
+        },
+        error: (err) => console.error(`Error logging in: ${err}`),
+      });
+    }
   }
 }
