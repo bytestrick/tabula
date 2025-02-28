@@ -14,7 +14,7 @@ export class AppComponent {
   }
 
   /**
-   * Sync the app color scheme with the os color scheme
+   * Sync the app color scheme with the OS color scheme
    */
   private static updateColorScheme() {
     const darkColorSchemeQuery = window.matchMedia('(prefers-color-scheme: dark)');

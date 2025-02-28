@@ -26,6 +26,6 @@ public class UserController {
         return "Logout successful";
     }
 
-    private static record LoginBody(String username, String password) {
+    private record LoginBody(String username, String password) {
     }
 }
