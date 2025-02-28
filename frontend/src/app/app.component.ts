@@ -8,4 +8,20 @@ import { RouterOutlet } from '@angular/router';
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
-export class AppComponent { }
+export class AppComponent {
+  ngOnInit() {
+    AppComponent.updateColorScheme();
+  }
+
+  /**
+   * Sync the app color scheme with the os color scheme
+   */
+  private static updateColorScheme() {
+    const darkColorSchemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const onChange = (isDark: boolean) => {
+      document.documentElement.setAttribute('data-bs-theme', isDark ? 'dark' : 'light');
+    }
+    darkColorSchemeQuery.addEventListener('change', e => onChange(e.matches));
+    onChange(darkColorSchemeQuery.matches); // at first load
+  }
+}
