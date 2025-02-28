@@ -3,12 +3,17 @@
     <label for="email-input" class="form-label">Email address</label>
     <input id="email-input" class="form-control" type="email" [(ngModel)]="email" name="email"
       placeholder="john.doe@example.com" required>
-    <div class="invalid-feedback">You must provide a valid email address.</div>
+    <div class="invalid-feedback">A valid email address is required</div>
   </div>
   <div class="mb-4">
     <label for="pass-input" class="form-label">Password</label>
-    <input id="pass-input" class="form-control" [(ngModel)]="password" name="password" type="password" required>
-    <div class="invalid-feedback">Password required</div>
+    <div class="input-group has-validation">
+      <input id="pass-input" class="form-control" [(ngModel)]="password" name="password" type="password" required>
+      <button id="pass-visible" type="button" class="btn btn-outline-secondary" (click)="togglePasswordVisibility()">
+        <i class="bi bi-eye" id="eye-icon"></i>
+      </button>
+      <div class="invalid-feedback">Password required</div>
+    </div>
   </div>
   <button type="submit" class="btn btn-primary">Log in</button>
 </form>

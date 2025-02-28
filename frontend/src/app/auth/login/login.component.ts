@@ -17,6 +17,23 @@ export class LoginComponent {
   email = '';
   password = '';
 
+  togglePasswordVisibility() {
+    const input = document.querySelector('#pass-input') as HTMLInputElement;
+    const show = document.querySelector('#eye-icon') as HTMLElement;
+    const button = document.querySelector('#pass-visible') as HTMLElement;
+    if (input.type === 'password') {
+      input.type = 'text';
+      button.classList.add('active');
+      show.classList.remove('bi-eye');
+      show.classList.add('bi-eye-slash');
+    } else {
+      button.classList.remove('active');
+      input.type = 'password';
+      show.classList.add('bi-eye');
+      show.classList.remove('bi-eye-slash');
+    }
+  }
+
   private static credentialsAreValid(event: Event): boolean {
     const form = event.target as HTMLFormElement;
     form.classList.add('was-validated');
@@ -40,6 +57,7 @@ export class LoginComponent {
           this.router.navigate(['/']);
           console.log(`Logged in as ${this.email}`);
         },
+        // TODO: branch and show visual indicator on wrong credentials
         error: (err) => console.error(`Error logging in: ${err}`),
       });
     }
