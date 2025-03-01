@@ -1,34 +1,30 @@
 <h3>{{ tableName }}</h3>
 
-@if (isEmpty) { <!-- Mostra una preview se la tabella è vuota -->
-  <table class="table table-striped">
+<div class="table-responsive">
+  <table class="table table-striped table-hover">
     <thead>
-    <tr>
-      <th>Header</th>
-      <th class="button-cell"><button class="btn btn-primary" type="button" (click)="addNewColumn()">+</button></th>
-    </tr>
+      <tr>
+        <th *ngFor="let dataTypes of dataTypesIcons" [innerHTML]="dataTypes.outerHTML"></th>
+        <th class="button-cell">
+          <button class="btn btn-primary" type="button" (click)="addNewColumn()">
+            <i class="bi bi-plus"></i>
+          </button>
+        </th>
+      </tr>
     </thead>
     <tbody>
-    <tr>
-      <td>data</td>
-    </tr>
-    <button class="btn btn-primary" type="button" (click)="addNewRow()">+</button>
-    </tbody>
-  </table>
-} @else {
-  <table class="table table-striped">
-    <thead>
-      <tr #columnsContainer>
-        <th>Header</th>
-        <th class="button-cell"><button class="btn btn-primary" type="button" (click)="addNewColumn()">+</button></th>
+      <tr *ngFor="let row of tableElement">
+        <td *ngFor="let cell of row; let colIndex = index" [innerHTML]="cell.outerHTML" (dblclick)="onCellDoubleClick($event, colIndex)"></td>
       </tr>
-    </thead>
-    <tbody #rowsContainer>
       <tr>
-        <td>...</td>
+        <td [attr.colspan]="colspan">
+          <button class="btn btn-primary" type="button" (click)="addNewRow()">
+            <i class="bi bi-plus"></i>
+          </button>
+        </td>
       </tr>
-      <button class="btn btn-primary" type="button" (click)="addNewRow()">+</button>
     </tbody>
   </table>
-}
+</div>
 
+<app-pop-up #popUp *ngIf="isInputMethodVisible" (close)="hideInputMethod()" [position]="inputMethodPosition" [inputComponent]="inputComponent"></app-pop-up>

@@ -1,0 +1,6 @@
+<div class="popup-overlay" (click)="closePopup()">
+  <div #popUpContainer class="popup-content" (click)="$event.stopPropagation()">
+    <ng-container [ngComponentOutlet]="inputComponent"></ng-container>
+  </div>
+</div>
+

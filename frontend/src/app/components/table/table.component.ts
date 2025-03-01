@@ -1,82 +1,105 @@
-import {Component, ElementRef, ViewChild, Renderer2} from '@angular/core';
+import {Component, OnInit, Renderer2, Type} from '@angular/core';
+import {Table} from '../../model/table';
+import {IDataType} from '../../model/data-type.interface';
+import {NgForOf, NgIf} from '@angular/common';
+import {TextualDataType} from '../../model/concrete-data-type/textual-data-type';
+import {PopUpComponent} from '../pop-up/pop-up.component';
+import {Pair} from '../../types/pair';
+import {IInputComponent} from '../../model/input-component.interface';
 
 @Component({
   selector: 'app-table',
   standalone: true,
-  imports: [],
+  imports: [
+    NgForOf,
+    PopUpComponent,
+    NgIf,
+  ],
   templateUrl: './table.component.html',
   styleUrl: './table.component.css'
 })
-export class TableComponent {
-
-  @ViewChild('columnsContainer') columnsContainer!: ElementRef;
-  @ViewChild('rowsContainer') rowsContainer!: ElementRef;
+export class TableComponent implements OnInit {
 
   tableName = "New Table";
-  isEmpty = true;
+  dataTypesIcons!: HTMLElement[];
+  tableElement!: HTMLElement[][];
+  colspan: number = 1;
+
+  isInputMethodVisible: boolean = false;
+  inputMethodPosition: Pair<number, number> = { first: 0, second: 0 };
+  inputComponent: Type<IInputComponent> | null = null;
+
+  private table: Table = new Table();
 
 
-  constructor(private renderer2: Renderer2) {}
-
-
-  getColumnsNumber(): number {
-    return this.columnsContainer.nativeElement.children.length - 1;
+  constructor(private renderer: Renderer2) {
+    this.table.addNewDataType(new TextualDataType(this.renderer));
+    this.table.addNewRow();
   }
 
 
-  getRowsNumber(): number {
-    return this.rowsContainer.nativeElement.children.length - 1;
+  ngOnInit(): void {
+    this.dataTypesIcons = this.getAllDataTypesIcons();
+    this.tableElement = this.getAllTableElements();
   }
 
 
-  private createCell(): HTMLElement {
-    const rowData = this.renderer2.createElement('td');
-    const text = this.renderer2.createText('...');
+  // Per ogni tipo di dato presente nella tabella ritorna il componente html che lo visualizza.
+  getAllDataTypesIcons(): HTMLElement[] {
+    const dataTypes: IDataType[] = this.table.getDataTypes();
+    const dataTypesIcons: HTMLElement[] = [];
 
-    this.renderer2.appendChild(rowData, text);
-
-    return rowData;
-  }
-
-
-  addNewColumn(): void {
-    if (this.isEmpty) {
-      this.isEmpty = false;
-      return;
+    for (let dataType of dataTypes) {
+      dataTypesIcons.push(dataType.getDataTypeIcon());
     }
 
-    const columnsNumber = this.getColumnsNumber();
-    const columnsContainer = this.columnsContainer.nativeElement;
-    const rowsContainer = this.rowsContainer.nativeElement;
-    const newColumn = this.renderer2.createElement('th');
-    const text = this.renderer2.createText('Header' + columnsNumber.toString());
+    return dataTypesIcons;
+  }
 
-    this.renderer2.appendChild(newColumn, text);
 
-    for (let i = 0; i < this.getRowsNumber(); ++i) {
-      this.renderer2.appendChild(rowsContainer.children[i], this.createCell());
+  getAllTableElements(): HTMLElement[][] {
+    const tableElement: HTMLElement[][] = [];
+
+    for (let i: number = 0; i < this.table.getRowSize(); ++i) {
+      tableElement.push([]);
+
+      for (let j: number = 0; j < this.table.getDataTypesAmount(); ++j) {
+        tableElement[i].push(this.table.getDataType(j).getDataTypeHTML())
+      }
     }
 
-    this.renderer2.insertBefore(columnsContainer, newColumn, columnsContainer.children[columnsNumber])
+    return tableElement;
   }
 
 
   addNewRow(): void {
-    if (this.isEmpty) {
-      this.isEmpty = false;
-      return;
-    }
+    this.table.addNewRow();
+    this.tableElement = this.getAllTableElements(); // TODO: fare l'aggiornamente delle righe in modo più efficente.
+  }
 
-    const columnsNumber = this.getColumnsNumber();
-    const rowsNumber = this.getRowsNumber();
-    const rowsContainer = this.rowsContainer.nativeElement;
-    const newRow = this.renderer2.createElement('tr');
 
-    for (let i = 0; i < columnsNumber - 1; ++i) {
-      this.renderer2.appendChild(newRow, this.createCell());
-    }
+  addNewColumn(): void {
+    this.table.addNewDataType(new TextualDataType(this.renderer));
+    this.dataTypesIcons = this.getAllDataTypesIcons();
+    this.tableElement = this.getAllTableElements(); // TODO: fare l'aggiornamente delle righe in modo più efficente.
+    ++this.colspan;
+  }
 
-    this.renderer2.appendChild(newRow, this.createCell());
-    this.renderer2.insertBefore(rowsContainer, newRow, rowsContainer.children[rowsNumber])
+
+  onCellDoubleClick(event: MouseEvent, colIndex: number): void {
+    const dataType: IDataType = this.table.getDataType(colIndex);
+    this.inputComponent = dataType.getInputComponent();
+    this.showInputMethod(event.x, event.y);
+  }
+
+
+  showInputMethod(x: number, y: number): void {
+    this.isInputMethodVisible = true;
+    this.inputMethodPosition = { first: x, second: y };
+  }
+
+
+  hideInputMethod(): void {
+    this.isInputMethodVisible = false;
   }
 }
