@@ -1,10 +1,11 @@
 import {Component, OnInit} from '@angular/core';
 import {RouterOutlet} from '@angular/router';
 import {ToastComponent} from './toast/toast.component';
+import {HomeComponent} from './home/home.component';
 
 @Component({
   selector: 'tbl-root',
-  imports: [RouterOutlet, ToastComponent],
+  imports: [RouterOutlet, ToastComponent, HomeComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
