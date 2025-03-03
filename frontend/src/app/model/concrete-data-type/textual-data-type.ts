@@ -1,14 +1,16 @@
 import {IDataType} from '../data-type.interface';
-import { IInputComponent } from '../input-component.interface';
+import { BaseInputComponent } from '../../components/input-components/base-input-component';
 import {Renderer2, Type} from '@angular/core';
-import {TextInputComponent} from '../../components/text-input/text-input.component';
+import {TextInputComponent} from '../../components/input-components/text-input/text-input.component';
+import {BaseCellComponent} from '../../components/table/cells/base-cell-component';
+import {TextualCellComponent} from '../../components/table/cells/textual-cell/textual-cell.component';
 
 export class TextualDataType implements IDataType {
 
   constructor(private renderer: Renderer2) {}
 
 
-  getInputComponent(): Type<IInputComponent> {
+  getInputComponent(): Type<BaseInputComponent> {
     return TextInputComponent;
   }
 
@@ -31,11 +33,7 @@ export class TextualDataType implements IDataType {
   }
 
 
-  getDataTypeHTML(): HTMLElement {
-    const div: HTMLElement = this.renderer.createElement('div');
-
-    this.renderer.appendChild(div, this.renderer.createText('data'));
-
-    return div;
+  getCellComponent(): Type<BaseCellComponent> {
+    return TextualCellComponent;
   }
 }
