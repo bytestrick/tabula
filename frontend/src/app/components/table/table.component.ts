@@ -1,35 +1,47 @@
-import {Component, OnInit, Renderer2, Type} from '@angular/core';
+import {
+  Component, ComponentRef,
+  OnInit, QueryList,
+  Renderer2,
+  Type,
+  ViewChildren,
+} from '@angular/core';
 import {Table} from '../../model/table';
 import {IDataType} from '../../model/data-type.interface';
 import {NgForOf, NgIf} from '@angular/common';
 import {TextualDataType} from '../../model/concrete-data-type/textual-data-type';
-import {PopUpComponent} from '../pop-up/pop-up.component';
+import {InputPopUpComponent} from '../input-pop-up/input-pop-up.component';
 import {Pair} from '../../types/pair';
-import {IInputComponent} from '../../model/input-component.interface';
+import {BaseInputComponent} from '../input-components/base-input-component';
+import {BaseCellComponent} from './cells/base-cell-component';
+import {CellWrapperComponent} from './cells/cell-wrapper/cell-wrapper.component';
 
 @Component({
   selector: 'app-table',
   standalone: true,
   imports: [
     NgForOf,
-    PopUpComponent,
+    InputPopUpComponent,
     NgIf,
+    CellWrapperComponent,
   ],
   templateUrl: './table.component.html',
   styleUrl: './table.component.css'
 })
 export class TableComponent implements OnInit {
 
+  @ViewChildren('tableBody') tableBodyChildren!: QueryList<ComponentRef<any>>;
+
   tableName = "New Table";
   dataTypesIcons!: HTMLElement[];
-  tableElement!: HTMLElement[][];
+  tableRows!: Type<BaseCellComponent>[][];
   colspan: number = 1;
 
   isInputMethodVisible: boolean = false;
   inputMethodPosition: Pair<number, number> = { first: 0, second: 0 };
-  inputComponent: Type<IInputComponent> | null = null;
+  inputComponent: Type<BaseInputComponent> | null = null;
 
   private table: Table = new Table();
+  private cellSelected: ComponentRef<BaseCellComponent> | null = null;
 
 
   constructor(private renderer: Renderer2) {
@@ -40,7 +52,7 @@ export class TableComponent implements OnInit {
 
   ngOnInit(): void {
     this.dataTypesIcons = this.getAllDataTypesIcons();
-    this.tableElement = this.getAllTableElements();
+    this.tableRows = this.getAllTableCells();
   }
 
 
@@ -57,14 +69,14 @@ export class TableComponent implements OnInit {
   }
 
 
-  getAllTableElements(): HTMLElement[][] {
-    const tableElement: HTMLElement[][] = [];
+  getAllTableCells(): Type<BaseCellComponent>[][] {
+    const tableElement: Type<BaseCellComponent>[][] = [];
 
     for (let i: number = 0; i < this.table.getRowSize(); ++i) {
       tableElement.push([]);
 
       for (let j: number = 0; j < this.table.getDataTypesAmount(); ++j) {
-        tableElement[i].push(this.table.getDataType(j).getDataTypeHTML())
+        tableElement[i].push(this.table.getDataType(j).getCellComponent())
       }
     }
 
@@ -74,21 +86,22 @@ export class TableComponent implements OnInit {
 
   addNewRow(): void {
     this.table.addNewRow();
-    this.tableElement = this.getAllTableElements(); // TODO: fare l'aggiornamente delle righe in modo più efficente.
+    this.tableRows = this.getAllTableCells(); // TODO: fare l'aggiornamento delle righe in modo più efficente.
   }
 
 
   addNewColumn(): void {
     this.table.addNewDataType(new TextualDataType(this.renderer));
     this.dataTypesIcons = this.getAllDataTypesIcons();
-    this.tableElement = this.getAllTableElements(); // TODO: fare l'aggiornamente delle righe in modo più efficente.
+    this.tableRows = this.getAllTableCells(); // TODO: fare l'aggiornamento delle righe in modo più efficente.
     ++this.colspan;
   }
 
 
-  onCellDoubleClick(event: MouseEvent, colIndex: number): void {
+  onCellDoubleClick(event: MouseEvent, colIndex: number, cell: ComponentRef<BaseCellComponent> | null): void {
     const dataType: IDataType = this.table.getDataType(colIndex);
-    this.inputComponent = dataType.getInputComponent();
+    this.inputComponent = dataType.getInputComponent(); // Assegna il metodo di input corretto in base al tipo presente sulla colonna corrispondente.
+    this.cellSelected = cell;
     this.showInputMethod(event.x, event.y);
   }
 
@@ -99,7 +112,11 @@ export class TableComponent implements OnInit {
   }
 
 
-  hideInputMethod(): void {
+  onInputPopUpClosed(value: any): void {
+    if (!(value === null))
+      this.cellSelected?.instance?.setValue(value);
+
+    this.cellSelected = null;
     this.isInputMethodVisible = false;
   }
 }

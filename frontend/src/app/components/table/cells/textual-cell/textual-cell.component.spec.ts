@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { PopUpComponent } from './pop-up.component';
+import { TextualCellComponent } from './textual-cell.component';
 
-describe('PopUpComponent', () => {
-  let component: PopUpComponent;
-  let fixture: ComponentFixture<PopUpComponent>;
+describe('TextualCellComponent', () => {
+  let component: TextualCellComponent;
+  let fixture: ComponentFixture<TextualCellComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PopUpComponent]
+      imports: [TextualCellComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(PopUpComponent);
+    fixture = TestBed.createComponent(TextualCellComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
