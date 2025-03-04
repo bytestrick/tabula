@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ComponentRef, Input, Type, ViewChild, ViewContainerRef} from '@angular/core';
+import {AfterViewInit, Component, ComponentRef, Input, OnInit, Type, ViewChild, ViewContainerRef} from '@angular/core';
 import {BaseCellComponent} from '../base-cell-component';
 
 @Component({
