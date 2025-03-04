@@ -1,1 +1,41 @@
-<p>home works!</p>
+<main>
+  <div class="m-2 row g-1 row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4">
+    <!-- Create table card -->
+    <div class="col">
+      <div class="card" style="height: 22rem;">
+        <div class="card-header">
+          <h5 class="card-title mb-3">Create new table</h5>
+        </div>
+        <div class="card-body overflow-y-scroll">
+
+          <form #createTableCardForm id="createTableCardFormId" class="needs-validation" novalidate (ngSubmit)="createTableCard()">
+            <div class="form-floating mb-3">
+              <input type="text" class="form-control" id="floatingInput" placeholder="Title" required [(ngModel)]="title" name="title">
+              <label for="floatingInput">Title</label>
+              <div class="valid-feedback">
+                Looks good!
+              </div>
+              <div class="invalid-feedback">
+                Title can not be empty.
+              </div>
+            </div>
+
+            <div class="form-floating">
+              <textarea class="form-control" placeholder="Description" id="floatingTextarea" [(ngModel)]="description" name="description"></textarea>
+              <label for="floatingTextarea">Description</label>
+              <div class="valid-feedback">
+                Looks good!
+              </div>
+            </div>
+          </form>
+
+        </div>
+        <div class="card-footer text-end">
+          <button type="button" class="btn btn-outline-secondary me-1 mb-1" (click)="cancelCreateTableCard()">Cancel</button>
+          <button type="submit" form="createTableCardFormId" class="btn btn-outline-primary me-1 mb-1">Create</button>
+        </div>
+      </div>
+    </div>
+    <ng-container #tableCardContainer></ng-container>
+  </div>
+</main>
