@@ -1,4 +1,4 @@
-import {Component, ElementRef, ViewChild} from '@angular/core';
+import {Component, ComponentRef, ElementRef, ViewChild, ViewContainerRef} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {NgIf} from '@angular/common';
 
@@ -18,8 +18,15 @@ export class TableCardComponent {
   protected formTitle: String = '';
   protected formDescription: String = '';
   protected inEditMode: boolean = false;
+  private ref!: ComponentRef<TableCardComponent>;
 
   @ViewChild('editTableCardForm') private form!: ElementRef<HTMLFormElement>;
+
+  public static create(containerRef: ViewContainerRef): ComponentRef<TableCardComponent> {
+    let newTableCard: ComponentRef<TableCardComponent> = containerRef.createComponent(TableCardComponent);
+    newTableCard.instance.ref = newTableCard;
+    return newTableCard;
+  }
 
   public edit(): void {
     this.formTitle = this.title;
@@ -54,5 +61,9 @@ export class TableCardComponent {
 
   public setDescription(description: String): void {
     this.description = description;
+  }
+
+  public delete(): void {
+    this.ref.destroy();
   }
 }

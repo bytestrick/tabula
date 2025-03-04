@@ -28,7 +28,7 @@ export class HomeComponent {
         console.error("tableCardContainer è undefined, impossibile creare il componente.");
         return;
       }
-      let newTableCard: ComponentRef<TableCardComponent> = this.tableCardContainerRef.createComponent(TableCardComponent);
+      let newTableCard: ComponentRef<TableCardComponent> = TableCardComponent.create(this.tableCardContainerRef);
       newTableCard.instance.setTitle(this.title);
       newTableCard.instance.setDescription(this.description);
 

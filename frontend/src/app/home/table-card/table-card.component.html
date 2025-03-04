@@ -1,6 +1,6 @@
 <div class="col">
   <div class="card overflow-hidden" style="height: 22rem;">
-    <div class="card-body">
+    <div class="card-body overflow-y-scroll">
       <div *ngIf="!inEditMode; else showEditTableCardForm">
         <h5 class="card-title">{{ title }}</h5>
         <p class="card-text">{{ description }}</p>
@@ -27,11 +27,10 @@
         </form>
       </ng-template>
     </div>
-    <div style="height: 100%"></div> <!-- filler verticale per spostare in basso i bottoni -->
     <div class="card-footer text-end">
       <div *ngIf="!inEditMode; else showButton">
         <button type="button" class="btn btn-outline-primary me-1 mb-1" (click)="edit()">Edit</button>
-        <button type="button" class="btn btn-outline-danger me-1 mb-1">Delete</button>
+        <button type="button" class="btn btn-outline-danger me-1 mb-1" (click)="delete()">Delete</button>
       </div>
       <ng-template #showButton>
         <button type="button" class="btn btn-outline-secondary me-1 mb-1" (click)="cancelEdit()">Cancel</button>
