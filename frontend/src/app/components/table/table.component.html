@@ -6,14 +6,14 @@
       <tr>
         <th *ngFor="let dataTypes of dataTypesIcons" [innerHTML]="dataTypes.outerHTML"></th>
         <th class="button-cell">
-          <button class="btn btn-primary" type="button" (click)="addNewColumn()">
+          <button class="btn btn-primary" type="button" (click)="onAddNewColumn()">
             <i class="bi bi-plus"></i>
           </button>
         </th>
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let row of tableRows">
+      <tr *ngFor="let row of rows">
         <td *ngFor="let cell of row; let colIndex = index">
           <app-cell-wrapper
             #cellWrapper
@@ -24,7 +24,7 @@
       </tr>
       <tr>
         <td [attr.colspan]="colspan">
-          <button class="btn btn-primary" type="button" (click)="addNewRow()">
+          <button class="btn btn-primary" type="button" (click)="onAddNewRow()">
             <i class="bi bi-plus"></i>
           </button>
         </td>

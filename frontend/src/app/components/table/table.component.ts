@@ -1,9 +1,8 @@
 import {
   Component, ComponentRef,
-  OnInit, QueryList,
+  OnInit,
   Renderer2,
   Type,
-  ViewChildren,
 } from '@angular/core';
 import {Table} from '../../model/table';
 import {IDataType} from '../../model/data-type.interface';
@@ -29,11 +28,9 @@ import {CellWrapperComponent} from './cells/cell-wrapper/cell-wrapper.component'
 })
 export class TableComponent implements OnInit {
 
-  @ViewChildren('tableBody') tableBodyChildren!: QueryList<ComponentRef<any>>;
-
   tableName = "New Table";
   dataTypesIcons!: HTMLElement[];
-  tableRows!: Type<BaseCellComponent>[][];
+  rows!: Type<BaseCellComponent>[][];
   colspan: number = 1;
 
   isInputMethodVisible: boolean = false;
@@ -51,13 +48,13 @@ export class TableComponent implements OnInit {
 
 
   ngOnInit(): void {
-    this.dataTypesIcons = this.getAllDataTypesIcons();
-    this.tableRows = this.getAllTableCells();
+    this.dataTypesIcons = this.loadAllDataTypesIcons();
+    this.rows = this.loadRows();
   }
 
 
   // Per ogni tipo di dato presente nella tabella ritorna il componente html che lo visualizza.
-  getAllDataTypesIcons(): HTMLElement[] {
+  loadAllDataTypesIcons(): HTMLElement[] {
     const dataTypes: IDataType[] = this.table.getDataTypes();
     const dataTypesIcons: HTMLElement[] = [];
 
@@ -69,31 +66,49 @@ export class TableComponent implements OnInit {
   }
 
 
-  getAllTableCells(): Type<BaseCellComponent>[][] {
-    const tableElement: Type<BaseCellComponent>[][] = [];
+  loadRows(): Type<BaseCellComponent>[][] {
+    const rows: Type<BaseCellComponent>[][] = [];
 
     for (let i: number = 0; i < this.table.getRowSize(); ++i) {
-      tableElement.push([]);
+      rows.push([]);
 
       for (let j: number = 0; j < this.table.getDataTypesAmount(); ++j) {
-        tableElement[i].push(this.table.getDataType(j).getCellComponent())
+        rows[i].push(this.table.getDataType(j).getCellComponent())
       }
     }
 
-    return tableElement;
+    return rows;
+  }
+
+
+  addNewDataType(dataType: IDataType): void {
+    this.table.addNewDataType(dataType);
+    this.dataTypesIcons.push(dataType.getDataTypeIcon());
   }
 
 
   addNewRow(): void {
     this.table.addNewRow();
-    this.tableRows = this.getAllTableCells(); // TODO: fare l'aggiornamento delle righe in modo più efficente.
+    this.rows.push([]);
+
+    for (let i: number = 0; i < this.table.getDataTypesAmount(); ++i)
+      this.rows[this.rows.length - 1][i] = this.table.getDataType(i).getCellComponent();
   }
 
 
-  addNewColumn(): void {
-    this.table.addNewDataType(new TextualDataType(this.renderer));
-    this.dataTypesIcons = this.getAllDataTypesIcons();
-    this.tableRows = this.getAllTableCells(); // TODO: fare l'aggiornamento delle righe in modo più efficente.
+  onAddNewRow(): void {
+    this.addNewRow();
+  }
+
+
+  onAddNewColumn(): void {
+    const dataType: IDataType = new TextualDataType(this.renderer);
+    this.addNewDataType(dataType);
+
+    // update rows.
+    for (let i: number = 0; i < this.rows.length; ++i)
+      this.rows[i].push(dataType.getCellComponent());
+
     ++this.colspan;
   }
 
