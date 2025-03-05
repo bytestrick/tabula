@@ -1,17 +1,17 @@
 <h3>{{ tableName }}</h3>
 
-<div class="table-responsive">
+<div class="table-responsive space-left-right">
   <table class="table table-bordered" style="table-layout: fixed; width: 100%;">
     <thead>
       <tr>
-        <th *ngFor="let dataTypes of dataTypesIcons; let colIndex = index" style="padding: 0">
+        <th *ngFor="let dataTypes of dataTypesIcons; let colIndex = index" style="padding: 0; border-left: none">
           <app-cell-wrapper
             #cellWrapper
             [cellType]="dataTypes"
             (dblclick)="onCellDoubleClick($event, colIndex, cellWrapper.cellRef)"
           ></app-cell-wrapper>
         </th>
-        <th class="button-cell">
+        <th class="button-cell" style="border-right: none">
           <button class="btn btn-primary" type="button" (click)="onAddNewColumn()">
             <i class="bi bi-plus"></i>
           </button>
@@ -20,7 +20,7 @@
     </thead>
     <tbody>
       <tr *ngFor="let row of rows">
-        <td *ngFor="let cell of row; let colIndex = index" style="padding: 0">
+        <td *ngFor="let cell of row; let colIndex = index" style="padding: 0; border-left: none">
           <app-cell-wrapper
             #cellWrapper
             [cellType]="cell"
@@ -29,7 +29,7 @@
         </td>
       </tr>
       <tr>
-        <td [attr.colspan]="lastRowColspan">
+        <td [attr.colspan]="lastRowColspan" style="border-left: none">
           <button class="btn btn-primary" type="button" (click)="onAddNewRow()">
             <i class="bi bi-plus"></i>
           </button>
