@@ -23,6 +23,7 @@
         <td *ngFor="let cell of row; let colIndex = index" style="padding: 0; border-left: none">
           <app-cell-wrapper
             #cellWrapper
+            appHighlightBorders [appHighlightBordersOf]="cellWrapper.borders.nativeElement" [canDisable]="!isInputMethodVisible"
             [cellType]="cell"
             (dblclick)="onCellDoubleClick($event, colIndex, cellWrapper.cellRef)"
           ></app-cell-wrapper>

@@ -13,6 +13,7 @@ import {Pair} from '../../types/pair';
 import {BaseInputComponent} from '../input-components/base-input-component';
 import {BaseCellComponent} from './cells/base-cell-component';
 import {CellWrapperComponent} from './cells/cell-wrapper/cell-wrapper.component';
+import {HighlightBordersDirective} from '../../directive/highlight-borders.directive';
 
 @Component({
   selector: 'app-table',
@@ -22,6 +23,7 @@ import {CellWrapperComponent} from './cells/cell-wrapper/cell-wrapper.component'
     InputPopUpComponent,
     NgIf,
     CellWrapperComponent,
+    HighlightBordersDirective,
   ],
   templateUrl: './table.component.html',
   styleUrl: './table.component.css'
