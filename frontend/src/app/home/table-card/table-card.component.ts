@@ -1,4 +1,10 @@
-import {Component, ComponentRef, ElementRef, ViewChild, ViewContainerRef} from '@angular/core';
+import {
+  Component,
+  ComponentRef,
+  ElementRef,
+  ViewChild,
+  ViewContainerRef
+} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {NgIf} from '@angular/common';
 
@@ -19,6 +25,7 @@ export class TableCardComponent {
   protected formDescription: String = '';
   protected inEditMode: boolean = false;
   private ref!: ComponentRef<TableCardComponent>;
+  private static previousRefInEdit: ComponentRef<TableCardComponent> | null = null;
 
   @ViewChild('editTableCardForm') private form!: ElementRef<HTMLFormElement>;
 
@@ -32,10 +39,16 @@ export class TableCardComponent {
     this.formTitle = this.title;
     this.formDescription = this.description;
     this.inEditMode = true;
+
+    if (TableCardComponent.previousRefInEdit) {
+      TableCardComponent.previousRefInEdit.instance.cancelEdit();
+    }
+    TableCardComponent.previousRefInEdit = this.ref;
   }
 
   public cancelEdit(): void {
     this.inEditMode = false;
+    TableCardComponent.previousRefInEdit = null;
     this.form.nativeElement.classList.remove('was-validated');
   }
 
@@ -48,6 +61,7 @@ export class TableCardComponent {
       this.title = this.formTitle;
       this.description = this.formDescription;
       this.inEditMode = false;
+      TableCardComponent.previousRefInEdit = null;
       this.form.nativeElement.classList.remove('was-validated');
     }
     else {
