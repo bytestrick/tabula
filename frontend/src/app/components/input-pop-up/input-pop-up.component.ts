@@ -28,13 +28,13 @@ export class InputPopUpComponent implements AfterViewInit {
   @Input() position: Pair<number, number> = { first: 0, second: 0 };
 
   @Input() inputComponent: Type<BaseInputComponent> | null = null;
-
+  @Input() inputComponentInitialValue: any;
 
   constructor(private renderer: Renderer2) {}
 
 
   ngAfterViewInit(): void {
-    this.addInputMethod(this.inputComponent);
+    this.addInputMethod(this.inputComponent, this.inputComponentInitialValue);
 
     this.renderer.setStyle(
       this.popUpContainer.nativeElement,
@@ -59,13 +59,13 @@ export class InputPopUpComponent implements AfterViewInit {
   }
 
 
-  addInputMethod(inputMethod: Type<BaseInputComponent> | null): void {
+  addInputMethod(inputMethod: Type<BaseInputComponent> | null, defaultValue: any): void {
     if (inputMethod === null)
       return;
 
     this.inputMethodContainer?.clear();
     const inputMethodRef: ComponentRef<BaseInputComponent> = this.inputMethodContainer?.createComponent(inputMethod);
-
+    inputMethodRef?.instance.setInitialValue(this.inputComponentInitialValue);
     inputMethodRef?.instance.inputConfirmed?.subscribe(
       (value: any): void => this.onInputConfirmed(value)
     );

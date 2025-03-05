@@ -8,6 +8,4 @@ import {BaseCellComponent} from '../base-cell-component';
   templateUrl: './textual-cell.component.html',
   styleUrl: './textual-cell.component.css'
 })
-export class TextualCellComponent extends BaseCellComponent {
-
-}
+export class TextualCellComponent extends BaseCellComponent {}

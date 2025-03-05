@@ -15,6 +15,12 @@ export class TextInputComponent extends BaseInputComponent {
 
   @ViewChild('input') input!: ElementRef<HTMLInputElement>;
 
+
+  override beforeShowUp(): void {
+    this.input.nativeElement.value = this.initialValue;
+  }
+
+
   onKeyPressed(event: KeyboardEvent): void {
     if (event.key === 'Enter') {
       this.inputConfirmed.emit(this.value);
@@ -32,6 +38,6 @@ export class TextInputComponent extends BaseInputComponent {
 
 
   override grabFocus(): void {
-    this.input?.nativeElement.focus();
+    this.input.nativeElement.focus();
   }
 }
