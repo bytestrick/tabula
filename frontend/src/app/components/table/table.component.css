@@ -2,3 +2,9 @@
   border-bottom: none;
   vertical-align: middle;
 }
+
+
+.space-left-right {
+  margin-right: 42px;
+  margin-left: 42px;
+}
