@@ -1,7 +1,7 @@
 import {
   AfterViewInit,
   Component,
-  ComponentRef,
+  ComponentRef, ElementRef,
   Input,
   Type,
   ViewChild,
@@ -14,7 +14,7 @@ import {BaseCellComponent} from '../base-cell-component';
   standalone: true,
   imports: [],
   template: `
-    <div [style]="highlight" (mouseenter)="onMouseEnter()" (mouseleave)="onMouseLeave()">
+    <div #borders>
       <ng-container #container></ng-container>
     </div>`,
   styles: [`
@@ -31,8 +31,7 @@ export class CellWrapperComponent implements AfterViewInit {
 
   @Input() cellType: Type<BaseCellComponent> | null = null;
   @ViewChild('container', { read: ViewContainerRef, static: true }) container!: ViewContainerRef;
-
-  protected highlight: string = 'none';
+  @ViewChild('borders', { static: true }) borders!: ElementRef;
 
   cellRef: ComponentRef<BaseCellComponent> | null = null;
 
@@ -42,16 +41,6 @@ export class CellWrapperComponent implements AfterViewInit {
       return;
 
     this.cellRef = this.container.createComponent(this.cellType);
-  }
-
-
-  onMouseEnter(): void {
-    this.highlight = 'border: solid 1px lightblue';
-  }
-
-
-  onMouseLeave(): void {
-    this.highlight = 'border: none';
   }
 }
 
