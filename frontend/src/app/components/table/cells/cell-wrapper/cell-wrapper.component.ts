@@ -14,8 +14,8 @@ import {BaseCellComponent} from '../base-cell-component';
   standalone: true,
   imports: [],
   template: `
-    <div [style]="highlight" (mouseenter)="onMouseEnter()" (mouseout)="onMouseOut()">
-        <ng-container #container></ng-container>
+    <div [style]="highlight" (mouseenter)="onMouseEnter()" (mouseleave)="onMouseLeave()">
+      <ng-container #container></ng-container>
     </div>`,
   styles: [`
     div {
@@ -31,8 +31,9 @@ export class CellWrapperComponent implements AfterViewInit {
   @Input() cellType: Type<BaseCellComponent> | null = null;
   @ViewChild('container', { read: ViewContainerRef, static: true }) container!: ViewContainerRef;
 
+  protected highlight: string = 'none';
+
   cellRef: ComponentRef<BaseCellComponent> | null = null;
-  highlight: string = 'none';
 
 
   ngAfterViewInit(): void {
@@ -48,7 +49,7 @@ export class CellWrapperComponent implements AfterViewInit {
   }
 
 
-  onMouseOut(): void {
+  onMouseLeave(): void {
     this.highlight = 'border: none';
   }
 }

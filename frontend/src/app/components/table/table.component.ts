@@ -31,7 +31,7 @@ export class TableComponent implements OnInit {
   tableName = "New Table";
   dataTypesIcons!: HTMLElement[];
   rows!: Type<BaseCellComponent>[][];
-  colspan: number = 1;
+  lastRowColspan: number = 1;
 
   isInputMethodVisible: boolean = false;
   inputMethodPosition: Pair<number, number> = { first: 0, second: 0 };
@@ -85,6 +85,10 @@ export class TableComponent implements OnInit {
   addNewDataType(dataType: IDataType): void {
     this.table.addNewDataType(dataType);
     this.dataTypesIcons.push(dataType.getDataTypeIcon());
+
+    // update rows.
+    for (let i: number = 0; i < this.rows.length; ++i)
+      this.rows[i].push(dataType.getCellComponent());
   }
 
 
@@ -106,11 +110,7 @@ export class TableComponent implements OnInit {
     const dataType: IDataType = new TextualDataType(this.renderer);
     this.addNewDataType(dataType);
 
-    // update rows.
-    for (let i: number = 0; i < this.rows.length; ++i)
-      this.rows[i].push(dataType.getCellComponent());
-
-    ++this.colspan;
+    ++this.lastRowColspan;
   }
 
 
