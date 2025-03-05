@@ -23,6 +23,7 @@ import {BaseCellComponent} from '../base-cell-component';
       overflow: auto;
       display: flex;
       align-items: center;
+      padding: 4px;
     }
   `]
 })
