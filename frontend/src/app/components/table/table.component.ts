@@ -36,6 +36,7 @@ export class TableComponent implements OnInit {
   isInputMethodVisible: boolean = false;
   inputMethodPosition: Pair<number, number> = { first: 0, second: 0 };
   inputComponent: Type<BaseInputComponent> | null = null;
+  inputComponentInitialValue: any = null;
 
   private table: Table = new Table();
   private cellSelected: ComponentRef<BaseCellComponent> | null = null;
@@ -116,6 +117,7 @@ export class TableComponent implements OnInit {
   onCellDoubleClick(event: MouseEvent, colIndex: number, cell: ComponentRef<BaseCellComponent> | null): void {
     const dataType: IDataType = this.table.getDataType(colIndex);
     this.inputComponent = dataType.getInputComponent(); // Assegna il metodo di input corretto in base al tipo presente sulla colonna corrispondente.
+    this.inputComponentInitialValue = cell?.instance.getValue();
     this.cellSelected = cell;
     this.showInputMethod(event.x, event.y);
   }

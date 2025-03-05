@@ -3,7 +3,7 @@ import {Directive} from '@angular/core';
 
 @Directive()
 export abstract class BaseCellComponent {
-  protected value: any;
+  protected value: any = null;
 
   setValue(value: any): void {
     this.value = value
