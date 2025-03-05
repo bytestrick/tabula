@@ -4,7 +4,13 @@
   <table class="table table-bordered" style="table-layout: fixed; width: 100%;">
     <thead>
       <tr>
-        <th *ngFor="let dataTypes of dataTypesIcons" [innerHTML]="dataTypes.outerHTML"></th>
+        <th *ngFor="let dataTypes of dataTypesIcons; let colIndex = index" style="padding: 0">
+          <app-cell-wrapper
+            #cellWrapper
+            [cellType]="dataTypes"
+            (dblclick)="onCellDoubleClick($event, colIndex, cellWrapper.cellRef)"
+          ></app-cell-wrapper>
+        </th>
         <th class="button-cell">
           <button class="btn btn-primary" type="button" (click)="onAddNewColumn()">
             <i class="bi bi-plus"></i>
