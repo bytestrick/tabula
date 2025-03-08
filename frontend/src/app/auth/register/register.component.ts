@@ -4,6 +4,7 @@ import {RouterLink} from '@angular/router';
 import {PasswordVisibilityDirective} from '../password-visibility.directive';
 import {NgForOf} from '@angular/common';
 import {HttpClient} from '@angular/common/http';
+import {enableTooltips} from '../../../main';
 
 interface Country {
   name: string,
@@ -32,6 +33,8 @@ export class RegisterComponent {
   country: Country | string = '';
 
   ngOnInit() {
+    enableTooltips();
+
     this.http.get<Country[]>('countries.json').subscribe({
       next: data => this.countries = data,
       error: err => console.error('Error getting countries data: ' + err),
