@@ -11,30 +11,30 @@ export class TableCardComponent {
   protected title: String = "Title";
   protected description: String = "Description";
 
-  @Output() editTableCardEvent: EventEmitter<TableCardComponent> = new EventEmitter();
-  @Output() deleteTableCardEvent: EventEmitter<void> = new EventEmitter();
-
-  delete(): void {
-    this.deleteTableCardEvent.emit();
+  // @Output() editTableCardEvent: EventEmitter<TableCardComponent> = new EventEmitter();
+  // @Output() deleteTableCardEvent: EventEmitter<void> = new EventEmitter();
+  //
+  public delete(): void {
+    // this.deleteTableCardEvent.emit();
   }
 
-  edit(): void {
-    this.editTableCardEvent.emit(this);
+  public edit(): void {
+    // this.editTableCardEvent.emit(this);
   }
 
-  setTitle(title: String): void {
+  public setTitle(title: String): void {
     this.title = title;
   }
 
-  getTitle(): String {
+  public getTitle(): String {
     return this.title;
   }
 
-  setDescription(description: String): void {
+  public setDescription(description: String): void {
     this.description = description;
   }
 
-  getDescription(): String {
+  public getDescription(): String {
     return this.description;
   }
 }

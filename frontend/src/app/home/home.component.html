@@ -1,87 +1,9 @@
 <main>
   <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3 m-2">
     <ng-container #tableCardContainer>
-      <app-create-table-card></app-create-table-card>
+      <app-create-table-card (createTableCardEvent)="modalCreateTableCard.show()"/>
     </ng-container>
   </div>
 </main>
 
-<!-- Modal Edit -->
-<div #editTableCardModal class="modal fade" id="editTableCardModal" tabindex="-1" aria-labelledby="editTableCardModal" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="editTableCardModalLabel">Edit table card</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <form #editCardTableForm class="container" (ngSubmit)="onSubmitEditTableCardForm()" novalidate>
-        <div class="modal-body">
-
-          <div class="input-group input-group mb-3">
-            <span class="input-group-text">Title</span>
-            <input type="text" class="form-control" placeholder="{{ modalTitlePlaceholder }}" [(ngModel)]="editFormTitle" name ="title" required>
-            <div class="invalid-feedback">
-              Please provide a title.
-            </div>
-            <div class="valid-feedback">
-              Looks good!
-            </div>
-          </div>
-          <div class="input-group input-group mb-3">
-            <span class="input-group-text">Description</span>
-            <input type="text" class="form-control" placeholder="{{ modalDescriptionPlaceholder }}" [(ngModel)]="editFormDescription" name ="description">
-            <div class="valid-feedback">
-              Looks good!
-            </div>
-          </div>
-
-          <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-outline-primary">Edit</button>
-          </div>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-<!-- Modal Create -->
-<div #createTableCardModal class="modal fade" id="createTableCardModal" tabindex="-1" aria-labelledby="editTableCardModal" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="createTableCardModalLabel">New table card</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <form #createCardTableForm class="container needs-validation" (ngSubmit)="onSubmitCreateTableCardForm()" novalidate>
-        <div class="modal-body">
-
-          <div class="input-group input-group mb-3">
-            <span class="input-group-text">Title</span>
-            <input type="text" class="form-control" placeholder="type..." [(ngModel)]="createFormTitle" name="create-title" required>
-            <div class="invalid-feedback">
-              Please provide a title.
-            </div>
-            <div class="valid-feedback">
-              Looks good!
-            </div>
-
-
-          </div>
-          <div class="input-group input-group mb-3">
-            <span class="input-group-text">Description</span>
-            <input type="text" class="form-control" placeholder="type..." [(ngModel)]="createFormDescription" name="description">
-            <div class="valid-feedback">
-              Looks good!
-            </div>
-          </div>
-
-          <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-outline-primary">Create</button>
-          </div>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
+<app-modal-create-table-card #modalCreateTableCard/>
