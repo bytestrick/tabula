@@ -1,14 +1,13 @@
-import { Component, inject } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { AuthService } from '../auth.service';
-import { Router } from '@angular/router';
+import {Component, inject} from '@angular/core';
+import {FormsModule} from '@angular/forms';
+import {AuthService} from '../auth.service';
+import {Router, RouterLink} from '@angular/router';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.css'
 })
 export class LoginComponent {
   auth = inject(AuthService);
@@ -24,11 +23,13 @@ export class LoginComponent {
     if (input.type === 'password') {
       input.type = 'text';
       button.classList.add('active');
-      show.classList.remove('bi-eye');
+      button.title = 'Hide password';
       show.classList.add('bi-eye-slash');
+      show.classList.remove('bi-eye');
     } else {
-      button.classList.remove('active');
       input.type = 'password';
+      button.classList.remove('active');
+      button.title = 'Show password';
       show.classList.add('bi-eye');
       show.classList.remove('bi-eye-slash');
     }
