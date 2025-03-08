@@ -14,11 +14,12 @@ import { FormsModule } from '@angular/forms';
 export abstract class ModalComponent implements AfterViewInit {
   @ViewChild('modal') private modal!: ElementRef;
   private instance!: Modal;
-  protected title: string = '';
+  protected title: string = 'Modal';
   protected titleField: string = '';
   protected descriptionField: string = '';
-  protected actionName: string = '';
+  protected actionName: string = 'Action';
   @ViewChild('form') private form !: ElementRef;
+
 
   public ngAfterViewInit(): void {
     const form: HTMLFormElement = this.form.nativeElement;
@@ -36,6 +37,8 @@ export abstract class ModalComponent implements AfterViewInit {
 
   protected onSubmit(): void {
     const form: HTMLFormElement = this.form.nativeElement;
+
+    console.log('asdfasdf');
 
     if (form.checkValidity()) {
       this.doOnSubmit();

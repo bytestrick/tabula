@@ -1,4 +1,5 @@
-import {Component, Output, EventEmitter} from '@angular/core';
+import {Component, ComponentRef, ViewContainerRef} from '@angular/core';
+import {HomeMediatorService} from '../../services/home/home-mediator.service';
 
 @Component({
   selector: 'app-table-card',
@@ -8,33 +9,42 @@ import {Component, Output, EventEmitter} from '@angular/core';
   styleUrl: './table-card.component.css'
 })
 export class TableCardComponent {
-  protected title: String = "Title";
-  protected description: String = "Description";
+  private ref!: ComponentRef<TableCardComponent>;
+  protected title: string = "Title";
+  protected description: string = "Description";
 
-  // @Output() editTableCardEvent: EventEmitter<TableCardComponent> = new EventEmitter();
-  // @Output() deleteTableCardEvent: EventEmitter<void> = new EventEmitter();
-  //
+
+  constructor(private homeMediatorService: HomeMediatorService) {}
+
+
+  public static create(containerRef: ViewContainerRef): TableCardComponent {
+    let newTableCard: ComponentRef<TableCardComponent> = containerRef.createComponent(TableCardComponent);
+    newTableCard.instance.ref = newTableCard;
+    return newTableCard.instance;
+  }
+
   public delete(): void {
-    // this.deleteTableCardEvent.emit();
+    this.ref.destroy();
   }
 
   public edit(): void {
-    // this.editTableCardEvent.emit(this);
+    this.homeMediatorService.editTableCard(this);
+    this.homeMediatorService.showModalEditTableCard();
   }
 
-  public setTitle(title: String): void {
+  public setTitle(title: string): void {
     this.title = title;
   }
 
-  public getTitle(): String {
+  public getTitle(): string {
     return this.title;
   }
 
-  public setDescription(description: String): void {
+  public setDescription(description: string): void {
     this.description = description;
   }
 
-  public getDescription(): String {
+  public getDescription(): string {
     return this.description;
   }
 }
