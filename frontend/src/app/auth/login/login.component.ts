@@ -2,38 +2,22 @@ import {Component, inject} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {AuthService} from '../auth.service';
 import {Router, RouterLink} from '@angular/router';
+import {PasswordVisibilityDirective} from '../password-visibility.directive';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, PasswordVisibilityDirective],
   templateUrl: './login.component.html',
 })
 export class LoginComponent {
   auth = inject(AuthService);
   router = inject(Router);
 
+  // Form fields
   email = '';
   password = '';
-
-  togglePasswordVisibility() {
-    const input = document.querySelector('#pass-input') as HTMLInputElement;
-    const show = document.querySelector('#eye-icon') as HTMLElement;
-    const button = document.querySelector('#pass-visible') as HTMLElement;
-    if (input.type === 'password') {
-      input.type = 'text';
-      button.classList.add('active');
-      button.title = 'Hide password';
-      show.classList.add('bi-eye-slash');
-      show.classList.remove('bi-eye');
-    } else {
-      input.type = 'password';
-      button.classList.remove('active');
-      button.title = 'Show password';
-      show.classList.add('bi-eye');
-      show.classList.remove('bi-eye-slash');
-    }
-  }
+  rememberLogin = true;
 
   private static credentialsAreValid(event: Event): boolean {
     const form = event.target as HTMLFormElement;
@@ -47,7 +31,7 @@ export class LoginComponent {
   }
 
   /**
-   * Basic login with credentials, is a proxy for the injected {@link AuthService}
+   * Basic login with credentials, it's a proxy for the injected {@link AuthService}
    */
   login(event: Event) {
     if (LoginComponent.credentialsAreValid(event)) {
