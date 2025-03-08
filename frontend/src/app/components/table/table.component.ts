@@ -6,7 +6,7 @@ import {
 } from '@angular/core';
 import {Table} from '../../model/table';
 import {IDataType} from '../../model/data-type.interface';
-import {NgForOf, NgIf} from '@angular/common';
+import {NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
 import {TextualDataType} from '../../model/concrete-data-type/textual-data-type';
 import {InputPopUpComponent} from '../input-pop-up/input-pop-up.component';
 import {Pair} from '../../types/pair';
@@ -14,6 +14,7 @@ import {BaseInputComponent} from '../input-components/base-input-component';
 import {BaseCellComponent} from './cells/base-cell-component';
 import {CellWrapperComponent} from './cells/cell-wrapper/cell-wrapper.component';
 import {HighlightBordersDirective} from '../../directive/highlight-borders.directive';
+import {TableOrganizerComponent} from '../table-organizer/table-organizer.component';
 
 @Component({
   selector: 'app-table',
@@ -24,6 +25,7 @@ import {HighlightBordersDirective} from '../../directive/highlight-borders.direc
     NgIf,
     CellWrapperComponent,
     HighlightBordersDirective,
+    TableOrganizerComponent,
   ],
   templateUrl: './table.component.html',
   styleUrl: './table.component.css'
@@ -35,12 +37,14 @@ export class TableComponent implements OnInit {
 
   protected dataTypesIcons!: Type<BaseCellComponent>[];
   protected rows!: Type<BaseCellComponent>[][];
-  protected lastRowColspan: number = 1;
   protected isInputMethodVisible: boolean = false;
 
   protected inputMethodPosition: Pair<number, number> = { first: 0, second: 0 };
   protected inputComponent: Type<BaseInputComponent> | null = null;
   protected inputComponentInitialValue: any = null;
+
+  protected hoveredRowIndex: number | null = null;
+  protected hoveredColIndex: number | null = null;
 
   tableName = "New Table";
 
@@ -117,8 +121,6 @@ export class TableComponent implements OnInit {
   onAddNewColumn(): void {
     const dataType: IDataType = new TextualDataType(this.renderer);
     this.addNewDataType(dataType);
-
-    ++this.lastRowColspan;
   }
 
 
@@ -149,5 +151,19 @@ export class TableComponent implements OnInit {
       this.currentCellSelected?.instance?.setValue(value);
 
     this.hideInputMethod();
+  }
+
+
+  onCellMouseEnter(rowIndex: number, colIndex: number): void {
+    console.log('r: ', rowIndex, 'c: ', colIndex)
+
+    this.hoveredRowIndex = rowIndex === -1 ? null : rowIndex;
+    this.hoveredColIndex = colIndex === -1 ? null : colIndex;
+  }
+
+
+  onMouseLeaveTable() {
+    this.hoveredRowIndex = null;
+    this.hoveredColIndex = null;
   }
 }

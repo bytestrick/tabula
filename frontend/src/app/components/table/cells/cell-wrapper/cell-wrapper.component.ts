@@ -19,11 +19,11 @@ import {BaseCellComponent} from '../base-cell-component';
     </div>`,
   styles: [`
     div {
-      height: 52px;
-      overflow: auto;
+      height: 60px;
+      overflow-x: auto;
+      overflow-y: hidden;
       display: flex;
       align-items: center;
-      padding: 4px;
     }
   `]
 })

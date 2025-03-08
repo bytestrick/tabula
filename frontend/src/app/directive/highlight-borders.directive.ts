@@ -9,7 +9,7 @@ export class HighlightBordersDirective implements OnChanges {
   @Input('appHighlightBordersOf') targetElement!: HTMLElement;
   @Input() canDisable: boolean = true;
 
-  private isHovered = false;
+  isHovered = false;
 
 
   constructor(private el: ElementRef, private renderer: Renderer2) {}

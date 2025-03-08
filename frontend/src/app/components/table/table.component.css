@@ -5,6 +5,32 @@
 
 
 .space-left-right {
-  margin-right: 42px;
-  margin-left: 42px;
+  margin-right: 20px;
+  margin-left: 20px;
+}
+
+
+.table td {
+  min-width: 100px !important;
+}
+
+
+td.center-td-content-v-h {
+  text-align: center;
+  vertical-align: middle;
+}
+
+
+td.center-td-content-v {
+  vertical-align: middle;
+}
+
+
+td.td-fit-content {
+  white-space: nowrap;
+  width: 0;
+}
+
+td {
+  padding: 0;
 }
