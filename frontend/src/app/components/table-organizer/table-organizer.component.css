@@ -1,0 +1,32 @@
+div {
+  display: inline-flex;
+  align-items: center;
+  background-color: lightgray;
+  border-radius: 6px;
+  padding: 2px;
+
+  opacity: 0;
+}
+
+
+div > *:not(:last-child) {
+  margin-right: 0;
+}
+
+
+div > *:last-child {
+  margin-right: 4px;
+}
+
+
+i {
+  border: none;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+}
+
+
+input {
+  margin: 0
+}
