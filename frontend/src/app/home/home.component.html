@@ -1,9 +1,10 @@
 <main>
   <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3 m-2">
     <ng-container #tableCardContainer>
-      <app-create-table-card (createTableCardEvent)="modalCreateTableCard.show()"/>
+      <app-create-table-card/>
     </ng-container>
   </div>
 </main>
 
-<app-modal-create-table-card #modalCreateTableCard/>
+<app-modal-create-table-card/>
+<app-modal-edit-table-card/>

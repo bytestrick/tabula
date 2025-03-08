@@ -1,20 +1,19 @@
-import {Component, ComponentRef, EventEmitter, Output, ViewChild} from '@angular/core';
-import {ModalCreateTableCardComponent} from '../modal/modal-create-table-card/modal-create-table-card.component';
+import {Component} from '@angular/core';
+import {HomeMediatorService} from '../../services/home/home-mediator.service';
 
 @Component({
   selector: 'app-create-table-card',
   standalone: true,
-  imports: [
-    ModalCreateTableCardComponent
-  ],
+  imports: [],
   templateUrl: './create-table-card.component.html',
   styleUrl: './create-table-card.component.css'
 })
 export class CreateTableCardComponent {
-  @ViewChild('modalCreateTableCard') private modal!: ModalCreateTableCardComponent;
-  @Output() protected createTableCardEvent: EventEmitter<void> = new EventEmitter();
+
+  constructor(private homeMediatorService: HomeMediatorService) { }
+
 
   protected create(): void {
-    this.createTableCardEvent.emit();
+    this.homeMediatorService.showModalCreateTableCard();
   }
 }

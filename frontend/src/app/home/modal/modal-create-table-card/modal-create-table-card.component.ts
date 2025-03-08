@@ -1,7 +1,8 @@
-import {Component, ComponentRef, ViewContainerRef} from '@angular/core';
+import {Component} from '@angular/core';
 import { ModalComponent } from '../modal.component';
 import {FormsModule} from '@angular/forms';
 import {TableCardComponent} from '../../table-card/table-card.component';
+import {HomeMediatorService} from '../../../services/home/home-mediator.service';
 
 @Component({
   selector: 'app-modal-create-table-card',
@@ -16,17 +17,16 @@ export class ModalCreateTableCardComponent extends ModalComponent {
   protected override title: string = 'Create new table card';
   protected override actionName: string = 'Create';
 
-  private tableCardContainerRef!: ViewContainerRef;
 
-  protected override doOnSubmit(): void {
-        // create new table card
-        let newTableCard: ComponentRef<TableCardComponent> = this.tableCardContainerRef.createComponent(TableCardComponent);
-        newTableCard.instance.setTitle(this.titleField);
-        newTableCard.instance.setDescription(this.descriptionField);
-
+  constructor(private homeMediatorService: HomeMediatorService) {
+    super();
+    homeMediatorService.setModalCreateTableCard(this);
   }
 
-  public setTableCardContainerRef(ref: ViewContainerRef): void {
-    this.tableCardContainerRef = ref;
+
+  protected override doOnSubmit(): void {
+    let newTableCard: TableCardComponent = this.homeMediatorService.createTableCard();
+    newTableCard.setTitle(this.titleField);
+    newTableCard.setDescription(this.descriptionField);
   }
 }
