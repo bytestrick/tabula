@@ -9,9 +9,20 @@ body {
   height: 100%;
 }
 
-/* If the body contains a either the login or the register component, center it */
+/* If the body contains either the login or the register component, center it */
 body:has(app-login, app-register) {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+/* Prevents layout shift on validation due to an icon being added to each input */
+.form-control, .form-select {
+  padding-right: calc(1.5em + .75rem) !important;
+}
+
+/* Validation tooltips are position in the top-right instead of the bottom-left */
+.invalid-tooltip, .valid-tooltip {
+  right: 0;
+  top: -100% !important;
 }
