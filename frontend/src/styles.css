@@ -7,6 +7,10 @@ body {
   margin: 0;
   width: 100%;
   height: 100%;
+}
+
+/* If the body contains a either the login or the register component, center it */
+body:has(app-login, app-register) {
   display: flex;
   justify-content: center;
   align-items: center;

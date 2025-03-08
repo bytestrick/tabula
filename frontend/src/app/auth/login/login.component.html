@@ -1,19 +1,40 @@
-<form (submit)="login($event)" class="row g-2 needs-validation" novalidate>
-  <div>
-    <label for="email-input" class="form-label">Email address</label>
-    <input id="email-input" class="form-control" type="email" [(ngModel)]="email" name="email"
-      placeholder="john.doe@example.com" required>
-    <div class="invalid-feedback">A valid email address is required</div>
+<form (submit)="login($event)" class="container needs-validation" novalidate>
+  <h1 class="mb-5 d-flex justify-content-center"><i class="me-3 bi bi-table" style="color: orangered"></i>Tabula</h1>
+
+  <h5 class="row mb-5 p-0 justify-content-center">Sign into your account</h5>
+
+  <div class="row mb-3">
+    <label for="email-input" class="form-label p-0">Email address</label>
+    <div class="input-group p-0 has-validation">
+      <input id="email-input" class="form-control" type="email" [(ngModel)]="email" name="email"
+             placeholder="john.doe@example.com" required>
+      <div class="invalid-feedback">A valid email address is required</div>
+    </div>
   </div>
-  <div class="mb-4">
-    <label for="pass-input" class="form-label">Password</label>
-    <div class="input-group has-validation">
+
+  <div class="row mb-3">
+    <label for="pass-input" class="form-label p-0">Password</label>
+    <div class="input-group p-0 has-validation">
       <input id="pass-input" class="form-control" [(ngModel)]="password" name="password" type="password" required>
-      <button id="pass-visible" type="button" class="btn btn-outline-secondary" (click)="togglePasswordVisibility()">
+      <button id="pass-visible" type="button" class="btn btn-outline-secondary"
+              (click)="togglePasswordVisibility()" title="Show password">
         <i class="bi bi-eye" id="eye-icon"></i>
       </button>
       <div class="invalid-feedback">Password required</div>
     </div>
   </div>
-  <button type="submit" class="btn btn-primary">Log in</button>
+
+  <div class="row mb-5">
+    <div class="col form-check">
+      <input id="remember-login" class="form-check-input" type="checkbox" value="persistent-login" checked>
+      <label for="remember-login" class="form-check-label">Keep me logged in</label>
+    </div>
+    <a class="col d-flex justify-content-end p-0" href="#">Forgot password?</a>
+  </div>
+
+  <div class="row mb-4">
+    <button type="submit" class="btn btn-primary">Log in</button>
+  </div>
+
+  <a class="row" routerLink="/register">Don't have an account?</a>
 </form>
