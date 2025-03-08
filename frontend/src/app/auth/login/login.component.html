@@ -16,9 +16,9 @@
     <label for="pass-input" class="form-label p-0">Password</label>
     <div class="input-group p-0 has-validation">
       <input id="pass-input" class="form-control" [(ngModel)]="password" name="password" type="password" required>
-      <button id="pass-visible" type="button" class="btn btn-outline-secondary"
-              (click)="togglePasswordVisibility()" title="Show password">
-        <i class="bi bi-eye" id="eye-icon"></i>
+      <button appPasswordVisibility id="pass-visible" type="button" class="btn btn-outline-secondary"
+              title="Show password">
+        <i class="bi bi-eye" id="pass-icon"></i>
       </button>
       <div class="invalid-feedback">Password required</div>
     </div>
@@ -26,7 +26,8 @@
 
   <div class="row mb-5">
     <div class="col form-check">
-      <input id="remember-login" class="form-check-input" type="checkbox" value="persistent-login" checked>
+      <input id="remember-login" class="form-check-input" type="checkbox" [(ngModel)]="rememberLogin"
+             name="rememberLogin" checked>
       <label for="remember-login" class="form-check-label">Keep me logged in</label>
     </div>
     <a class="col d-flex justify-content-end p-0" href="#">Forgot password?</a>
