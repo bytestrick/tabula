@@ -3,6 +3,7 @@ import {FormsModule} from '@angular/forms';
 import {AuthService} from '../auth.service';
 import {Router, RouterLink} from '@angular/router';
 import {PasswordVisibilityDirective} from '../password-visibility.directive';
+import {enableTooltips} from '../../../main';
 
 @Component({
   selector: 'app-login',
@@ -18,6 +19,10 @@ export class LoginComponent {
   email = '';
   password = '';
   rememberLogin = true;
+
+  ngOnInit() {
+    enableTooltips();
+  }
 
   private static credentialsAreValid(event: Event): boolean {
     const form = event.target as HTMLFormElement;

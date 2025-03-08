@@ -1,4 +1,5 @@
 import {Directive, ElementRef, HostListener} from '@angular/core';
+import {Tooltip} from 'bootstrap';
 
 /**
  * An {@link https://angular.dev/guide/directives/attribute-directives attribute directive} to toggle the password
@@ -21,13 +22,13 @@ export class PasswordVisibilityDirective {
     if (input.type === 'password') {
       input.type = 'text';
       this.button.classList.add('active');
-      this.button.title = 'Hide password';
+      Tooltip.getInstance(this.button)?.setContent({'.tooltip-inner': 'Hide password'});
       icon.classList.add('bi-eye-slash');
       icon.classList.remove('bi-eye');
     } else {
       input.type = 'password';
       this.button.classList.remove('active');
-      this.button.title = 'Show password';
+      Tooltip.getInstance(this.button)?.setContent({'.tooltip-inner': 'Show password'});
       icon.classList.add('bi-eye');
       icon.classList.remove('bi-eye-slash');
     }

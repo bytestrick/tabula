@@ -17,7 +17,7 @@
     <div class="input-group p-0 has-validation">
       <input id="pass-input" class="form-control" [(ngModel)]="password" name="password" type="password" required>
       <button appPasswordVisibility id="pass-visible" type="button" class="btn btn-outline-secondary"
-              title="Show password">
+              data-bs-toggle="tooltip" data-bs-title="Show password">
         <i class="bi bi-eye" id="pass-icon"></i>
       </button>
       <div class="invalid-tooltip">Password required</div>
