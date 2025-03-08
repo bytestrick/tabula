@@ -24,6 +24,7 @@ import {BaseCellComponent} from '../base-cell-component';
       overflow-y: hidden;
       display: flex;
       align-items: center;
+      padding: 6px;
     }
   `]
 })

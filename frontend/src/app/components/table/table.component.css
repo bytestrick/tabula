@@ -1,5 +1,4 @@
 .button-cell {
-  border-bottom: none;
   vertical-align: middle;
 }
 
@@ -31,6 +30,8 @@ td.td-fit-content {
   width: 0;
 }
 
-td {
-  padding: 0;
+
+.remove-border {
+  border: none;
+  border-color: inherit;
 }
