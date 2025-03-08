@@ -38,6 +38,20 @@ export class RegisterComponent {
     });
   }
 
+  private static formDataIsValid(event: Event) {
+    const form = event.target as HTMLFormElement;
+    form.classList.add('was-validated');
+    if (!form.checkValidity()) {
+      event.preventDefault();
+      event.stopPropagation();
+      return false;
+    }
+    return true;
+
+  }
+
   register(event: Event) {
+    if (RegisterComponent.formDataIsValid(event)) {
+    }
   }
 }

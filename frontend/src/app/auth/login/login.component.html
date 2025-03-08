@@ -8,7 +8,7 @@
     <div class="input-group p-0 has-validation">
       <input id="email-input" class="form-control" type="email" [(ngModel)]="email" name="email"
              placeholder="john.doe@example.com" required>
-      <div class="invalid-feedback">A valid email address is required</div>
+      <div class="invalid-tooltip">A valid email address is required</div>
     </div>
   </div>
 
@@ -20,7 +20,7 @@
               title="Show password">
         <i class="bi bi-eye" id="pass-icon"></i>
       </button>
-      <div class="invalid-feedback">Password required</div>
+      <div class="invalid-tooltip">Password required</div>
     </div>
   </div>
 
@@ -34,7 +34,7 @@
   </div>
 
   <div class="row mb-4">
-    <button type="submit" class="btn btn-primary">Log in</button>
+    <button class="btn btn-primary">Log in</button>
   </div>
 
   <a class="row" routerLink="/register">Don't have an account?</a>

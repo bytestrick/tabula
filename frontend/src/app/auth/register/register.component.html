@@ -1,55 +1,58 @@
-<form (submit)="register($event)" class="container needs-validation" novalidate>
+<form (submit)="register($event)" class="needs-validation" novalidate>
   <h1 class="mb-5 d-flex justify-content-center"><i class="me-3 bi bi-table" style="color: orangered"></i>Tabula</h1>
 
   <h5 class="row mb-5 p-0 justify-content-center">Create an account</h5>
 
   <div class="row mb-3">
     <label for="name-input" class="form-label p-0">Name</label>
-    <div class="input-group p-0 has-validation">
+    <div class="input-group p-0 has-validation position-relative">
       <input id="name-input" class="form-control" placeholder="John" type="text" [(ngModel)]="name" name="name"
              required>
-      <div class="invalid-feedback">Name required</div>
+      <div class="invalid-tooltip">Name required</div>
     </div>
   </div>
 
-  <div class="row mb-3">
+  <div class="row mb-3 position-relative">
     <label for="surname-input" class="form-label p-0">Surname</label>
     <div class="input-group p-0 has-validation">
       <input id="surname-input" class="form-control" placeholder="Doe" type="text" [(ngModel)]="surname" name="surname"
              required>
-      <div class="invalid-feedback">Surname required</div>
+      <div class="invalid-tooltip">Surname required</div>
     </div>
   </div>
 
   <div class="row mb-3">
     <label for="country-input" class="form-label p-0">Country</label>
-    <div class="input-group p-0 has-validation">
+    <div class="input-group p-0 has-validation position-relative">
       <select id="country-input" class="form-select" [(ngModel)]="country" name="country" required>
         <option value="" disabled selected>Select your country</option>
-        <option *ngFor="let country of countries" [value]="country">{{ country.name }}&nbsp;&nbsp;{{ country.flag }}</option>
+        <option *ngFor="let country of countries"
+                [value]="country">{{ country.name.length > 26 ? country.name.substring(0, 26) + '…' : country.name }}
+          &nbsp;&nbsp;{{ country.flag }}
+        </option>
       </select>
-      <div class="invalid-feedback">Country required</div>
+      <div class="invalid-tooltip">Country required</div>
     </div>
   </div>
 
   <div class="row mb-3">
     <label for="email-input" class="form-label p-0">Email address</label>
-    <div class="input-group p-0 has-validation">
+    <div class="input-group p-0 has-validation position-relative">
       <input id="email-input" class="form-control" type="email" [(ngModel)]="email" name="email"
              placeholder="john.doe@example.com" required>
-      <div class="invalid-feedback">A valid email address is required</div>
+      <div class="invalid-tooltip">A valid email address is required</div>
     </div>
   </div>
 
   <div class="row mb-3">
     <label for="pass-input" class="form-label p-0">Password</label>
-    <div class="input-group has-validation p-0">
+    <div class="input-group has-validation p-0 position-relative">
       <input id="pass-input" class="form-control" [(ngModel)]="password" name="password" type="password" required>
       <button appPasswordVisibility id="pass-visible" type="button" class="btn btn-outline-secondary"
               title="Show password">
         <i class="bi bi-eye" id="pass-icon"></i>
       </button>
-      <div class="invalid-feedback">Password required</div>
+      <div class="invalid-tooltip">Password required</div>
     </div>
   </div>
 
@@ -62,7 +65,7 @@
   </div>
 
   <div class="row mb-4">
-    <button type="submit" class="btn btn-primary">Sign up</button>
+    <button class="btn btn-primary">Sign up</button>
   </div>
 
   <a class="row" routerLink="/login">Already have an account?</a>
