@@ -3,11 +3,13 @@ import {
   Component,
   ComponentRef, ElementRef,
   Input,
-  Type,
   ViewChild,
   ViewContainerRef
 } from '@angular/core';
 import {BaseCellComponent} from '../base-cell-component';
+import {DataType} from '../../../../model/data-type';
+import {DataTypeCellComponent} from '../data-type-cell/data-type-cell.component';
+import {Pair} from '../../../../model/pair';
 
 @Component({
   selector: 'app-cell-wrapper',
@@ -30,7 +32,8 @@ import {BaseCellComponent} from '../base-cell-component';
 })
 export class CellWrapperComponent implements AfterViewInit {
 
-  @Input() cellType: Type<BaseCellComponent> | null = null;
+  @Input() cellDataType: DataType | null = null;
+  @Input() iconDataType: Pair<DataType, DataType> | null = null;
   @ViewChild('container', { read: ViewContainerRef, static: true }) container!: ViewContainerRef;
   @ViewChild('borders', { static: true }) borders!: ElementRef;
 
@@ -38,10 +41,13 @@ export class CellWrapperComponent implements AfterViewInit {
 
 
   ngAfterViewInit(): void {
-    if (this.cellType === null)
-      return;
+    if (this.cellDataType !== null)
+      this.cellRef = this.container.createComponent(this.cellDataType.getCellComponent());
 
-    this.cellRef = this.container.createComponent(this.cellType);
+    if (this.iconDataType !== null) {
+      this.cellRef = this.container.createComponent(DataTypeCellComponent);
+      this.cellRef.setInput('iconName', this.iconDataType.second.getIconName());
+    }
   }
 }
 

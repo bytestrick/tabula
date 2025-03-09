@@ -1,8 +1,8 @@
 import {
   AfterViewInit,
   Component,
-  ElementRef,
-  Input,
+  ElementRef, EventEmitter,
+  Input, Output,
   Renderer2,
   ViewChild
 } from '@angular/core';
@@ -23,17 +23,14 @@ export class TableOrganizerComponent implements AfterViewInit {
   @Input() rowIndicators: boolean = true;
   @Input() showOrganizer: boolean = false;
 
+  @Output() addAt: EventEmitter<void> = new EventEmitter<void>;
+
 
   constructor(private renderer: Renderer2) {}
 
 
   ngAfterViewInit(): void {
     this.renderer.addClass(this.container.nativeElement, this.rowIndicators ? 'row-indicators' : 'column-indicators');
-  }
-
-
-  onInsertDown(): void {
-
   }
 
 
@@ -44,5 +41,10 @@ export class TableOrganizerComponent implements AfterViewInit {
 
   onDrag(): void {
 
+  }
+
+
+  onAddAt(): void {
+    this.addAt.emit();
   }
 }

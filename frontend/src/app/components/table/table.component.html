@@ -9,10 +9,14 @@
         <td class="td-fit-content remove-border" (mouseenter)="onCellMouseEnter(-1, -1)"></td>
         <td
           class="center-td-content-v-h"
-          *ngFor="let dataTypes of dataTypesIcons; let colIndex = index"
+          *ngFor="let dataTypes of table.getDataTypes(); let colIndex = index"
           (mouseenter)="onCellMouseEnter(-1, colIndex)"
         >
-          <app-table-organizer [showOrganizer]="hoveredColIndex === colIndex" [rowIndicators]="false"></app-table-organizer>
+          <app-table-organizer
+            [showOrganizer]="hoveredColIndex === colIndex"
+            [rowIndicators]="false"
+            (addAt)="onAddColumnAt(colIndex)"
+          ></app-table-organizer>
         </td>
         <!-- serve per aggiungere la cella della colonna finale, quella dove c'è il bottone per aggiungere le colonne -->
         <td class="remove-border" (mouseenter)="onCellMouseEnter(-1, -1)"></td>
@@ -24,41 +28,45 @@
         <td class="td-fit-content remove-border" (mouseenter)="onCellMouseEnter(-1, -1)"></td>
         <td
           appHighlightBorders [appHighlightBordersOf]="cellWrapper.borders.nativeElement" [canDisable]="!isInputMethodVisible"
-          *ngFor="let dataTypes of dataTypesIcons; let colIndex = index"
+          *ngFor="let dataTypes of table.getDataTypes(); let colIndex = index"
           (mouseenter)="onCellMouseEnter(-1, colIndex)"
           style="padding: 0"
         >
           <app-cell-wrapper
             #cellWrapper
-            [cellType]="dataTypes"
-            (dblclick)="onCellDoubleClick($event, colIndex, cellWrapper.cellRef)"
+            [iconDataType]="dataTypes"
+            (dblclick)="onCellDoubleClick($event, dataTypes.first, cellWrapper.cellRef)"
           ></app-cell-wrapper>
         </td>
         <td class="center-td-content-v remove-border" (mouseenter)="onCellMouseEnter(-1, -1)">
-          <button class="btn btn-primary" type="button" (click)="onAddNewColumn()">
+          <button class="btn btn-primary" type="button" (click)="onAddNewColumn()" title="Append new column">
             <i class="bi bi-plus-lg"></i>
           </button>
         </td>
       </tr>
 
       <!-- righe per gli elementi della tabella -->
-      <tr *ngFor="let row of rows; let rowIndex = index">
+      <tr *ngFor="let row of table.getRows(); let rowIndex = index">
         <!-- celle per contenere i table-organizer delle righe -->
         <td class="center-td-content-v-h td-fit-content remove-border" (mouseenter)="onCellMouseEnter(rowIndex, -1)">
-          <app-table-organizer [showOrganizer]="hoveredRowIndex === rowIndex" [rowIndicators]="true"></app-table-organizer>
+          <app-table-organizer
+            [showOrganizer]="hoveredRowIndex === rowIndex"
+            [rowIndicators]="true"
+            (addAt)="onAddRowAt(rowIndex)"
+          ></app-table-organizer>
         </td>
 
         <!-- celle in cui inserire i dati -->
         <td
-          *ngFor="let cell of row; let colIndex = index"
+          *ngFor="let cellDataType of row; let colIndex = index"
           (mouseenter)="onCellMouseEnter(rowIndex, colIndex)"
           style="padding: 0"
         >
           <app-cell-wrapper
             #cellWrapper
             appHighlightBorders [appHighlightBordersOf]="cellWrapper.borders.nativeElement" [canDisable]="!isInputMethodVisible"
-            [cellType]="cell"
-            (dblclick)="onCellDoubleClick($event, colIndex, cellWrapper.cellRef)"
+            [cellDataType]="cellDataType"
+            (dblclick)="onCellDoubleClick($event, cellDataType, cellWrapper.cellRef)"
           ></app-cell-wrapper>
         </td>
 
@@ -71,16 +79,16 @@
         <!-- serve per aggiungere la la cella della colonna iniziale, quella per il table-organizer delle righe -->
         <td class="td-fit-content remove-border" (mouseenter)="onCellMouseEnter(-1, -1)"></td>
         <td class="center-td-content-v remove-border" (mouseenter)="onCellMouseEnter(-1, -1)">
-          <button class="btn btn-primary" type="button" (click)="onAddNewRow()">
+          <button class="btn btn-primary" type="button" (click)="onAddNewRow()" title="Append new row">
             <i class="bi bi-plus-lg"></i>
           </button>
         </td>
 
         <!--
-          aggiunge le restanti celle. Non sfora perché ci sono du colonne in più. Una per il bottone di aggiunta
+          aggiunge le restanti celle. Non sfora perché ci sono due colonne in più. Una per il bottone di aggiunta
           colonne e una per i table-organizer delle righe
         -->
-        <td class="remove-border" *ngFor="let cell of rows[0]" (mouseenter)="onCellMouseEnter(-1, -1)"></td>
+        <td class="remove-border" *ngFor="let cell of table.getDataTypes()" (mouseenter)="onCellMouseEnter(-1, -1)"></td>
       </tr>
     </tbody>
   </table>

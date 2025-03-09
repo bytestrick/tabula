@@ -1,20 +1,20 @@
 import {
   Component, ComponentRef,
-  OnInit,
-  Renderer2,
   Type,
 } from '@angular/core';
 import {Table} from '../../model/table';
-import {IDataType} from '../../model/data-type.interface';
-import {NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
+import {DataType} from '../../model/data-type';
+import {NgForOf, NgIf} from '@angular/common';
 import {TextualDataType} from '../../model/concrete-data-type/textual-data-type';
 import {InputPopUpComponent} from '../input-pop-up/input-pop-up.component';
-import {Pair} from '../../types/pair';
+import {Pair} from '../../model/pair';
 import {BaseInputComponent} from '../input-components/base-input-component';
 import {BaseCellComponent} from './cells/base-cell-component';
 import {CellWrapperComponent} from './cells/cell-wrapper/cell-wrapper.component';
 import {HighlightBordersDirective} from '../../directive/highlight-borders.directive';
 import {TableOrganizerComponent} from '../table-organizer/table-organizer.component';
+import {DataTypesChooserComponent} from '../input-components/data-types-chooser/data-types-chooser.component';
+import {NumericDataType} from '../../model/concrete-data-type/numeric-data-type';
 
 @Component({
   selector: 'app-table',
@@ -30,13 +30,13 @@ import {TableOrganizerComponent} from '../table-organizer/table-organizer.compon
   templateUrl: './table.component.html',
   styleUrl: './table.component.css'
 })
-export class TableComponent implements OnInit {
+export class TableComponent {
 
-  private table: Table = new Table();
   private currentCellSelected: ComponentRef<BaseCellComponent> | null = null;
+  private currentDataType: DataType | null = null;
 
-  protected dataTypesIcons!: Type<BaseCellComponent>[];
-  protected rows!: Type<BaseCellComponent>[][];
+  protected table: Table = new Table();
+
   protected isInputMethodVisible: boolean = false;
 
   protected inputMethodPosition: Pair<number, number> = { first: 0, second: 0 };
@@ -46,70 +46,37 @@ export class TableComponent implements OnInit {
   protected hoveredRowIndex: number | null = null;
   protected hoveredColIndex: number | null = null;
 
-  tableName = "New Table";
+  tableName: string = "New Table";
 
 
-  constructor(private renderer: Renderer2) {
-    this.table.addNewDataType(new TextualDataType(this.renderer));
+  constructor() {
+    // inizializza il componente in modo tale da avere già una colonna e una riga
+    this.table.addNewDataType(new TextualDataType());
     this.table.addNewRow();
   }
 
 
-  ngOnInit(): void {
-    this.loadTable();
-  }
-
-
-  loadTable() {
-    this.dataTypesIcons = this.loadAllDataTypesIcons();
-    this.rows = this.loadRows();
-  }
-
-
-  // Per ogni tipo di dato presente nella tabella ritorna il componente html che lo visualizza.
-  private loadAllDataTypesIcons(): Type<BaseCellComponent>[] {
-    const dataTypes: IDataType[] = this.table.getDataTypes();
-    const dataTypesIcons: Type<BaseCellComponent>[] = [];
-
-    for (let dataType of dataTypes) {
-      dataTypesIcons.push(dataType.getDataTypeIcon());
+  insertNewRowAt(rowIndex: number): void {
+    if (rowIndex >= 0 && rowIndex < this.table.getRowsNumber()) {
+      this.table.insertNewRowAt(rowIndex);
     }
-
-    return dataTypesIcons;
   }
 
 
-  private loadRows(): Type<BaseCellComponent>[][] {
-    const rows: Type<BaseCellComponent>[][] = [];
-
-    for (let i: number = 0; i < this.table.getRowSize(); ++i) {
-      rows.push([]);
-
-      for (let j: number = 0; j < this.table.getDataTypesAmount(); ++j) {
-        rows[i].push(this.table.getDataType(j).getCellComponent())
-      }
+  insertNewColAt(colIndex: number, dataType: DataType): void {
+    if (colIndex >= 0 && colIndex < this.table.getDataTypesAmount()) {
+      this.table.insertNewDataTypeAt(colIndex, dataType);
     }
-
-    return rows;
   }
 
 
-  addNewDataType(dataType: IDataType): void {
+  addNewCol(dataType: DataType): void {
     this.table.addNewDataType(dataType);
-    this.dataTypesIcons.push(dataType.getDataTypeIcon());
-
-    // update rows.
-    for (let i: number = 0; i < this.rows.length; ++i)
-      this.rows[i].push(dataType.getCellComponent());
   }
 
 
   addNewRow(): void {
     this.table.addNewRow();
-    this.rows.push([]);
-
-    for (let i: number = 0; i < this.table.getDataTypesAmount(); ++i)
-      this.rows[this.rows.length - 1][i] = this.table.getDataType(i).getCellComponent();
   }
 
 
@@ -119,51 +86,74 @@ export class TableComponent implements OnInit {
 
 
   onAddNewColumn(): void {
-    const dataType: IDataType = new TextualDataType(this.renderer);
-    this.addNewDataType(dataType);
+    const dataType: DataType = new TextualDataType();
+    this.showDataTypeChooser(0, 0);
+    this.addNewCol(dataType);
   }
 
 
-  onCellDoubleClick(event: MouseEvent, colIndex: number, cell: ComponentRef<BaseCellComponent> | null): void {
-    const dataType: IDataType = this.table.getDataType(colIndex);
+  onCellDoubleClick(event: MouseEvent, dataType: DataType, cell: ComponentRef<BaseCellComponent> | null): void {
     this.showInputMethod(event.x, event.y, dataType, cell);
   }
 
 
-  showInputMethod(x: number, y: number, dataType: IDataType, cell: ComponentRef<BaseCellComponent> | null): void {
+  showInputMethod(x: number, y: number, dataType: DataType, cell: ComponentRef<BaseCellComponent> | null): void {
     this.currentCellSelected = cell;
+    this.currentDataType = dataType;
     this.inputComponent = dataType.getInputComponent(); // Assegna il metodo di input corretto in base al tipo presente sulla colonna corrispondente.
     this.inputComponentInitialValue = cell?.instance.getValue();
 
     this.isInputMethodVisible = true;
-    this.inputMethodPosition = { first: x, second: y };
+    this.inputMethodPosition = new Pair(x, y);
+  }
+
+
+  showDataTypeChooser(x: number, y: number): void {
+    this.currentCellSelected = null;
+    this.inputComponent = DataTypesChooserComponent;
+    this.inputComponentInitialValue = null;
+
+    this.isInputMethodVisible = true;
+    this.inputMethodPosition = new Pair(x, y);
   }
 
 
   hideInputMethod(): void {
     this.currentCellSelected = null;
+    this.currentDataType = null;
     this.isInputMethodVisible = false;
   }
 
 
   onInputPopUpClosed(value: any): void {
-    if (!(value === null))
+    if (!(value === null)) {
       this.currentCellSelected?.instance?.setValue(value);
+      this.currentDataType?.setValue(value);
+    }
 
     this.hideInputMethod();
   }
 
 
   onCellMouseEnter(rowIndex: number, colIndex: number): void {
-    console.log('r: ', rowIndex, 'c: ', colIndex)
-
     this.hoveredRowIndex = rowIndex === -1 ? null : rowIndex;
     this.hoveredColIndex = colIndex === -1 ? null : colIndex;
   }
 
 
-  onMouseLeaveTable() {
+  onMouseLeaveTable(): void {
     this.hoveredRowIndex = null;
     this.hoveredColIndex = null;
+  }
+
+
+  onAddColumnAt(colIndex: number): void {
+    const dataType: DataType = new TextualDataType();
+    this.insertNewColAt(colIndex, dataType);
+  }
+
+
+  onAddRowAt(rowIndex: number): void {
+    this.insertNewRowAt(rowIndex);
   }
 }
