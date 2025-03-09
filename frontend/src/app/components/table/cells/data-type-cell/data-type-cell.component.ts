@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import {BaseCellComponent} from '../base-cell-component';
 
 @Component({
@@ -9,9 +9,12 @@ import {BaseCellComponent} from '../base-cell-component';
   styleUrl: './data-type-cell.component.css'
 })
 export class DataTypeCellComponent extends BaseCellComponent {
+
   private readonly defaultValue: string = 'New Column';
 
   override value: any = this.defaultValue;
+
+  @Input() iconName: string = '';
 
 
   override setValue(value: any): void {

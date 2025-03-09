@@ -1,44 +1,40 @@
-import {IDataType} from './data-type.interface';
+import {DataType} from './data-type';
+import {Pair} from './pair';
+import {TextualDataType} from './concrete-data-type/textual-data-type';
 
 export class Table {
 
-  // Se serve tenere traccia di tutti gli elementi dentro la tabella seguire le indicazioni sotto.
+  private table: DataType[][] = [];
 
-  private rowsNumber: number = 0; // da commentare
-  //private table: IDataType[][] = []; da scommentare
-  private dataTypes: IDataType[] = [];
+  // first: il tipo di dato scelto per la cella.
+  // second: il tipo di dato scelto per la colonna corrispondente.
+  private dataTypes: Pair<DataType, DataType>[] = [];
 
 
-  addNewDataType(dataType: IDataType): void {
-    this.dataTypes.push(dataType);
-    //this.updateRow(); da scommentare
+  addNewDataType(dataType: DataType): void {
+    this.dataTypes.push(new Pair(new TextualDataType(), dataType));
+
+    for (let i: number = 0; i < this.getRowsNumber(); ++i) {
+      while (this.table[i].length < this.getDataTypesAmount()) {
+        const currentDataType: DataType = this.dataTypes[this.table[i].length].second;
+        this.table[i].push(currentDataType.getNewDataType())
+      }
+    }
   }
 
 
   addNewRow(): void {
-    ++this.rowsNumber; // da commentare
-    // da scommentare
-    // const lastRowI: number = this.table.length - 1;
-    //
-    // for (let i: number = 0; i < this.dataTypes.length; ++i) {
-    //   this.table[lastRowI].push(this.dataTypes[i].getNewDataType());
-    // }
+    this.table.push([]);
+    const lastRowI: number = this.getRowsNumber() - 1;
+
+    for (let i: number = 0; i < this.getDataTypesAmount(); ++i) {
+      this.table[lastRowI].push(this.dataTypes[i].second.getNewDataType());
+    }
   }
 
-  // da scommentare
-  // private updateRow(): void {
-  //   for (let i: number = 0; i < this.getRowSize(); ++i) {
-  //     while (this.table[i].length < this.getDataTypesAmount()) {
-  //       const currentDataType: IDataType = this.dataTypes[this.table[i].length - 1];
-  //       this.table[i].push(currentDataType.getNewDataType())
-  //     }
-  //   }
-  // }
 
-
-  getRowSize(): number {
-    return this.rowsNumber; // da commentare
-    //return this.table.length; da scommentare
+  getRowsNumber(): number {
+    return this.table.length;
   }
 
 
@@ -47,12 +43,33 @@ export class Table {
   }
 
 
-  getDataTypes():IDataType[] {
+  getDataTypes(): Pair<DataType, DataType>[] {
     return this.dataTypes;
   }
 
 
-  getDataType(i: number): IDataType {
-    return this.dataTypes[i];
+  insertNewRowAt(rowIndex: number): void {
+    if (rowIndex >= 0 && rowIndex < this.getRowsNumber()) {
+      this.table.splice(rowIndex, 0, []);
+
+      for (let i: number = 0; i < this.getDataTypesAmount(); ++i)
+        this.table[rowIndex].push(this.dataTypes[i].second.getNewDataType());
+    }
+  }
+
+
+  insertNewDataTypeAt(colIndex: number, dataType: DataType): void {
+    if (colIndex >= 0 && colIndex < this.getDataTypesAmount()) {
+      this.dataTypes.splice(colIndex, 0, new Pair(new TextualDataType(), dataType));
+
+      for (let i: number = 0; i < this.getRowsNumber(); ++i) {
+        this.table[i].splice(colIndex, 0, this.dataTypes[colIndex].second.getNewDataType());
+      }
+    }
+  }
+
+
+  getRows(): DataType[][] {
+    return this.table;
   }
 }

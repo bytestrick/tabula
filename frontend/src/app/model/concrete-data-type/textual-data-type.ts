@@ -1,32 +1,28 @@
-import {IDataType} from '../data-type.interface';
+import {DataType} from '../data-type';
 import { BaseInputComponent } from '../../components/input-components/base-input-component';
-import {Renderer2, Type} from '@angular/core';
+import {Type} from '@angular/core';
 import {TextInputComponent} from '../../components/input-components/text-input/text-input.component';
 import {BaseCellComponent} from '../../components/table/cells/base-cell-component';
 import {TextualCellComponent} from '../../components/table/cells/textual-cell/textual-cell.component';
-import {DataTypeCellComponent} from '../../components/table/cells/data-type-cell/data-type-cell.component';
 
-export class TextualDataType implements IDataType {
+export class TextualDataType extends DataType {
 
-  constructor(private renderer: Renderer2) {}
-
-
-  getInputComponent(): Type<BaseInputComponent> {
+  override getInputComponent(): Type<BaseInputComponent> {
     return TextInputComponent;
   }
 
 
-  getNewDataType(): IDataType {
-    throw new Error('Method not implemented.');
+  override getNewDataType(): DataType {
+    return new TextualDataType();
   }
 
 
-  getDataTypeIcon(): Type<BaseCellComponent> {
-    return DataTypeCellComponent;
-  }
-
-
-  getCellComponent(): Type<BaseCellComponent> {
+  override getCellComponent(): Type<BaseCellComponent> {
     return TextualCellComponent;
+  }
+
+
+  override getIconName(): string {
+    return 'bi-fonts';
   }
 }

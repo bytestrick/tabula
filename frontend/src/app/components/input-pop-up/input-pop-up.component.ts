@@ -9,7 +9,7 @@ import {
   Type,
   ViewChild, ViewContainerRef
 } from '@angular/core';
-import {Pair} from '../../types/pair';
+import {Pair} from '../../model/pair';
 import {BaseInputComponent} from '../input-components/base-input-component';
 
 @Component({
