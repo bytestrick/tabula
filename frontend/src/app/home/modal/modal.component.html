@@ -10,9 +10,10 @@
       <form #form class="needs-validation" (ngSubmit)="onSubmit()" novalidate>
         <div class="modal-body">
 
-          <div class="input-group mb-3">
-            <span class="input-group-text">Title</span>
-            <input type="text" class="form-control" placeholder="type..." [(ngModel)]="titleField" name="create-title"
+          <div class="mb-3">
+            <label for="title" class="form-label">Title</label>
+            <input type="text" id="title" class="form-control" placeholder="Start typing to enter a title" [(ngModel)]="titleField"
+                   name="title"
                    required>
             <div class="invalid-feedback">
               Please provide a title.
@@ -20,12 +21,12 @@
             <div class="valid-feedback">
               Looks good!
             </div>
-
           </div>
-          <div class="input-group">
-            <span class="input-group-text">Description</span>
-            <textarea type="text" class="form-control" placeholder="type..." style="height: 100px"
-                      [(ngModel)]="descriptionField" name="description"></textarea>
+
+          <div>
+            <label for="description" class="form-label">Description</label>
+            <textarea class="form-control" id="description" placeholder="Start typing to enter a description" [(ngModel)]="descriptionField" name="description"
+                      style="height: 100px"></textarea>
             <div class="valid-feedback">
               Looks good!
             </div>
