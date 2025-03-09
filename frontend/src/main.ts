@@ -3,8 +3,7 @@ import {appConfig} from './app/app.config';
 import {AppComponent} from './app/app.component';
 import {Tooltip} from 'bootstrap';
 
-bootstrapApplication(AppComponent, appConfig)
-  .catch((err) => console.error(err));
+bootstrapApplication(AppComponent, appConfig).catch(console.error);
 
 /**
  * Enable Bootstrap tooltips on all elements with the `data-bs-toggle="tooltip"` attribute in the component template.
