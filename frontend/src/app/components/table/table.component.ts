@@ -15,6 +15,7 @@ import {HighlightBordersDirective} from '../../directive/highlight-borders.direc
 import {TableOrganizerComponent} from '../table-organizer/table-organizer.component';
 import {DataTypesChooserComponent} from '../input-components/data-types-chooser/data-types-chooser.component';
 import {NumericDataType} from '../../model/concrete-data-type/numeric-data-type';
+import {CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray} from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-table',
@@ -26,6 +27,8 @@ import {NumericDataType} from '../../model/concrete-data-type/numeric-data-type'
     CellWrapperComponent,
     HighlightBordersDirective,
     TableOrganizerComponent,
+    CdkDropList,
+    CdkDrag,
   ],
   templateUrl: './table.component.html',
   styleUrl: './table.component.css'
@@ -155,5 +158,14 @@ export class TableComponent {
 
   onAddRowAt(rowIndex: number): void {
     this.insertNewRowAt(rowIndex);
+  }
+
+
+  dropColumn(event: CdkDragDrop<any, any>): void {
+    this.table.swapCol(event.previousIndex, event.currentIndex);
+  }
+
+  dropRow(event: CdkDragDrop<any, any>): void {
+    this.table.swapRow(event.previousIndex, event.currentIndex);
   }
 }
