@@ -14,20 +14,14 @@
 }
 
 
-td.center-td-content-v-h {
+.center-td-content-v-h {
   text-align: center;
   vertical-align: middle;
 }
 
 
-td.center-td-content-v {
+.center-td-content-v {
   vertical-align: middle;
-}
-
-
-td.td-fit-content {
-  white-space: nowrap;
-  width: 0;
 }
 
 

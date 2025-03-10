@@ -1,6 +1,7 @@
 import {DataType} from './data-type';
 import {Pair} from './pair';
 import {TextualDataType} from './concrete-data-type/textual-data-type';
+import {moveItemInArray} from '@angular/cdk/drag-drop';
 
 export class Table {
 
@@ -71,5 +72,19 @@ export class Table {
 
   getRows(): DataType[][] {
     return this.table;
+  }
+
+
+  swapCol(fromIndex: number, toIndex: number): void {
+    for (let row of this.table) {
+      moveItemInArray(row, fromIndex, toIndex);
+    }
+
+    moveItemInArray(this.dataTypes, fromIndex, toIndex);
+  }
+
+
+  swapRow(fromIndex: number, toIndex: number): void {
+    moveItemInArray(this.table, fromIndex, toIndex);
   }
 }

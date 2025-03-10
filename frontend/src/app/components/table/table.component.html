@@ -1,54 +1,57 @@
 <h3>{{ tableName }}</h3>
 
 <div class="table-responsive space-left-right">
-  <table class="table table-bordered" style="table-layout: fixed; width: 100%;" (mouseleave)="onMouseLeaveTable()">
-    <tbody>
-      <!-- riga per i table-organizer delle colonne -->
-      <tr class="remove-border">
+  <table class="table table-bordered" (mouseleave)="onMouseLeaveTable()">
+    <thead>
+    <!-- riga per i table-organizer -->
+      <tr class="remove-border" cdkDropList cdkDropListOrientation="horizontal" (cdkDropListDropped)="dropColumn($event)">
         <!-- serve per aggiungere la cella della colonna iniziale, quella per il table-organizer delle righe -->
-        <td class="td-fit-content remove-border" (mouseenter)="onCellMouseEnter(-1, -1)"></td>
-        <td
+        <th class="remove-border fit-content" (mouseenter)="onCellMouseEnter(-1, -1)"></th>
+        <th
+          *ngFor="let colDataType of this.table.getDataTypes(); let colIndex = index"
           class="center-td-content-v-h"
-          *ngFor="let dataTypes of table.getDataTypes(); let colIndex = index"
           (mouseenter)="onCellMouseEnter(-1, colIndex)"
+          cdkDrag
         >
           <app-table-organizer
             [showOrganizer]="hoveredColIndex === colIndex"
             [rowIndicators]="false"
             (addAt)="onAddColumnAt(colIndex)"
           ></app-table-organizer>
-        </td>
+        </th>
         <!-- serve per aggiungere la cella della colonna finale, quella dove c'è il bottone per aggiungere le colonne -->
-        <td class="remove-border" (mouseenter)="onCellMouseEnter(-1, -1)"></td>
+        <th class="remove-border" (mouseenter)="onCellMouseEnter(-1, -1)"></th>
       </tr>
-
-      <!-- riga per i data-type-cell -->
+      <!-- riga per i data-type -->
       <tr>
-        <!-- serve per aggiungere la la cella della colonna iniziale, quella per il table-organizer delle righe -->
-        <td class="td-fit-content remove-border" (mouseenter)="onCellMouseEnter(-1, -1)"></td>
-        <td
-          appHighlightBorders [appHighlightBordersOf]="cellWrapper.borders.nativeElement" [canDisable]="!isInputMethodVisible"
-          *ngFor="let dataTypes of table.getDataTypes(); let colIndex = index"
+        <!-- serve per aggiungere la cella della colonna iniziale, quella per il table-organizer delle righe -->
+        <th class="remove-border fit-content" (mouseenter)="onCellMouseEnter(-1, -1)"></th>
+        <th
+          *ngFor="let colDataType of this.table.getDataTypes(); let colIndex = index"
+          class="center-td-content-v-h"
           (mouseenter)="onCellMouseEnter(-1, colIndex)"
           style="padding: 0"
         >
           <app-cell-wrapper
             #cellWrapper
-            [iconDataType]="dataTypes"
-            (dblclick)="onCellDoubleClick($event, dataTypes.first, cellWrapper.cellRef)"
+            appHighlightBorders [appHighlightBordersOf]="cellWrapper.borders.nativeElement" [canDisable]="!isInputMethodVisible"
+            [iconDataType]="colDataType"
+            (dblclick)="onCellDoubleClick($event, colDataType.first, cellWrapper.cellRef)"
           ></app-cell-wrapper>
-        </td>
-        <td class="center-td-content-v remove-border" (mouseenter)="onCellMouseEnter(-1, -1)">
+        </th>
+        <!-- serve per aggiungere la cella della colonna finale, quella dove c'è il bottone per aggiungere le colonne -->
+        <th class="remove-border" (mouseenter)="onCellMouseEnter(-1, -1)">
           <button class="btn btn-primary" type="button" (click)="onAddNewColumn()" title="Append new column">
             <i class="bi bi-plus-lg"></i>
           </button>
-        </td>
+        </th>
       </tr>
-
+    </thead>
+    <tbody cdkDropList (cdkDropListDropped)="dropRow($event)">
       <!-- righe per gli elementi della tabella -->
-      <tr *ngFor="let row of table.getRows(); let rowIndex = index">
+      <tr *ngFor="let row of table.getRows(); let rowIndex = index" cdkDrag>
         <!-- celle per contenere i table-organizer delle righe -->
-        <td class="center-td-content-v-h td-fit-content remove-border" (mouseenter)="onCellMouseEnter(rowIndex, -1)">
+        <td class="remove-border center-td-content-v-h" (mouseenter)="onCellMouseEnter(rowIndex, -1)">
           <app-table-organizer
             [showOrganizer]="hoveredRowIndex === rowIndex"
             [rowIndicators]="true"

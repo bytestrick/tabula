@@ -7,12 +7,14 @@ import {
   ViewChild
 } from '@angular/core';
 import {NgStyle} from '@angular/common';
+import {CdkDragHandle} from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-table-organizer',
   standalone: true,
   imports: [
-    NgStyle
+    NgStyle,
+    CdkDragHandle
   ],
   templateUrl: './table-organizer.component.html',
   styleUrl: './table-organizer.component.css'
@@ -35,11 +37,6 @@ export class TableOrganizerComponent implements AfterViewInit {
 
 
   onSelect(event: Event): void {
-
-  }
-
-
-  onDrag(): void {
 
   }
 
