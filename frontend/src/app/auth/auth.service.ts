@@ -1,7 +1,7 @@
-import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Router } from '@angular/router';
+import {HttpClient} from '@angular/common/http';
+import {inject, Injectable} from '@angular/core';
+import {Observable} from 'rxjs';
+import {Router} from '@angular/router';
 
 /**
  * {@link Injectable} service that manages authentication
@@ -16,11 +16,11 @@ export class AuthService {
   /**
    * Log in the application
    */
-  login(email: string, password: string): Observable<void> {
+  login(email: string, password: string, rememberMe: boolean): Observable<void> {
     return this.http.post<void>(
-      '/api/login',
-      { email, password },
-      {responseType: 'json', withCredentials: true }
+      '/login',
+      {email, password, rememberMe},
+      {responseType: 'json', withCredentials: true}
     );
   }
 
@@ -28,6 +28,6 @@ export class AuthService {
    * Log out from the app
    */
   logout(): Observable<void> {
-    return this.http.post<void>('/api/logout', {});
+    return this.http.post<void>('/logout', {});
   }
 }
