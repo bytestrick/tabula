@@ -2,12 +2,11 @@ import {Component, OnInit} from '@angular/core';
 import {RouterOutlet} from '@angular/router';
 import {ToastComponent} from './toast/toast.component';
 import {HomeComponent} from './home/home.component';
-import {ModalComponent} from './home/modal/modal.component';
-import {ModalCreateTableCardComponent} from './home/modal/modal-create-table-card/modal-create-table-card.component';
+import {NavbarComponent} from './navbar/navbar.component';
 
 @Component({
   selector: 'tbl-root',
-  imports: [RouterOutlet, ToastComponent, HomeComponent],
+  imports: [RouterOutlet, HomeComponent, NavbarComponent, ToastComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
