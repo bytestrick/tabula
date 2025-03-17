@@ -14,30 +14,30 @@
         <th class="remove-border fit-content" (mouseenter)="onCellMouseEnter(-1, -1)"></th>
 
         <th
-          cdkDrag
-          (cdkDragStarted)="onDragStarted()"
-          (cdkDragEnded)="onDragEnded()"
-
           *ngFor="let _ of this.table.getDataTypes(); let colIndex = index"
           class="center-td-content-v-h"
           (mouseenter)="onCellMouseEnter(-1, colIndex)"
         >
           <app-table-organizer
-            [showOrganizer]="hoveredColIndex === colIndex"
+            cdkDrag
+            (cdkDragStarted)="onDragStarted()"
+            (cdkDragEnded)="onDragEnded()"
+
+            [showOrganizer]="hoveredColIndex === colIndex && !isAnElementDragged"
             [rowIndicators]="false"
             (addAt)="onAddColumnAt(colIndex)"
-          ></app-table-organizer>
-
-          <!-- Preview della colonna durante il drag and drop -->
-          <div *cdkDragPreview class="drag-preview column-preview">
-            <i class="bi bi-arrow-left-right"></i>
-            <div
-              *ngFor="let cell of table.getCol(colIndex, previewLimit)"
-              class="preview-cell"
-            >
-              {{ cell.getValue() }}
+          >
+            <!-- Preview della colonna durante il drag and drop -->
+            <div *cdkDragPreview class="drag-preview column-preview">
+              <i class="bi bi-arrow-left-right"></i>
+              <div
+                *ngFor="let cell of table.getCol(colIndex, previewLimit)"
+                class="preview-cell"
+              >
+                {{ cell.getValue() }}
+              </div>
             </div>
-          </div>
+          </app-table-organizer>
         </th>
 
         <!-- serve per aggiungere la cella della colonna finale, quella dove c'è il bottone per aggiungere le colonne -->
@@ -80,7 +80,7 @@
         <!-- celle per contenere i table-organizer delle righe -->
         <td class="remove-border center-td-content-v-h fit-content" (mouseenter)="onCellMouseEnter(rowIndex, -1)">
           <app-table-organizer
-            [showOrganizer]="hoveredRowIndex === rowIndex"
+            [showOrganizer]="hoveredRowIndex === rowIndex && !isAnElementDragged"
             [rowIndicators]="true"
             (addAt)="onAddRowAt(rowIndex)"
 
