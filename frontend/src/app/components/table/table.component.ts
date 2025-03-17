@@ -44,7 +44,7 @@ export class TableComponent {
   private currentCellSelected: ComponentRef<BaseCellComponent> | null = null;
   private currentDataType: DataType | null = null;
 
-  private isAnElementDragged: boolean = false;
+  protected isAnElementDragged: boolean = false;
 
   protected table: Table = new Table();
 
@@ -148,8 +148,8 @@ export class TableComponent {
 
 
   onCellMouseEnter(rowIndex: number, colIndex: number): void {
-    this.hoveredRowIndex = rowIndex === -1 || this.isAnElementDragged ? null : rowIndex;
-    this.hoveredColIndex = colIndex === -1 || this.isAnElementDragged ? null : colIndex;
+    this.hoveredRowIndex = rowIndex === -1 ? null : rowIndex;
+    this.hoveredColIndex = colIndex === -1 ? null : colIndex;
   }
 
 
@@ -171,18 +171,21 @@ export class TableComponent {
 
 
   onDropColumn(event: CdkDragDrop<any, any>): void {
-    this.table.swapCol(event.previousIndex, event.currentIndex);
+    if (this.hoveredColIndex !== null && event.previousIndex !== this.hoveredColIndex)
+      this.table.swapCol(event.previousIndex, this.hoveredColIndex);
   }
 
 
   onDropRow(event: CdkDragDrop<any, any>): void {
-    this.table.swapRow(event.previousIndex, event.currentIndex);
+    if (this.hoveredRowIndex !== null && event.previousIndex !== this.hoveredRowIndex)
+      this.table.swapRow(event.previousIndex, this.hoveredRowIndex);
   }
 
 
   onDragEnded(): void {
     this.isAnElementDragged = false;
   }
+
 
   onDragStarted(): void {
     this.isAnElementDragged = true;
