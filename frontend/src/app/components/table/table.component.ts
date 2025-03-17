@@ -14,8 +14,13 @@ import {CellWrapperComponent} from './cells/cell-wrapper/cell-wrapper.component'
 import {HighlightBordersDirective} from '../../directive/highlight-borders.directive';
 import {TableOrganizerComponent} from '../table-organizer/table-organizer.component';
 import {DataTypesChooserComponent} from '../input-components/data-types-chooser/data-types-chooser.component';
-import {NumericDataType} from '../../model/concrete-data-type/numeric-data-type';
-import {CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray} from '@angular/cdk/drag-drop';
+import {
+  CdkDrag,
+  CdkDragDrop,
+  CdkDragPreview,
+  CdkDropList,
+} from '@angular/cdk/drag-drop';
+
 
 @Component({
   selector: 'app-table',
@@ -29,6 +34,7 @@ import {CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray} from '@angular/cdk/d
     TableOrganizerComponent,
     CdkDropList,
     CdkDrag,
+    CdkDragPreview,
   ],
   templateUrl: './table.component.html',
   styleUrl: './table.component.css'
@@ -37,6 +43,8 @@ export class TableComponent {
 
   private currentCellSelected: ComponentRef<BaseCellComponent> | null = null;
   private currentDataType: DataType | null = null;
+
+  private isAnElementDragged: boolean = false;
 
   protected table: Table = new Table();
 
@@ -50,6 +58,7 @@ export class TableComponent {
   protected hoveredColIndex: number | null = null;
 
   tableName: string = "New Table";
+  previewLimit: number = 5;
 
 
   constructor() {
@@ -139,8 +148,8 @@ export class TableComponent {
 
 
   onCellMouseEnter(rowIndex: number, colIndex: number): void {
-    this.hoveredRowIndex = rowIndex === -1 ? null : rowIndex;
-    this.hoveredColIndex = colIndex === -1 ? null : colIndex;
+    this.hoveredRowIndex = rowIndex === -1 || this.isAnElementDragged ? null : rowIndex;
+    this.hoveredColIndex = colIndex === -1 || this.isAnElementDragged ? null : colIndex;
   }
 
 
@@ -161,11 +170,21 @@ export class TableComponent {
   }
 
 
-  dropColumn(event: CdkDragDrop<any, any>): void {
+  onDropColumn(event: CdkDragDrop<any, any>): void {
     this.table.swapCol(event.previousIndex, event.currentIndex);
   }
 
-  dropRow(event: CdkDragDrop<any, any>): void {
+
+  onDropRow(event: CdkDragDrop<any, any>): void {
     this.table.swapRow(event.previousIndex, event.currentIndex);
+  }
+
+
+  onDragEnded(): void {
+    this.isAnElementDragged = false;
+  }
+
+  onDragStarted(): void {
+    this.isAnElementDragged = true;
   }
 }

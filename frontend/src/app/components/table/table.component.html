@@ -1,27 +1,49 @@
 <h3>{{ tableName }}</h3>
 
 <div class="table-responsive space-left-right">
-  <table class="table table-bordered" (mouseleave)="onMouseLeaveTable()">
+  <table class="table table-bordered" (mouseleave)="onMouseLeaveTable()" style="table-layout: fixed;">
     <thead>
-    <!-- riga per i table-organizer -->
-      <tr class="remove-border" cdkDropList cdkDropListOrientation="horizontal" (cdkDropListDropped)="dropColumn($event)">
+      <!-- riga per i table-organizer -->
+      <tr
+        class="remove-border"
+        cdkDropList
+        cdkDropListOrientation="horizontal"
+        (cdkDropListDropped)="onDropColumn($event)"
+      >
         <!-- serve per aggiungere la cella della colonna iniziale, quella per il table-organizer delle righe -->
         <th class="remove-border fit-content" (mouseenter)="onCellMouseEnter(-1, -1)"></th>
+
         <th
-          *ngFor="let colDataType of this.table.getDataTypes(); let colIndex = index"
+          cdkDrag
+          (cdkDragStarted)="onDragStarted()"
+          (cdkDragEnded)="onDragEnded()"
+
+          *ngFor="let _ of this.table.getDataTypes(); let colIndex = index"
           class="center-td-content-v-h"
           (mouseenter)="onCellMouseEnter(-1, colIndex)"
-          cdkDrag
         >
           <app-table-organizer
             [showOrganizer]="hoveredColIndex === colIndex"
             [rowIndicators]="false"
             (addAt)="onAddColumnAt(colIndex)"
           ></app-table-organizer>
+
+          <!-- Preview della colonna durante il drag and drop -->
+          <div *cdkDragPreview class="drag-preview column-preview">
+            <i class="bi bi-arrow-left-right"></i>
+            <div
+              *ngFor="let cell of table.getCol(colIndex, previewLimit)"
+              class="preview-cell"
+            >
+              {{ cell.getValue() }}
+            </div>
+          </div>
         </th>
+
         <!-- serve per aggiungere la cella della colonna finale, quella dove c'è il bottone per aggiungere le colonne -->
         <th class="remove-border" (mouseenter)="onCellMouseEnter(-1, -1)"></th>
       </tr>
+
       <!-- riga per i data-type -->
       <tr>
         <!-- serve per aggiungere la cella della colonna iniziale, quella per il table-organizer delle righe -->
@@ -47,16 +69,36 @@
         </th>
       </tr>
     </thead>
-    <tbody cdkDropList (cdkDropListDropped)="dropRow($event)">
+    <tbody
+      cdkDropList
+      (cdkDropListDropped)="onDropRow($event)"
+    >
       <!-- righe per gli elementi della tabella -->
-      <tr *ngFor="let row of table.getRows(); let rowIndex = index" cdkDrag>
+      <tr
+        *ngFor="let row of table.getRows(); let rowIndex = index"
+      >
         <!-- celle per contenere i table-organizer delle righe -->
-        <td class="remove-border center-td-content-v-h" (mouseenter)="onCellMouseEnter(rowIndex, -1)">
+        <td class="remove-border center-td-content-v-h fit-content" (mouseenter)="onCellMouseEnter(rowIndex, -1)">
           <app-table-organizer
             [showOrganizer]="hoveredRowIndex === rowIndex"
             [rowIndicators]="true"
             (addAt)="onAddRowAt(rowIndex)"
-          ></app-table-organizer>
+
+            cdkDrag
+            (cdkDragStarted)="onDragStarted()"
+            (cdkDragEnded)="onDragEnded()"
+          >
+            <!-- Preview della riga durante il drag and drop -->
+            <div *cdkDragPreview class="drag-preview row-preview">
+              <i class="bi bi-arrow-down-up"></i>
+              <div
+                *ngFor="let cell of table.getRow(rowIndex, previewLimit)"
+                class="preview-cell"
+              >
+                {{ cell.getValue() }}
+              </div>
+            </div>
+          </app-table-organizer>
         </td>
 
         <!-- celle in cui inserire i dati -->
@@ -78,9 +120,12 @@
         -->
         <td class="remove-border" (mouseenter)="onCellMouseEnter(-1, -1)"></td>
       </tr>
-      <tr>
+    </tbody>
+    <tbody>
+      <tr> <!-- riga dove sta il bottone di aggiunta righe -->
         <!-- serve per aggiungere la la cella della colonna iniziale, quella per il table-organizer delle righe -->
         <td class="td-fit-content remove-border" (mouseenter)="onCellMouseEnter(-1, -1)"></td>
+
         <td class="center-td-content-v remove-border" (mouseenter)="onCellMouseEnter(-1, -1)">
           <button class="btn btn-primary" type="button" (click)="onAddNewRow()" title="Append new row">
             <i class="bi bi-plus-lg"></i>
