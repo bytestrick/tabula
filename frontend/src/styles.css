@@ -1,5 +1,6 @@
 @import "bootstrap-icons/font/bootstrap-icons.css";
 
+
 html, body {
   margin: 0;
   width: 100%;
@@ -35,3 +36,12 @@ tbl-sign-in form, tbl-sign-up form, tbl-otp form {
 .btn-hover:hover {
   background-color: var(--bs-border-color-translucent) !important;
 }
+
+:root {
+  --cell-table-min-width: 120px;
+  --cell-table-min-height: 60px;
+  --row-drag-preview-max-width: 240px;
+  --col-drag-preview-max-height: 180px;
+  --cell-table-padding: 6px;
+}
+

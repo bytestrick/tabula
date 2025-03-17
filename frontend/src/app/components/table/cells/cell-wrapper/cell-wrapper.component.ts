@@ -21,12 +21,12 @@ import {Pair} from '../../../../model/pair';
     </div>`,
   styles: [`
     div {
-      height: 60px;
+      height: var(--cell-table-min-height);
       overflow-x: auto;
       overflow-y: hidden;
       display: flex;
       align-items: center;
-      padding: 6px;
+      padding: var(--cell-table-padding);
     }
   `]
 })
