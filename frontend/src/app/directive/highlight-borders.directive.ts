@@ -1,18 +1,38 @@
-import {Directive, ElementRef, HostListener, Input, OnChanges, Renderer2, SimpleChanges} from '@angular/core';
+import {
+  AfterViewInit,
+  Directive,
+  ElementRef,
+  HostListener,
+  Input,
+  OnChanges,
+  Renderer2,
+  SimpleChanges
+} from '@angular/core';
 
 @Directive({
   selector: '[appHighlightBorders]',
   standalone: true
 })
-export class HighlightBordersDirective implements OnChanges {
+export class HighlightBordersDirective implements OnChanges, AfterViewInit {
 
   @Input('appHighlightBordersOf') targetElement!: HTMLElement;
   @Input() canDisable: boolean = true;
 
-  isHovered = false;
+  private borderStyle: string = '2px dashed';
+  private borderColor: string = 'var(--bs-primary)';
+
+  isHovered: boolean = false;
 
 
   constructor(private el: ElementRef, private renderer: Renderer2) {}
+
+
+  ngAfterViewInit(): void {
+    const element: HTMLElement = this.targetElement || this.el.nativeElement;
+
+    this.renderer.setStyle(element, 'border', this.borderStyle);
+    this.renderer.setStyle(element, 'border-color', 'transparent');
+  }
 
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -42,12 +62,12 @@ export class HighlightBordersDirective implements OnChanges {
 
   private applyHighlight(): void {
     const element: HTMLElement = this.targetElement || this.el.nativeElement;
-    this.renderer.setStyle(element, 'border', 'solid 1px lightblue');
+    this.renderer.setStyle(element, 'border-color', this.borderColor);
   }
 
 
   private removeHighlight(): void {
     const element: HTMLElement = this.targetElement || this.el.nativeElement;
-    this.renderer.removeStyle(element, 'border');
+    this.renderer.setStyle(element, 'border-color', 'transparent');
   }
 }
