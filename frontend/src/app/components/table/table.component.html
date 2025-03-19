@@ -1,22 +1,25 @@
 <h3>{{ tableName }}</h3>
 
 <div class="table-responsive space-left-right">
-  <table class="table table-bordered" (mouseleave)="onMouseLeaveTable()" style="table-layout: fixed;">
+  <table class="table table-bordered" (mouseleave)="onMouseLeaveTable()">
+    <colgroup>
+      <col style="width: 105px;">
+    </colgroup>
     <thead>
       <!-- riga per i table-organizer -->
       <tr
         class="remove-border"
         cdkDropList
         cdkDropListOrientation="horizontal"
-        (cdkDropListDropped)="onDropColumn($event)"
+        (cdkDropListDropped)="onColumnDropped($event)"
       >
         <!-- serve per aggiungere la cella della colonna iniziale, quella per il table-organizer delle righe -->
-        <th class="remove-border fit-content" (mouseenter)="onCellMouseEnter(-1, -1)"></th>
+        <th class="remove-border" (mouseenter)="onMouseEnteredCell(-1, -1)"></th>
 
         <th
-          *ngFor="let _ of this.table.getDataTypes(); let colIndex = index"
+          *ngFor="let _ of this.table.getHeadersCells(); let colIndex = index"
           class="center-td-content-v-h"
-          (mouseenter)="onCellMouseEnter(-1, colIndex)"
+          (mouseenter)="onMouseEnteredCell(-1, colIndex)"
         >
           <app-table-organizer
             cdkDrag
@@ -25,7 +28,8 @@
 
             [showOrganizer]="hoveredColIndex === colIndex && !isAnElementDragged"
             [rowIndicators]="false"
-            (addAt)="onAddColumnAt(colIndex)"
+            (addAt)="onColumnAddedAt(colIndex)"
+            (selectionToggle)="onColumnSelectionToggled($event, colIndex)"
           >
             <!-- Preview della colonna durante il drag and drop -->
             <div *cdkDragPreview class="drag-preview column-preview">
@@ -34,36 +38,36 @@
                 *ngFor="let cell of table.getCol(colIndex, previewLimit)"
                 class="preview-cell"
               >
-                {{ cell.getValue() }}
+                {{ cell.value }}
               </div>
             </div>
           </app-table-organizer>
         </th>
 
         <!-- serve per aggiungere la cella della colonna finale, quella dove c'è il bottone per aggiungere le colonne -->
-        <th class="remove-border" (mouseenter)="onCellMouseEnter(-1, -1)"></th>
+        <th class="remove-border" (mouseenter)="onMouseEnteredCell(-1, -1)"></th>
       </tr>
 
       <!-- riga per i data-type -->
       <tr>
         <!-- serve per aggiungere la cella della colonna iniziale, quella per il table-organizer delle righe -->
-        <th class="remove-border fit-content" (mouseenter)="onCellMouseEnter(-1, -1)"></th>
+        <th class="remove-border" (mouseenter)="onMouseEnteredCell(-1, -1)"></th>
         <th
-          *ngFor="let colDataType of this.table.getDataTypes(); let colIndex = index"
+          *ngFor="let headerCell of this.table.getHeadersCells(); let colIndex = index"
           class="center-td-content-v-h"
-          (mouseenter)="onCellMouseEnter(-1, colIndex)"
+          (mouseenter)="onMouseEnteredCell(-1, colIndex)"
           style="padding: 0"
         >
           <app-cell-wrapper
             #cellWrapper
-            appHighlightBorders [appHighlightBordersOf]="cellWrapper.borders.nativeElement" [canDisable]="!isInputMethodVisible"
-            [iconDataType]="colDataType"
-            (dblclick)="onCellDoubleClick($event, colDataType.first, cellWrapper.cellRef)"
+            appHighlightBorders [appHighlightBordersOf]="cellWrapper.bordersToHighLight.nativeElement" [canDisable]="!isInputMethodVisible"
+            [headerCell]="headerCell"
+            (dblclick)="onDoubleClickedCell($event, headerCell)"
           ></app-cell-wrapper>
         </th>
         <!-- serve per aggiungere la cella della colonna finale, quella dove c'è il bottone per aggiungere le colonne -->
-        <th class="remove-border" (mouseenter)="onCellMouseEnter(-1, -1)">
-          <button class="btn btn-primary" type="button" (click)="onAddNewColumn()" title="Append new column">
+        <th class="remove-border center-container" (mouseenter)="onMouseEnteredCell(-1, -1)">
+          <button class="btn btn-primary center" type="button" (click)="onNewColumnAdded()" title="Append new column">
             <i class="bi bi-plus-lg"></i>
           </button>
         </th>
@@ -71,18 +75,19 @@
     </thead>
     <tbody
       cdkDropList
-      (cdkDropListDropped)="onDropRow($event)"
+      (cdkDropListDropped)="onRowDropped($event)"
     >
       <!-- righe per gli elementi della tabella -->
       <tr
         *ngFor="let row of table.getRows(); let rowIndex = index"
       >
         <!-- celle per contenere i table-organizer delle righe -->
-        <td class="remove-border center-td-content-v-h fit-content" (mouseenter)="onCellMouseEnter(rowIndex, -1)">
+        <td class="remove-border center-td-content-v-h" (mouseenter)="onMouseEnteredCell(rowIndex, -1)">
           <app-table-organizer
             [showOrganizer]="hoveredRowIndex === rowIndex && !isAnElementDragged"
             [rowIndicators]="true"
-            (addAt)="onAddRowAt(rowIndex)"
+            (addAt)="onRowAddedAt(rowIndex)"
+            (selectionToggle)="onRowSelectionToggled($event, rowIndex)"
 
             cdkDrag
             (cdkDragStarted)="onDragStarted()"
@@ -95,7 +100,7 @@
                 *ngFor="let cell of table.getRow(rowIndex, previewLimit)"
                 class="preview-cell"
               >
-                {{ cell.getValue() }}
+                {{ cell.value }}
               </div>
             </div>
           </app-table-organizer>
@@ -103,31 +108,31 @@
 
         <!-- celle in cui inserire i dati -->
         <td
-          *ngFor="let cellDataType of row; let colIndex = index"
-          (mouseenter)="onCellMouseEnter(rowIndex, colIndex)"
+          *ngFor="let cell of row; let colIndex = index"
+          (mouseenter)="onMouseEnteredCell(rowIndex, colIndex)"
           style="padding: 0"
         >
           <app-cell-wrapper
             #cellWrapper
-            appHighlightBorders [appHighlightBordersOf]="cellWrapper.borders.nativeElement" [canDisable]="!isInputMethodVisible"
-            [cellDataType]="cellDataType"
-            (dblclick)="onCellDoubleClick($event, cellDataType, cellWrapper.cellRef)"
+            appHighlightBorders [appHighlightBordersOf]="cellWrapper.bordersToHighLight.nativeElement" [canDisable]="!isInputMethodVisible"
+            [cell]="cell"
+            (dblclick)="onDoubleClickedCell($event, cell)"
           ></app-cell-wrapper>
         </td>
 
         <!--
           serve per aggiungere la cella della colonna finale, quella dove c'è il bottone per aggiungere le colonne
         -->
-        <td class="remove-border" (mouseenter)="onCellMouseEnter(-1, -1)"></td>
+        <td class="remove-border" (mouseenter)="onMouseEnteredCell(-1, -1)"></td>
       </tr>
     </tbody>
     <tbody>
       <tr> <!-- riga dove sta il bottone di aggiunta righe -->
         <!-- serve per aggiungere la la cella della colonna iniziale, quella per il table-organizer delle righe -->
-        <td class="td-fit-content remove-border" (mouseenter)="onCellMouseEnter(-1, -1)"></td>
+        <td class="remove-border" (mouseenter)="onMouseEnteredCell(-1, -1)"></td>
 
-        <td class="center-td-content-v remove-border" (mouseenter)="onCellMouseEnter(-1, -1)">
-          <button class="btn btn-primary" type="button" (click)="onAddNewRow()" title="Append new row">
+        <td class="center-td-content-v remove-border" (mouseenter)="onMouseEnteredCell(-1, -1)">
+          <button class="btn btn-primary" type="button" (click)="onNewRowAdded()" title="Append new row">
             <i class="bi bi-plus-lg"></i>
           </button>
         </td>
@@ -136,7 +141,7 @@
           aggiunge le restanti celle. Non sfora perché ci sono due colonne in più. Una per il bottone di aggiunta
           colonne e una per i table-organizer delle righe
         -->
-        <td class="remove-border" *ngFor="let cell of table.getDataTypes()" (mouseenter)="onCellMouseEnter(-1, -1)"></td>
+        <td class="remove-border" *ngFor="let cell of table.getHeadersCells()" (mouseenter)="onMouseEnteredCell(-1, -1)"></td>
       </tr>
     </tbody>
   </table>

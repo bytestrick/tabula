@@ -1,5 +1,5 @@
 import {
-  Component, ComponentRef,
+  Component,
   Type,
 } from '@angular/core';
 import {Table} from '../../model/table';
@@ -9,7 +9,6 @@ import {TextualDataType} from '../../model/concrete-data-type/textual-data-type'
 import {InputPopUpComponent} from '../input-pop-up/input-pop-up.component';
 import {Pair} from '../../model/pair';
 import {BaseInputComponent} from '../input-components/base-input-component';
-import {BaseCellComponent} from './cells/base-cell-component';
 import {CellWrapperComponent} from './cells/cell-wrapper/cell-wrapper.component';
 import {HighlightBordersDirective} from '../../directive/highlight-borders.directive';
 import {TableOrganizerComponent} from '../table-organizer/table-organizer.component';
@@ -20,8 +19,8 @@ import {
   CdkDragPreview,
   CdkDropList,
 } from '@angular/cdk/drag-drop';
-
-
+import {FormsModule} from '@angular/forms';
+import {Cell} from '../../model/cell';
 @Component({
   selector: 'app-table',
   standalone: true,
@@ -35,14 +34,17 @@ import {
     CdkDropList,
     CdkDrag,
     CdkDragPreview,
+    FormsModule,
   ],
   templateUrl: './table.component.html',
   styleUrl: './table.component.css'
 })
 export class TableComponent {
 
-  private currentCellSelected: ComponentRef<BaseCellComponent> | null = null;
-  private currentDataType: DataType | null = null;
+  private currentCellSelected: Cell | null = null;
+
+  protected rowsSelected: Set<number> = new Set<number>;
+  protected colsSelected: Set<number> = new Set<number>;
 
   protected isAnElementDragged: boolean = false;
 
@@ -50,7 +52,7 @@ export class TableComponent {
 
   protected isInputMethodVisible: boolean = false;
 
-  protected inputMethodPosition: Pair<number, number> = { first: 0, second: 0 };
+  protected inputMethodPosition: Pair<number, number> = {first: 0, second: 0};
   protected inputComponent: Type<BaseInputComponent> | null = null;
   protected inputComponentInitialValue: any = null;
 
@@ -63,7 +65,7 @@ export class TableComponent {
 
   constructor() {
     // inizializza il componente in modo tale da avere già una colonna e una riga
-    this.table.addNewDataType(new TextualDataType());
+    this.table.addNewHeader(new TextualDataType());
     this.table.addNewRow();
   }
 
@@ -76,14 +78,14 @@ export class TableComponent {
 
 
   insertNewColAt(colIndex: number, dataType: DataType): void {
-    if (colIndex >= 0 && colIndex < this.table.getDataTypesAmount()) {
+    if (colIndex >= 0 && colIndex < this.table.getHeadersCellsAmount()) {
       this.table.insertNewDataTypeAt(colIndex, dataType);
     }
   }
 
 
   addNewCol(dataType: DataType): void {
-    this.table.addNewDataType(dataType);
+    this.table.addNewHeader(dataType);
   }
 
 
@@ -92,28 +94,27 @@ export class TableComponent {
   }
 
 
-  onAddNewRow(): void {
+  onNewRowAdded(): void {
     this.addNewRow();
   }
 
 
-  onAddNewColumn(): void {
+  onNewColumnAdded(): void {
     const dataType: DataType = new TextualDataType();
     this.showDataTypeChooser(0, 0);
     this.addNewCol(dataType);
   }
 
 
-  onCellDoubleClick(event: MouseEvent, dataType: DataType, cell: ComponentRef<BaseCellComponent> | null): void {
-    this.showInputMethod(event.x, event.y, dataType, cell);
+  onDoubleClickedCell(event: MouseEvent, cell: Cell): void {
+    this.showInputMethod(event.x, event.y, cell);
   }
 
 
-  showInputMethod(x: number, y: number, dataType: DataType, cell: ComponentRef<BaseCellComponent> | null): void {
+  showInputMethod(x: number, y: number, cell: Cell): void {
     this.currentCellSelected = cell;
-    this.currentDataType = dataType;
-    this.inputComponent = dataType.getInputComponent(); // Assegna il metodo di input corretto in base al tipo presente sulla colonna corrispondente.
-    this.inputComponentInitialValue = cell?.instance.getValue();
+    this.inputComponent = cell.cellDataType.getInputComponent(); // Assegna il metodo di input corretto in base al tipo presente sulla colonna corrispondente.
+    this.inputComponentInitialValue = cell.value; // Valore di default mostrato quando compare il popup per prendere l'input.
 
     this.isInputMethodVisible = true;
     this.inputMethodPosition = new Pair(x, y);
@@ -132,22 +133,33 @@ export class TableComponent {
 
   hideInputMethod(): void {
     this.currentCellSelected = null;
-    this.currentDataType = null;
     this.isInputMethodVisible = false;
   }
 
 
   onInputPopUpClosed(value: any): void {
     if (!(value === null)) {
-      this.currentCellSelected?.instance?.setValue(value);
-      this.currentDataType?.setValue(value);
+      if (this.currentCellSelected !== null && this.colsSelected.size === 0 && this.rowsSelected.size === 0) {
+        this.currentCellSelected.value = value;
+      }
+      else {
+        this.rowsSelected.forEach(e => {
+          for (let r of this.table.getRow(e))
+            r.value = value;
+        });
+
+        this.colsSelected.forEach(e => {
+          for (let c of this.table.getCol(e))
+            c.value = value;
+        });
+      }
     }
 
     this.hideInputMethod();
   }
 
 
-  onCellMouseEnter(rowIndex: number, colIndex: number): void {
+  onMouseEnteredCell(rowIndex: number, colIndex: number): void {
     this.hoveredRowIndex = rowIndex === -1 ? null : rowIndex;
     this.hoveredColIndex = colIndex === -1 ? null : colIndex;
   }
@@ -159,24 +171,24 @@ export class TableComponent {
   }
 
 
-  onAddColumnAt(colIndex: number): void {
+  onColumnAddedAt(colIndex: number): void {
     const dataType: DataType = new TextualDataType();
     this.insertNewColAt(colIndex, dataType);
   }
 
 
-  onAddRowAt(rowIndex: number): void {
+  onRowAddedAt(rowIndex: number): void {
     this.insertNewRowAt(rowIndex);
   }
 
 
-  onDropColumn(event: CdkDragDrop<any, any>): void {
+  onColumnDropped(event: CdkDragDrop<any, any>): void {
     if (this.hoveredColIndex !== null && event.previousIndex !== this.hoveredColIndex)
       this.table.swapCol(event.previousIndex, this.hoveredColIndex);
   }
 
 
-  onDropRow(event: CdkDragDrop<any, any>): void {
+  onRowDropped(event: CdkDragDrop<any, any>): void {
     if (this.hoveredRowIndex !== null && event.previousIndex !== this.hoveredRowIndex)
       this.table.swapRow(event.previousIndex, this.hoveredRowIndex);
   }
@@ -189,5 +201,21 @@ export class TableComponent {
 
   onDragStarted(): void {
     this.isAnElementDragged = true;
+  }
+
+
+  onColumnSelectionToggled(value: boolean, colIndex: number): void {
+    if (value)
+      this.colsSelected.add(colIndex);
+    else
+      this.colsSelected.delete(colIndex);
+  }
+
+
+  onRowSelectionToggled(value: boolean, rowIndex: number): void {
+    if (value)
+      this.rowsSelected.add(rowIndex);
+    else
+      this.rowsSelected.delete(rowIndex);
   }
 }

@@ -1,9 +1,13 @@
 div {
   display: inline-flex;
   align-items: center;
+  justify-content: space-around;
   background-color: lightgray;
   border-radius: 6px;
   padding: 2px;
+
+  min-width: 78px;
+  min-height: 30px;
 
   opacity: 0;
 }

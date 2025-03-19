@@ -26,6 +26,7 @@ export class TableOrganizerComponent implements AfterViewInit {
   @Input() showOrganizer: boolean = false;
 
   @Output() addAt: EventEmitter<void> = new EventEmitter<void>;
+  @Output() selectionToggle: EventEmitter<boolean> = new EventEmitter<boolean>;
 
 
   constructor(private renderer: Renderer2) {}
@@ -36,12 +37,13 @@ export class TableOrganizerComponent implements AfterViewInit {
   }
 
 
-  onSelect(event: Event): void {
-
+  onSelectionToggled(event: Event): void {
+    const checkbox = event.target as HTMLInputElement;
+    this.selectionToggle.emit(checkbox.checked);
   }
 
 
-  onAddAt(): void {
+  onAddedAt(): void {
     this.addAt.emit();
   }
 }
