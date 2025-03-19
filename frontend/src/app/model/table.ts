@@ -1,24 +1,22 @@
 import {DataType} from './data-type';
-import {Pair} from './pair';
 import {TextualDataType} from './concrete-data-type/textual-data-type';
 import {moveItemInArray} from '@angular/cdk/drag-drop';
+import {HeaderCell} from './header-cell';
+import {Cell} from './cell';
 
 export class Table {
 
-  private table: DataType[][] = [];
-
-  // first: il tipo di dato scelto per la cella.
-  // second: il tipo di dato scelto per la colonna corrispondente.
-  private dataTypes: Pair<DataType, DataType>[] = [];
+  private table: Cell[][] = [];
+  private headerCells: HeaderCell[] = [];
 
 
-  addNewDataType(dataType: DataType): void {
-    this.dataTypes.push(new Pair(new TextualDataType(), dataType));
+  addNewHeader(dataType: DataType): void {
+    this.headerCells.push(new HeaderCell(new TextualDataType(), null, dataType));
 
     for (let i: number = 0; i < this.getRowsNumber(); ++i) {
-      while (this.table[i].length < this.getDataTypesAmount()) {
-        const currentDataType: DataType = this.dataTypes[this.table[i].length].second;
-        this.table[i].push(currentDataType.getNewDataType())
+      while (this.table[i].length < this.getHeadersCellsAmount()) {
+        const currentDataType: DataType = this.headerCells[this.table[i].length].columnDataType;
+        this.table[i].push(new Cell(currentDataType.getNewDataType(), null));
       }
     }
   }
@@ -28,8 +26,8 @@ export class Table {
     this.table.push([]);
     const lastRowI: number = this.getRowsNumber() - 1;
 
-    for (let i: number = 0; i < this.getDataTypesAmount(); ++i) {
-      this.table[lastRowI].push(this.dataTypes[i].second.getNewDataType());
+    for (let i: number = 0; i < this.getHeadersCellsAmount(); ++i) {
+      this.table[lastRowI].push(new Cell(this.headerCells[i].columnDataType.getNewDataType(), null));
     }
   }
 
@@ -39,13 +37,13 @@ export class Table {
   }
 
 
-  getDataTypesAmount(): number {
-    return this.dataTypes.length;
+  getHeadersCellsAmount(): number {
+    return this.headerCells.length;
   }
 
 
-  getDataTypes(): Pair<DataType, DataType>[] {
-    return this.dataTypes;
+  getHeadersCells(): HeaderCell[] {
+    return this.headerCells;
   }
 
 
@@ -53,24 +51,24 @@ export class Table {
     if (rowIndex >= 0 && rowIndex < this.getRowsNumber()) {
       this.table.splice(rowIndex, 0, []);
 
-      for (let i: number = 0; i < this.getDataTypesAmount(); ++i)
-        this.table[rowIndex].push(this.dataTypes[i].second.getNewDataType());
+      for (let i: number = 0; i < this.getHeadersCellsAmount(); ++i)
+        this.table[rowIndex].push(new Cell(this.headerCells[i].columnDataType.getNewDataType(), null));
     }
   }
 
 
   insertNewDataTypeAt(colIndex: number, dataType: DataType): void {
-    if (colIndex >= 0 && colIndex < this.getDataTypesAmount()) {
-      this.dataTypes.splice(colIndex, 0, new Pair(new TextualDataType(), dataType));
+    if (colIndex >= 0 && colIndex < this.getHeadersCellsAmount()) {
+      this.headerCells.splice(colIndex, 0, new HeaderCell(new TextualDataType(), null, dataType));
 
       for (let i: number = 0; i < this.getRowsNumber(); ++i) {
-        this.table[i].splice(colIndex, 0, this.dataTypes[colIndex].second.getNewDataType());
+        this.table[i].splice(colIndex, 0, new Cell(this.headerCells[colIndex].columnDataType.getNewDataType(), null));
       }
     }
   }
 
 
-  getRows(): DataType[][] {
+  getRows(): Cell[][] {
     return this.table;
   }
 
@@ -80,21 +78,20 @@ export class Table {
       moveItemInArray(row, fromIndex, toIndex);
     }
 
-    moveItemInArray(this.dataTypes, fromIndex, toIndex);
+    moveItemInArray(this.headerCells, fromIndex, toIndex);
   }
 
 
   swapRow(fromIndex: number, toIndex: number): void {
     moveItemInArray(this.table, fromIndex, toIndex);
-    console.log(fromIndex, ' ', toIndex);
   }
 
 
-  getCol(colIndex: number, limit: number): DataType[] {
-    if (limit <= 0 || colIndex < 0 || colIndex >= this.getDataTypesAmount())
+  getCol(colIndex: number, limit: number = this.getRowsNumber()): Cell[] {
+    if (limit <= 0 || colIndex < 0 || colIndex >= this.getHeadersCellsAmount())
       return [];
 
-    const col: DataType[] = [];
+    const col: Cell[] = [];
 
     for (let i: number = 0; i < Math.min(this.getRowsNumber(), limit); ++i)
       col.push(this.table[i][colIndex]);
@@ -103,15 +100,15 @@ export class Table {
   }
 
 
-  getRow(rowIndex: number, limit: number): DataType[] {
+  getRow(rowIndex: number, limit: number = this.getHeadersCellsAmount()): Cell[] {
     if (limit <= 0 || rowIndex < 0 || rowIndex >= this.getRowsNumber())
       return [];
 
-    return this.table[rowIndex].slice(0, Math.min(this.getDataTypesAmount(), limit));
+    return this.table[rowIndex].slice(0, Math.min(this.getHeadersCellsAmount(), limit));
   }
 
 
-  getDataType(colIndex: number): DataType {
-    return this.dataTypes[colIndex].second;
+  getColDataType(colIndex: number): DataType {
+    return this.headerCells[colIndex].columnDataType;
   }
 }

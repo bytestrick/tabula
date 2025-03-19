@@ -20,16 +20,33 @@
 }
 
 
+.center-container {
+  position: relative;
+}
+
+.center {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+
 .remove-border {
   border: none;
   border-color: inherit;
 }
 
 
-.fit-content {
-  width: 105px;
+td,th {
+  min-width: var(--cell-table-min-width);
+  min-height: var(--cell-table-min-height);
 }
 
+/* Per far si che la prima colonna della tabella possa avere una width propria. */
+tr > td:first-child,
+tr > th:first-child {
+  min-width: auto;
+}
 
 /*
 * Classi per la preview del drag di righe e colonne.

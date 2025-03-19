@@ -5,7 +5,7 @@
     'transition': 'opacity 0.1s ease-out',
     'pointer-events': showOrganizer ? 'auto' : 'none'}"
 >
-  <i class="btn btn-outline-primary bi bi-plus" (click)="onAddAt()"></i>
+  <i class="btn btn-outline-primary bi bi-plus" (click)="onAddedAt()"></i>
   <i class="bi bi-grip-horizontal" cdkDragHandle></i>
-  <input class="form-check-input" type="checkbox" (input)="onSelect($event)">
+  <input class="form-check-input" type="checkbox" (change)="onSelectionToggled($event)">
 </div>
