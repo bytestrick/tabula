@@ -1,5 +1,25 @@
-.button-cell {
-  vertical-align: middle;
+.app-table-bordered {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.app-table-bordered tr {
+  border-top: 1px solid #dee2e6;
+  border-bottom: 1px solid #dee2e6;
+  border-left: 1px solid transparent;
+  border-right: 1px solid transparent;
+}
+
+.app-table-bordered td:not(:last-child),
+.app-table-bordered th:not(:last-child) {
+  border-right: 1px solid #dee2e6;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.app-table-bordered td,
+.app-table-bordered th {
+  border-top: 1px solid transparent;
+  border-left: 1px solid transparent;
 }
 
 
@@ -32,12 +52,11 @@
 
 
 .remove-border {
-  border: none;
-  border-color: inherit;
+  border: none inherit;
 }
 
 
-td,th {
+td, th {
   min-width: var(--cell-table-min-width);
   min-height: var(--cell-table-min-height);
 }

@@ -1,5 +1,5 @@
 <div class="table-responsive space-left-right">
-  <table class="table table-bordered" (mouseleave)="onMouseLeaveTable()">
+  <table class="table app-table-bordered" (mouseleave)="onMouseLeaveTable()">
     <thead>
       <!-- riga per i table-organizer -->
       <tr
@@ -103,6 +103,7 @@
 
         <!-- celle in cui inserire i dati -->
         <td
+          #areaToSelect
           *ngFor="let cell of row; let colIndex = index"
           (mouseenter)="onMouseEnteredCell(rowIndex, colIndex)"
           style="padding: 0"
@@ -110,7 +111,13 @@
           <app-cell-wrapper
             #cellWrapper
             appHighlightBorders [appHighlightBordersOf]="cellWrapper.bordersToHighLight.nativeElement" [appHighlightCanDisable]="!isInputMethodVisible"
-            appSelect [appIsSelected]="isRowSelected(rowIndex) || isColumnSelected(colIndex)" [appTargetOfSelection]="cellWrapper.areaToSelect.nativeElement"
+            appSelect [appIsSelected]="isRowSelected(rowIndex) || isColumnSelected(colIndex)" [appTargetOfSelection]="areaToSelect"
+            [selectedNeighbors]="{
+              top: isRowSelected(rowIndex - 1) || (rowIndex - 1 >= 0 && isColumnSelected(colIndex)),
+              bottom: isRowSelected(rowIndex + 1) || (rowIndex + 1< table.getRowsNumber() && isColumnSelected(colIndex)),
+              left: isColumnSelected(colIndex - 1) || (colIndex - 1 >= 0 && isRowSelected(rowIndex)),
+              right: isColumnSelected(colIndex + 1) || (colIndex + 1 < table.getHeadersCellsAmount() && isRowSelected(rowIndex))
+            }"
             [cell]="cell"
             (dblclick)="onDoubleClickedCell($event, cell)"
           ></app-cell-wrapper>

@@ -30,8 +30,9 @@ export class HighlightBordersDirective implements OnChanges, AfterViewInit {
   ngAfterViewInit(): void {
     const element: HTMLElement = this.targetElement || this.elementRef.nativeElement;
 
-    this.renderer.setStyle(element, 'border', this.borderStyle);
-    this.renderer.setStyle(element, 'border-color', 'transparent');
+    this.renderer.setStyle(element, 'outline', this.borderStyle);
+    this.renderer.setStyle(element, 'outline-offset', '-1px');
+    this.renderer.setStyle(element, 'outline-color', 'transparent');
   }
 
 
@@ -62,12 +63,12 @@ export class HighlightBordersDirective implements OnChanges, AfterViewInit {
 
   private applyHighlight(): void {
     const element: HTMLElement = this.targetElement || this.elementRef.nativeElement;
-    this.renderer.setStyle(element, 'border-color', this.borderColor);
+    this.renderer.setStyle(element, 'outline-color', this.borderColor);
   }
 
 
   private removeHighlight(): void {
     const element: HTMLElement = this.targetElement || this.elementRef.nativeElement;
-    this.renderer.setStyle(element, 'border-color', 'transparent');
+    this.renderer.setStyle(element, 'outline-color', 'transparent');
   }
 }
