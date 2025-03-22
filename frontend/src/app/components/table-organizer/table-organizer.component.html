@@ -2,7 +2,7 @@
   #container
   [ngStyle]="
     {'opacity': showOrganizer ? '1' : '0',
-    'transition': 'opacity 0.1s ease-out',
+    'transition': 'opacity 200ms cubic-bezier(0, 0, 0.2, 1)',
     'pointer-events': showOrganizer ? 'auto' : 'none'}"
 >
   <i class="btn btn-outline-primary bi bi-plus" (click)="onAddedAt()"></i>

@@ -21,6 +21,7 @@ import {
 } from '@angular/cdk/drag-drop';
 import {FormsModule} from '@angular/forms';
 import {Cell} from '../../model/cell';
+import {SelectDirective} from '../../directive/select.directive';
 @Component({
   selector: 'app-table',
   standalone: true,
@@ -35,6 +36,7 @@ import {Cell} from '../../model/cell';
     CdkDrag,
     CdkDragPreview,
     FormsModule,
+    SelectDirective,
   ],
   templateUrl: './table.component.html',
   styleUrl: './table.component.css'
@@ -42,9 +44,6 @@ import {Cell} from '../../model/cell';
 export class TableComponent {
 
   private currentCellSelected: Cell | null = null;
-
-  protected rowsSelected: Set<number> = new Set<number>;
-  protected colsSelected: Set<number> = new Set<number>;
 
   protected isAnElementDragged: boolean = false;
 
@@ -59,12 +58,11 @@ export class TableComponent {
   protected hoveredRowIndex: number | null = null;
   protected hoveredColIndex: number | null = null;
 
-  tableName: string = "New Table";
-  previewLimit: number = 5;
+  previewLimit: number = 5; // Preview che compare durante il drag di righe e colonne.
 
 
   constructor() {
-    // inizializza il componente in modo tale da avere già una colonna e una riga
+    // Inizializza il componente in modo tale da avere già una colonna e una riga.
     this.table.addNewHeader(new TextualDataType());
     this.table.addNewRow();
   }
@@ -139,16 +137,16 @@ export class TableComponent {
 
   onInputPopUpClosed(value: any): void {
     if (!(value === null)) {
-      if (this.currentCellSelected !== null && this.colsSelected.size === 0 && this.rowsSelected.size === 0) {
+      if (this.currentCellSelected !== null && !this.table.hasColumnSelected() && !this.table.hasRowsSelected()) {
         this.currentCellSelected.value = value;
       }
       else {
-        this.rowsSelected.forEach(e => {
+        this.table.doForEachRowSelected(e => {
           for (let r of this.table.getRow(e))
             r.value = value;
         });
 
-        this.colsSelected.forEach(e => {
+        this.table.doForEachColumnSelected(e => {
           for (let c of this.table.getCol(e))
             c.value = value;
         });
@@ -204,18 +202,22 @@ export class TableComponent {
   }
 
 
-  onColumnSelectionToggled(value: boolean, colIndex: number): void {
-    if (value)
-      this.colsSelected.add(colIndex);
-    else
-      this.colsSelected.delete(colIndex);
+  onColumnSelectionToggled(value: boolean, columnIndex: number): void {
+    this.table.selectColumn(value, columnIndex);
   }
 
 
   onRowSelectionToggled(value: boolean, rowIndex: number): void {
-    if (value)
-      this.rowsSelected.add(rowIndex);
-    else
-      this.rowsSelected.delete(rowIndex);
+    this.table.selectRow(value, rowIndex);
+  }
+
+
+  isColumnSelected(columnIndex: number): boolean {
+    return this.table.isColumnSelected(columnIndex);
+  }
+
+
+  isRowSelected(rowIndex: number): boolean {
+    return this.table.isRowSelected(rowIndex)
   }
 }

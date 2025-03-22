@@ -15,20 +15,20 @@ import {
 })
 export class HighlightBordersDirective implements OnChanges, AfterViewInit {
 
-  @Input('appHighlightBordersOf') targetElement!: HTMLElement;
-  @Input() canDisable: boolean = true;
+  @Input('appHighlightBordersOf') targetElement?: HTMLElement;
+  @Input('appHighlightCanDisable') canDisable: boolean = true;
 
   private borderStyle: string = '2px dashed';
   private borderColor: string = 'var(--bs-primary)';
 
-  isHovered: boolean = false;
+  private isHovered: boolean = false;
 
 
-  constructor(private el: ElementRef, private renderer: Renderer2) {}
+  constructor(private elementRef: ElementRef, private renderer: Renderer2) {}
 
 
   ngAfterViewInit(): void {
-    const element: HTMLElement = this.targetElement || this.el.nativeElement;
+    const element: HTMLElement = this.targetElement || this.elementRef.nativeElement;
 
     this.renderer.setStyle(element, 'border', this.borderStyle);
     this.renderer.setStyle(element, 'border-color', 'transparent');
@@ -61,13 +61,13 @@ export class HighlightBordersDirective implements OnChanges, AfterViewInit {
 
 
   private applyHighlight(): void {
-    const element: HTMLElement = this.targetElement || this.el.nativeElement;
+    const element: HTMLElement = this.targetElement || this.elementRef.nativeElement;
     this.renderer.setStyle(element, 'border-color', this.borderColor);
   }
 
 
   private removeHighlight(): void {
-    const element: HTMLElement = this.targetElement || this.el.nativeElement;
+    const element: HTMLElement = this.targetElement || this.elementRef.nativeElement;
     this.renderer.setStyle(element, 'border-color', 'transparent');
   }
 }

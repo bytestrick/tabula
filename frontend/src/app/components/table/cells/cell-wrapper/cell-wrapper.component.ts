@@ -36,6 +36,7 @@ export class CellWrapperComponent implements AfterViewInit {
   @Input() headerCell: HeaderCell | null = null;
   @ViewChild('container', { read: ViewContainerRef, static: true }) container!: ViewContainerRef;
   @ViewChild('borders', { static: true }) bordersToHighLight!: ElementRef;
+  @ViewChild('borders', { static: true }) areaToSelect!: ElementRef;
 
 
   ngAfterViewInit(): void {
