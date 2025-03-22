@@ -3,7 +3,7 @@ import { CreateTableCardComponent } from './create-table-card/create-table-card.
 import {FormsModule} from '@angular/forms';
 import {ModalCreateTableCardComponent} from './modal/modal-create-table-card/modal-create-table-card.component';
 import {ModalEditTableCardComponent} from './modal/modal-edit-table-card/modal-edit-table-card.component';
-import {HomeMediatorService} from '../services/home/home-mediator.service';
+import {HomeMediatorService} from './home-mediator.service';
 
 @Component({
   selector: 'app-table-cards-container',

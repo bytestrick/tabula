@@ -1,7 +1,7 @@
 import {Injectable, ViewContainerRef} from '@angular/core';
-import {TableCardComponent} from '../../home/table-card/table-card.component';
-import {ModalEditTableCardComponent} from '../../home/modal/modal-edit-table-card/modal-edit-table-card.component';
-import {ModalCreateTableCardComponent} from '../../home/modal/modal-create-table-card/modal-create-table-card.component';
+import {TableCardComponent} from './table-card/table-card.component';
+import {ModalEditTableCardComponent} from './modal/modal-edit-table-card/modal-edit-table-card.component';
+import {ModalCreateTableCardComponent} from './modal/modal-create-table-card/modal-create-table-card.component';
 
 @Injectable({
   providedIn: 'root'
