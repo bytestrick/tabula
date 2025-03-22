@@ -1,10 +1,5 @@
-<h3>{{ tableName }}</h3>
-
 <div class="table-responsive space-left-right">
   <table class="table table-bordered" (mouseleave)="onMouseLeaveTable()">
-    <colgroup>
-      <col style="width: 105px;">
-    </colgroup>
     <thead>
       <!-- riga per i table-organizer -->
       <tr
@@ -60,7 +55,7 @@
         >
           <app-cell-wrapper
             #cellWrapper
-            appHighlightBorders [appHighlightBordersOf]="cellWrapper.bordersToHighLight.nativeElement" [canDisable]="!isInputMethodVisible"
+            appHighlightBorders [appHighlightBordersOf]="cellWrapper.bordersToHighLight.nativeElement" [appHighlightCanDisable]="!isInputMethodVisible"
             [headerCell]="headerCell"
             (dblclick)="onDoubleClickedCell($event, headerCell)"
           ></app-cell-wrapper>
@@ -114,7 +109,8 @@
         >
           <app-cell-wrapper
             #cellWrapper
-            appHighlightBorders [appHighlightBordersOf]="cellWrapper.bordersToHighLight.nativeElement" [canDisable]="!isInputMethodVisible"
+            appHighlightBorders [appHighlightBordersOf]="cellWrapper.bordersToHighLight.nativeElement" [appHighlightCanDisable]="!isInputMethodVisible"
+            appSelect [appIsSelected]="isRowSelected(rowIndex) || isColumnSelected(colIndex)" [appTargetOfSelection]="cellWrapper.areaToSelect.nativeElement"
             [cell]="cell"
             (dblclick)="onDoubleClickedCell($event, cell)"
           ></app-cell-wrapper>

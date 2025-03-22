@@ -9,6 +9,9 @@ export class Table {
   private table: Cell[][] = [];
   private headerCells: HeaderCell[] = [];
 
+  private rowsSelected: Set<number> = new Set<number>;
+  private columnsSelected: Set<number> = new Set<number>;
+
 
   addNewHeader(dataType: DataType): void {
     this.headerCells.push(new HeaderCell(new TextualDataType(), null, dataType));
@@ -79,11 +82,21 @@ export class Table {
     }
 
     moveItemInArray(this.headerCells, fromIndex, toIndex);
+
+    if (this.isColumnSelected(fromIndex)) {
+      this.columnsSelected.delete(fromIndex);
+      this.columnsSelected.add(toIndex);
+    }
   }
 
 
   swapRow(fromIndex: number, toIndex: number): void {
     moveItemInArray(this.table, fromIndex, toIndex);
+
+    if (this.isRowSelected(fromIndex)) {
+      this.rowsSelected.delete(fromIndex);
+      this.rowsSelected.add(toIndex);
+    }
   }
 
 
@@ -110,5 +123,51 @@ export class Table {
 
   getColDataType(colIndex: number): DataType {
     return this.headerCells[colIndex].columnDataType;
+  }
+
+
+  selectRow(value: boolean, rowIndex: number): void {
+    if (value)
+      this.rowsSelected.add(rowIndex);
+    else
+      this.rowsSelected.delete(rowIndex);
+  }
+
+
+  selectColumn(value: boolean, columnIndex: number): void {
+    if (value)
+      this.columnsSelected.add(columnIndex);
+    else
+      this.columnsSelected.delete(columnIndex);
+  }
+
+
+  isColumnSelected(columnIndex: number): boolean {
+    return this.columnsSelected.has(columnIndex);
+  }
+
+
+  isRowSelected(rowIndex: number): boolean {
+    return this.rowsSelected.has(rowIndex);
+  }
+
+
+  hasRowsSelected(): boolean {
+    return this.rowsSelected.size !== 0;
+  }
+
+
+  hasColumnSelected(): boolean {
+    return this.columnsSelected.size !== 0;
+  }
+
+
+  doForEachRowSelected(fn: (rowIndex: number) => void): void {
+    this.rowsSelected.forEach(fn);
+  }
+
+
+  doForEachColumnSelected(fn: (columnIndex: number) => void): void {
+    this.columnsSelected.forEach(fn);
   }
 }
