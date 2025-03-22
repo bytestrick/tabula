@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {HomeMediatorService} from '../../services/home/home-mediator.service';
+import {HomeMediatorService} from '../home-mediator.service';
 
 @Component({
   selector: 'app-create-table-card',

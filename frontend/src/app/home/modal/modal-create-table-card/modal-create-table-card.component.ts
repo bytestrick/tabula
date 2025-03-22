@@ -2,7 +2,7 @@ import {Component} from '@angular/core';
 import { ModalComponent } from '../modal.component';
 import {FormsModule} from '@angular/forms';
 import {TableCardComponent} from '../../table-card/table-card.component';
-import {HomeMediatorService} from '../../../services/home/home-mediator.service';
+import {HomeMediatorService} from '../../home-mediator.service';
 
 @Component({
   selector: 'app-modal-create-table-card',
