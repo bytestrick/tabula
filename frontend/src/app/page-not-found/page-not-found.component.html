@@ -1,0 +1,10 @@
+<main class="container text-center">
+  <h1 class="mb-5">Page Not Found</h1>
+
+  <h5 class="mb-5"><span class="font-monospace">{{ currentPage }}</span> doesn't exist</h5>
+
+  <div class="d-flex justify-content-center">
+    <button id="go-back" (click)="onGoBack()" class="btn btn-primary">Go back</button>
+    <button id="go-home" routerLink="/" class="btn btn-secondary">Go Home</button>
+  </div>
+</main>
