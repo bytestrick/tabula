@@ -6,7 +6,7 @@
   <div class="row mb-3">
     <label for="name-input" class="form-label p-0">Name</label>
     <div class="input-group p-0 has-validation position-relative">
-      <input id="name-input" class="form-control" placeholder="John" type="text" [(ngModel)]="name" name="name"
+      <input id="name-input" class="form-control" placeholder="John" type="text" [(ngModel)]="user.name" name="name"
              required>
       <div class="invalid-tooltip">Name required</div>
     </div>
@@ -15,7 +15,8 @@
   <div class="row mb-3 position-relative">
     <label for="surname-input" class="form-label p-0">Surname</label>
     <div class="input-group p-0 has-validation">
-      <input id="surname-input" class="form-control" placeholder="Doe" type="text" [(ngModel)]="surname" name="surname"
+      <input id="surname-input" class="form-control" placeholder="Doe" type="text" [(ngModel)]="user.surname"
+             name="surname"
              required>
       <div class="invalid-tooltip">Surname required</div>
     </div>
@@ -24,11 +25,12 @@
   <div class="row mb-3">
     <label for="country-input" class="form-label p-0">Country</label>
     <div class="input-group p-0 has-validation position-relative">
-      <select id="country-input" class="form-select" [(ngModel)]="country" name="country" required>
-        <option value="" disabled selected>Select your country</option>
-        <option *ngFor="let country of countries"
-                [value]="country">{{ country.name.length > 26 ? country.name.substring(0, 26) + '…' : country.name }}
-          &nbsp;&nbsp;{{ country.flag }}
+      <select (change)="onCountryChange()" id="country-input" class="form-select" [(ngModel)]="countryIndex"
+              name="country" required>
+        <option value="0" disabled>Select your country</option>
+        <option [value]="i" *ngFor="let country of countries; index as i">
+          {{ country.name.length > 26 ? country.name.substring(0, 26) + '…' : country.name }}&nbsp;
+          {{ country.flag }}
         </option>
       </select>
       <div class="invalid-tooltip">Country required</div>
@@ -38,7 +40,7 @@
   <div class="row mb-3">
     <label for="email-input" class="form-label p-0">Email address</label>
     <div class="input-group p-0 has-validation position-relative">
-      <input id="email-input" class="form-control" type="email" [(ngModel)]="email" name="email"
+      <input id="email-input" class="form-control" type="email" [(ngModel)]="user.email" name="email"
              placeholder="john.doe@example.com" required>
       <div class="invalid-tooltip">A valid email address is required</div>
     </div>
@@ -47,7 +49,7 @@
   <div class="row mb-3">
     <label for="pass-input" class="form-label p-0">Password</label>
     <div class="input-group has-validation p-0 position-relative">
-      <input id="pass-input" class="form-control" [(ngModel)]="password" name="password" type="password" required>
+      <input id="pass-input" class="form-control" [(ngModel)]="user.password" name="password" type="password" required>
       <button appPasswordVisibility id="pass-visible" type="button" class="btn btn-outline-secondary"
               data-bs-toggle="tooltip" data-bs-title="Show password">
         <i class="bi bi-eye" id="pass-icon"></i>
@@ -58,7 +60,7 @@
 
   <div class="row mb-5">
     <div class="form-check">
-      <input id="remember-login" class="form-check-input" type="checkbox" [(ngModel)]="rememberLogin"
+      <input id="remember-login" class="form-check-input" type="checkbox" [(ngModel)]="user.rememberMe"
              name="rememberLogin" checked>
       <label for="remember-login" class="form-check-label">Keep me logged in</label>
     </div>
