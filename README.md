@@ -1,8 +1,10 @@
 # Tabula
 
-To run the backend: `./gradlew bootRun` from `backend/`.
+The focus of this project lies on the architecture and the structure of a 3-layers web app. Thus, it doesn't address the issues of security and accessibility, which are addressed in another project.
 
-To run the frontend: `ng serve --open` from `frontend/`.
+This repository contains two subprojects, one is the backend of the app which is a Java-Springboot-PostgreSQL-Gradle application, while the other is the frontend of the app which is a TypeScript-Angular-NPM app.
+
+TODO: add command to bootstrap-run the whole project.
 
 ## Credits
 
