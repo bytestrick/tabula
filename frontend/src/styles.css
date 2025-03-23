@@ -10,7 +10,7 @@ body {
 }
 
 /* If the body contains either the login or the register component, center it */
-body:has(app-login, app-register) {
+body:has(app-login, app-register, app-page-not-found) {
   display: flex;
   justify-content: center;
   align-items: center;
