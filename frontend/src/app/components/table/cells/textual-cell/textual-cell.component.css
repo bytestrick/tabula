@@ -1,4 +1,15 @@
 p {
   margin: 0;
-  padding: 4px;
+  padding: 0;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+/* per far funzionare text-overflow: ellipsis; */
+:host {
+  flex: auto;
+  min-width: 0;
 }

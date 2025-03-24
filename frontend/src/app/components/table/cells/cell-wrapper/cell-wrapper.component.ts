@@ -20,12 +20,10 @@ import {Cell} from '../../../../model/cell';
     </div>`,
   styles: [`
     div {
-      overflow-x: auto;
-      overflow-y: hidden;
       display: flex;
+      overflow: auto;
       align-items: center;
-
-      padding: var(--cell-table-padding);
+      margin: var(--cell-table-margin);
       height: var(--cell-table-min-height);
     }
   `]

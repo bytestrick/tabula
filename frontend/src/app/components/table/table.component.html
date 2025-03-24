@@ -57,7 +57,7 @@
             #cellWrapper
             appHighlightBorders [appHighlightBordersOf]="cellWrapper.bordersToHighLight.nativeElement" [appHighlightCanDisable]="!isInputMethodVisible"
             [headerCell]="headerCell"
-            (dblclick)="onDoubleClickedCell($event, headerCell)"
+            (dblclick)="onDoubleClickedCell($event, -1, colIndex)"
           ></app-cell-wrapper>
         </th>
         <!-- serve per aggiungere la cella della colonna finale, quella dove c'è il bottone per aggiungere le colonne -->
@@ -119,7 +119,7 @@
               right: isColumnSelected(colIndex + 1) || (colIndex + 1 < table.getHeadersCellsAmount() && isRowSelected(rowIndex))
             }"
             [cell]="cell"
-            (dblclick)="onDoubleClickedCell($event, cell)"
+            (dblclick)="onDoubleClickedCell($event, rowIndex, colIndex)"
           ></app-cell-wrapper>
         </td>
 
