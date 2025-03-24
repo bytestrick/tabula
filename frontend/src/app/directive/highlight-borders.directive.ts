@@ -31,7 +31,7 @@ export class HighlightBordersDirective implements OnChanges, AfterViewInit {
     const element: HTMLElement = this.targetElement || this.elementRef.nativeElement;
 
     this.renderer.setStyle(element, 'outline', this.borderStyle);
-    this.renderer.setStyle(element, 'outline-offset', '-1px');
+    this.renderer.setStyle(element, 'outline-offset', 'calc(var(--cell-table-margin) - 1px)');
     this.renderer.setStyle(element, 'outline-color', 'transparent');
   }
 

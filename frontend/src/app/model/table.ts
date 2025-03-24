@@ -77,13 +77,19 @@ export class Table {
 
 
   swapCol(fromIndex: number, toIndex: number): void {
+    if (fromIndex < 0 || fromIndex >= this.getHeadersCellsAmount())
+      return;
+
+    if (toIndex < 0 || toIndex >= this.getHeadersCellsAmount())
+      return;
+
     for (let row of this.table) {
       moveItemInArray(row, fromIndex, toIndex);
     }
 
     moveItemInArray(this.headerCells, fromIndex, toIndex);
 
-    if (this.isColumnSelected(fromIndex)) {
+    if (this.isColumnSelected(fromIndex) && !this.isColumnSelected(toIndex)) {
       this.columnsSelected.delete(fromIndex);
       this.columnsSelected.add(toIndex);
     }
@@ -91,9 +97,15 @@ export class Table {
 
 
   swapRow(fromIndex: number, toIndex: number): void {
+    if (fromIndex < 0 || fromIndex >= this.getRowsNumber())
+      return;
+
+    if (toIndex < 0 || toIndex >= this.getRowsNumber())
+      return;
+
     moveItemInArray(this.table, fromIndex, toIndex);
 
-    if (this.isRowSelected(fromIndex)) {
+    if (this.isRowSelected(fromIndex) && !this.isRowSelected(toIndex)) {
       this.rowsSelected.delete(fromIndex);
       this.rowsSelected.add(toIndex);
     }
@@ -169,5 +181,15 @@ export class Table {
 
   doForEachColumnSelected(fn: (columnIndex: number) => void): void {
     this.columnsSelected.forEach(fn);
+  }
+
+
+  getCell(rowIndex: number, columnIndex: number): Cell {
+    return this.table[rowIndex][columnIndex];
+  }
+
+
+  getHeaderCell(columnIndex: number): HeaderCell {
+    return this.headerCells[columnIndex];
   }
 }

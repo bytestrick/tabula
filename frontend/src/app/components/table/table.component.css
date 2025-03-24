@@ -4,16 +4,16 @@
 }
 
 .app-table-bordered tr {
-  border-top: 1px solid #dee2e6;
-  border-bottom: 1px solid #dee2e6;
+  border-top: 1px solid var(--bs-border-color);;
+  border-bottom: 1px solid var(--bs-border-color);;
   border-left: 1px solid transparent;
   border-right: 1px solid transparent;
 }
 
 .app-table-bordered td:not(:last-child),
 .app-table-bordered th:not(:last-child) {
-  border-right: 1px solid #dee2e6;
-  border-bottom: 1px solid #dee2e6;
+  border-right: 1px solid var(--bs-border-color);;
+  border-bottom: 1px solid var(--bs-border-color);;
 }
 
 .app-table-bordered td,

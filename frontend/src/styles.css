@@ -38,11 +38,11 @@ tbl-sign-in form, tbl-sign-up form, tbl-otp form {
 }
 
 :root {
-  --cell-table-min-width: 160px;
-  --cell-table-min-height: 60px;
+  --cell-table-min-width: calc(160px - var(--cell-table-margin));
+  --cell-table-min-height: calc(60px - var(--cell-table-margin));
   --row-drag-preview-max-width: 240px;
   --col-drag-preview-max-height: 180px;
-  --cell-table-padding: 6px;
+  --cell-table-margin: 6px;
 
   --elevated-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
   0 8px 10px 1px rgba(0, 0, 0, 0.14),

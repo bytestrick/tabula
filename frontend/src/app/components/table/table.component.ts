@@ -43,7 +43,7 @@ import {SelectDirective} from '../../directive/select.directive';
 })
 export class TableComponent {
 
-  private currentCellSelected: Cell | null = null;
+  private clickedCellCoords: { i: number, j: number } | null = null;
 
   protected isAnElementDragged: boolean = false;
 
@@ -104,13 +104,14 @@ export class TableComponent {
   }
 
 
-  onDoubleClickedCell(event: MouseEvent, cell: Cell): void {
-    this.showInputMethod(event.x, event.y, cell);
+  onDoubleClickedCell(event: MouseEvent, rowIndex: number, columnIndex: number): void {
+    this.showInputMethod(event.x, event.y, rowIndex, columnIndex);
   }
 
 
-  showInputMethod(x: number, y: number, cell: Cell): void {
-    this.currentCellSelected = cell;
+  showInputMethod(x: number, y: number, rowIndex: number, columnIndex: number): void {
+    this.clickedCellCoords = { i: rowIndex, j: columnIndex };
+    const cell: Cell = this.table.getCell(rowIndex, columnIndex);
     this.inputComponent = cell.cellDataType.getInputComponent(); // Assegna il metodo di input corretto in base al tipo presente sulla colonna corrispondente.
     this.inputComponentInitialValue = cell.value; // Valore di default mostrato quando compare il popup per prendere l'input.
 
@@ -120,7 +121,7 @@ export class TableComponent {
 
 
   showDataTypeChooser(x: number, y: number): void {
-    this.currentCellSelected = null;
+    this.clickedCellCoords = null;
     this.inputComponent = DataTypesChooserComponent;
     this.inputComponentInitialValue = null;
 
@@ -130,15 +131,18 @@ export class TableComponent {
 
 
   hideInputMethod(): void {
-    this.currentCellSelected = null;
+    this.clickedCellCoords = null;
     this.isInputMethodVisible = false;
   }
 
 
   onInputPopUpClosed(value: any): void {
-    if (!(value === null)) {
-      if (this.currentCellSelected !== null && !this.table.hasColumnSelected() && !this.table.hasRowsSelected()) {
-        this.currentCellSelected.value = value;
+    if (value !== null && this.clickedCellCoords !== null) {
+      if (!this.table.isRowSelected(this.clickedCellCoords.i) && !this.table.isColumnSelected(this.clickedCellCoords.j)) {
+        const cell: Cell = this.clickedCellCoords.i === -1 ?
+          this.table.getHeaderCell(this.clickedCellCoords.j) :
+          this.table.getCell(this.clickedCellCoords.i, this.clickedCellCoords.j);
+        cell.value = value;
       }
       else {
         this.table.doForEachRowSelected(e => {
