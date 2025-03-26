@@ -36,6 +36,7 @@ export class ResizableTableColumnDirective implements OnInit, AfterViewInit {
     // Controlla se il resize-handle è stato cliccato.
     if ((event.target as HTMLElement).classList.contains('resize-handle') && this.colElement) {
       this.dragging = true;
+      this.colElement?.setAttribute('data-resized', '');
 
       if (this.body !== null) {
         // Per evitare che l'icona del mouse sfarfalli cambiando icona velocemente quando il mouse esce dal
