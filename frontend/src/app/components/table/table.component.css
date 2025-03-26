@@ -51,22 +51,20 @@
 }
 
 
-.remove-border {
-  border: none inherit;
+table {
+  table-layout: fixed;
 }
 
-
-td, th {
-  min-width: var(--cell-table-min-width);
-  min-height: var(--cell-table-min-height);
-}
-
-/* Per far si che la prima colonna della tabella possa avere una width propria. */
-tr > td:first-child,
-tr > th:first-child {
+.first-column {
   min-width: auto;
   width: 105px;
   max-width: 105px;
+}
+
+.column {
+  width: var(--cell-table-min-width);
+  min-width: var(--cell-table-min-width);
+  min-height: var(--cell-table-min-height);
 }
 
 /*
@@ -114,5 +112,16 @@ tr > th:first-child {
 
 .preview-cell {
   padding: 2px 4px;
+}
+
+/**************************************/
+
+.resize-handle {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 5px;
+  height: 100%;
+  cursor: var(--resize-column-cursor-style);
 }
 

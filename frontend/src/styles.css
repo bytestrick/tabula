@@ -38,8 +38,8 @@ tbl-sign-in form, tbl-sign-up form, tbl-otp form {
 }
 
 :root {
-  --cell-table-min-width: calc(160px - var(--cell-table-margin));
-  --cell-table-min-height: calc(60px - var(--cell-table-margin));
+  --cell-table-min-width: max(160px - var(--cell-table-margin), 160px);
+  --cell-table-min-height: max(60px - var(--cell-table-margin), 60px);
   --row-drag-preview-max-width: 240px;
   --col-drag-preview-max-height: 180px;
   --cell-table-margin: 6px;
@@ -47,5 +47,7 @@ tbl-sign-in form, tbl-sign-up form, tbl-otp form {
   --elevated-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
   0 8px 10px 1px rgba(0, 0, 0, 0.14),
   0 3px 14px 2px rgba(0, 0, 0, 0.12);
+
+  --resize-column-cursor-style: col-resize;
 }
 

@@ -1,15 +1,22 @@
 <div class="table-responsive space-left-right">
   <table class="table app-table-bordered" (mouseleave)="onMouseLeaveTable()">
+    <colgroup #colgroup>
+      <col class="first-column">
+      <col
+        *ngFor="let _ of this.table.getHeadersCells(); let columnIndex = index"
+        [attr.data-index]="columnIndex"
+        class="column"
+      >
+    </colgroup>
     <thead>
       <!-- riga per i table-organizer -->
       <tr
-        class="remove-border"
         cdkDropList
         cdkDropListOrientation="horizontal"
         (cdkDropListDropped)="onColumnDropped($event)"
       >
         <!-- serve per aggiungere la cella della colonna iniziale, quella per il table-organizer delle righe -->
-        <th class="remove-border" (mouseenter)="onMouseEnteredCell(-1, -1)"></th>
+        <th (mouseenter)="onMouseEnteredCell(-1, -1)"></th>
 
         <th
           *ngFor="let _ of this.table.getHeadersCells(); let colIndex = index"
@@ -40,18 +47,19 @@
         </th>
 
         <!-- serve per aggiungere la cella della colonna finale, quella dove c'è il bottone per aggiungere le colonne -->
-        <th class="remove-border" (mouseenter)="onMouseEnteredCell(-1, -1)"></th>
+        <th (mouseenter)="onMouseEnteredCell(-1, -1)"></th>
       </tr>
 
       <!-- riga per i data-type -->
       <tr>
         <!-- serve per aggiungere la cella della colonna iniziale, quella per il table-organizer delle righe -->
-        <th class="remove-border" (mouseenter)="onMouseEnteredCell(-1, -1)"></th>
+        <th (mouseenter)="onMouseEnteredCell(-1, -1)"></th>
         <th
           *ngFor="let headerCell of this.table.getHeadersCells(); let colIndex = index"
           class="center-td-content-v-h"
           (mouseenter)="onMouseEnteredCell(-1, colIndex)"
-          style="padding: 0"
+          style="padding: 0; position: relative;"
+          appResizableTableColumn [colIndex]="colIndex" [colgroup]="colgroup"
         >
           <app-cell-wrapper
             #cellWrapper
@@ -59,6 +67,7 @@
             [headerCell]="headerCell"
             (dblclick)="onDoubleClickedCell($event, -1, colIndex)"
           ></app-cell-wrapper>
+          <div class="resize-handle"></div>
         </th>
         <!-- serve per aggiungere la cella della colonna finale, quella dove c'è il bottone per aggiungere le colonne -->
         <th class="remove-border center-container" (mouseenter)="onMouseEnteredCell(-1, -1)">
@@ -114,7 +123,7 @@
             appSelect [appIsSelected]="isRowSelected(rowIndex) || isColumnSelected(colIndex)" [appTargetOfSelection]="areaToSelect"
             [selectedNeighbors]="{
               top: isRowSelected(rowIndex - 1) || (rowIndex - 1 >= 0 && isColumnSelected(colIndex)),
-              bottom: isRowSelected(rowIndex + 1) || (rowIndex + 1< table.getRowsNumber() && isColumnSelected(colIndex)),
+              bottom: isRowSelected(rowIndex + 1) || (rowIndex + 1 < table.getRowsNumber() && isColumnSelected(colIndex)),
               left: isColumnSelected(colIndex - 1) || (colIndex - 1 >= 0 && isRowSelected(rowIndex)),
               right: isColumnSelected(colIndex + 1) || (colIndex + 1 < table.getHeadersCellsAmount() && isRowSelected(rowIndex))
             }"
@@ -126,15 +135,15 @@
         <!--
           serve per aggiungere la cella della colonna finale, quella dove c'è il bottone per aggiungere le colonne
         -->
-        <td class="remove-border" (mouseenter)="onMouseEnteredCell(-1, -1)"></td>
+        <td (mouseenter)="onMouseEnteredCell(-1, -1)"></td>
       </tr>
     </tbody>
     <tbody>
       <tr> <!-- riga dove sta il bottone di aggiunta righe -->
         <!-- serve per aggiungere la la cella della colonna iniziale, quella per il table-organizer delle righe -->
-        <td class="remove-border" (mouseenter)="onMouseEnteredCell(-1, -1)"></td>
+        <td (mouseenter)="onMouseEnteredCell(-1, -1)"></td>
 
-        <td class="center-td-content-v remove-border" (mouseenter)="onMouseEnteredCell(-1, -1)">
+        <td style="border-right-color: transparent; border-left-color: transparent;" class="center-td-content-v" (mouseenter)="onMouseEnteredCell(-1, -1)">
           <button class="btn btn-primary" type="button" (click)="onNewRowAdded()" title="Append new row">
             <i class="bi bi-plus-lg"></i>
           </button>
@@ -144,7 +153,7 @@
           aggiunge le restanti celle. Non sfora perché ci sono due colonne in più. Una per il bottone di aggiunta
           colonne e una per i table-organizer delle righe
         -->
-        <td class="remove-border" *ngFor="let cell of table.getHeadersCells()" (mouseenter)="onMouseEnteredCell(-1, -1)"></td>
+        <td style="border-right-color: transparent; border-left-color: transparent;" *ngFor="let cell of table.getHeadersCells()" (mouseenter)="onMouseEnteredCell(-1, -1)"></td>
       </tr>
     </tbody>
   </table>
