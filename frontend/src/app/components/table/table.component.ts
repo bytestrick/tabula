@@ -22,6 +22,7 @@ import {
 import {FormsModule} from '@angular/forms';
 import {Cell} from '../../model/cell';
 import {SelectDirective} from '../../directive/select.directive';
+import {ResizableTableColumnDirective} from '../../directive/resizable-table-column.directive';
 @Component({
   selector: 'app-table',
   standalone: true,
@@ -37,6 +38,7 @@ import {SelectDirective} from '../../directive/select.directive';
     CdkDragPreview,
     FormsModule,
     SelectDirective,
+    ResizableTableColumnDirective,
   ],
   templateUrl: './table.component.html',
   styleUrl: './table.component.css'
@@ -109,9 +111,16 @@ export class TableComponent {
   }
 
 
+  private getCellFromCoords(i: number, j: number): Cell {
+    return i === -1 ?
+      this.table.getHeaderCell(j) :
+      this.table.getCell(i, j);
+  }
+
+
   showInputMethod(x: number, y: number, rowIndex: number, columnIndex: number): void {
     this.clickedCellCoords = { i: rowIndex, j: columnIndex };
-    const cell: Cell = this.table.getCell(rowIndex, columnIndex);
+    const cell: Cell = this.getCellFromCoords(this.clickedCellCoords.i, this.clickedCellCoords.j);
     this.inputComponent = cell.cellDataType.getInputComponent(); // Assegna il metodo di input corretto in base al tipo presente sulla colonna corrispondente.
     this.inputComponentInitialValue = cell.value; // Valore di default mostrato quando compare il popup per prendere l'input.
 
@@ -139,9 +148,7 @@ export class TableComponent {
   onInputPopUpClosed(value: any): void {
     if (value !== null && this.clickedCellCoords !== null) {
       if (!this.table.isRowSelected(this.clickedCellCoords.i) && !this.table.isColumnSelected(this.clickedCellCoords.j)) {
-        const cell: Cell = this.clickedCellCoords.i === -1 ?
-          this.table.getHeaderCell(this.clickedCellCoords.j) :
-          this.table.getCell(this.clickedCellCoords.i, this.clickedCellCoords.j);
+        const cell: Cell = this.getCellFromCoords(this.clickedCellCoords.i, this.clickedCellCoords.j);
         cell.value = value;
       }
       else {
