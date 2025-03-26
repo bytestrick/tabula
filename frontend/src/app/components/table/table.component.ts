@@ -1,6 +1,6 @@
 import {
-  Component,
-  Type,
+  Component, ElementRef,
+  Type, ViewChild,
 } from '@angular/core';
 import {Table} from '../../model/table';
 import {DataType} from '../../model/data-type';
@@ -23,6 +23,7 @@ import {FormsModule} from '@angular/forms';
 import {Cell} from '../../model/cell';
 import {SelectDirective} from '../../directive/select.directive';
 import {ResizableTableColumnDirective} from '../../directive/resizable-table-column.directive';
+import {UpdateColumnsDirective} from '../../directive/update-columns.directive';
 @Component({
   selector: 'app-table',
   standalone: true,
@@ -39,6 +40,7 @@ import {ResizableTableColumnDirective} from '../../directive/resizable-table-col
     FormsModule,
     SelectDirective,
     ResizableTableColumnDirective,
+    UpdateColumnsDirective,
   ],
   templateUrl: './table.component.html',
   styleUrl: './table.component.css'
