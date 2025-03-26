@@ -38,8 +38,6 @@ export abstract class ModalComponent implements AfterViewInit {
   protected onSubmit(): void {
     const form: HTMLFormElement = this.form.nativeElement;
 
-    console.log('asdfasdf');
-
     if (form.checkValidity()) {
       this.doOnSubmit();
       this.instance.hide();

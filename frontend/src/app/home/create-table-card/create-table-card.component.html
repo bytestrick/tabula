@@ -1,10 +1,12 @@
 <div class="shadow-sm rounded col">
   <div class="card overflow-hidden" style="height: 20rem;"> <!-- style="width: 14rem; height: 18rem;" -->
-    <div style="height: 100%"></div> <!-- filler verticale per spostare in basso i bottoni -->
+    <div style="height: 100%"></div> <!-- filler verticale per spostare in basso il bottone -->
     <div class="card-body text-center">
-      <button type="button" class="btn btn-primary" (click)="create()">Create</button>
+      <button id="create-card-button" type="button" class="btn btn-hover rounded-circle" (click)="create()">
+        <i id="create-card-icon" class="bi bi-plus-lg"></i>
+      </button>
     </div>
-    <div style="height: 100%"></div> <!-- filler verticale per spostare in basso i bottoni -->
+    <div style="height: 100%"></div> <!-- filler verticale per spostare in alto il bottone -->
   </div>
 </div>
 

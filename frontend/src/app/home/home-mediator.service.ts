@@ -19,8 +19,8 @@ export class HomeMediatorService {
     this.modalEditTableCard = modalEditTableCard;
   }
 
-  public editTableCard(tableCard: TableCardComponent): void {
-    this.modalEditTableCard.editTableCard(tableCard);
+  public setTableCardToEdit(tableCard: TableCardComponent): void {
+    this.modalEditTableCard.setTableCardToEdit(tableCard);
   }
 
   public showModalEditTableCard(): void {
@@ -33,8 +33,8 @@ export class HomeMediatorService {
     this.tableContainerRef = tableCardContainerRef;
   }
 
-  public createTableCard(): TableCardComponent {
-    return TableCardComponent.create(this.tableContainerRef);
+  public createTableCard(id: string): TableCardComponent {
+    return TableCardComponent.create(id, this.tableContainerRef);
   }
 
   // ---
