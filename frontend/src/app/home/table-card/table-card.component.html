@@ -1,12 +1,12 @@
 <div class="shadow-sm rounded col">
   <div class="card overflow-hidden" style="height: 20rem;">
-    <div class="card-body overflow-y-scroll">
+    <div class="card-body overflow-y-scroll my-1">
       <h5 class="card-title">{{ title }}</h5>
       <p class="card-text">{{ description }}</p>
     </div>
     <div class="card-footer text-end">
-      <button type="button" class="btn btn-primary me-1 mb-1" (click)="edit()">Edit</button>
-      <button type="button" class="btn btn-danger me-1 mb-1" (click)="delete()">Delete</button>
+      <button type="button" class="btn btn-primary me-1 mb-1" (click)="onEdit()">Edit</button>
+      <button type="button" class="btn btn-danger me-1 mb-1" (click)="onDelete()">Delete</button>
     </div>
   </div>
 </div>

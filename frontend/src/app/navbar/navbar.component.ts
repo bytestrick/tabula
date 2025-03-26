@@ -24,14 +24,10 @@ export class NavbarComponent {
   constructor(private navbarService: NavbarService) {}
 
   protected onSearchSubmit(searchForm: HTMLFormElement): void {
-    this.navbarService.getTableCard().subscribe(
-      (response: TableCardComponent): void => {
-
-      },
-      (error: HttpErrorResponse): void => {
-
-      }
-    );
+    // this.navbarService.prova().subscribe({
+    //   next: data => console.log('Success:', data),
+    //   error: err => console.error('Error:', err)
+    // });
   }
 
   protected clearSearch(): void {

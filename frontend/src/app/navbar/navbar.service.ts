@@ -8,10 +8,6 @@ import {TableCardComponent} from '../home/table-card/table-card.component';
 })
 export class NavbarService {
 
-  constructor(private httpClient: HttpClient) {}
+  constructor(private http: HttpClient) {}
 
-  public getTableCard(): Observable<TableCardComponent> {
-    return this.httpClient.get<TableCardComponent>(`/tableCard`);
-    // return this.httpClient.get<TableCardComponent>(`${environment.apiBaseUrl}/tableCard`);
-  }
 }
