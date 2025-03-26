@@ -93,6 +93,10 @@ export class Table {
       this.columnsSelected.delete(fromIndex);
       this.columnsSelected.add(toIndex);
     }
+    else if (!this.isColumnSelected(fromIndex) && this.isColumnSelected(toIndex)) {
+      this.columnsSelected.delete(toIndex);
+      this.columnsSelected.add(fromIndex);
+    }
   }
 
 
@@ -108,6 +112,10 @@ export class Table {
     if (this.isRowSelected(fromIndex) && !this.isRowSelected(toIndex)) {
       this.rowsSelected.delete(fromIndex);
       this.rowsSelected.add(toIndex);
+    }
+    else if (!this.isRowSelected(fromIndex) && this.isRowSelected(toIndex)) {
+      this.rowsSelected.delete(toIndex);
+      this.rowsSelected.add(fromIndex);
     }
   }
 
