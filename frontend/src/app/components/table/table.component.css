@@ -120,8 +120,15 @@ table {
   position: absolute;
   right: 0;
   top: 0;
-  width: 5px;
+  width: 7px;
   height: 100%;
-  cursor: var(--resize-column-cursor-style);
+  background-color: transparent;
 }
 
+.resize-handle-active-area {
+  margin: 0 auto;
+  width: 5px; /* mette 2px di deadzone resize-handle.width - resize-handle-active-area.width */
+  height: 100%;
+  cursor: var(--resize-column-cursor-style);
+  background-color: transparent;
+}

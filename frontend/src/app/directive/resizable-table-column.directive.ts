@@ -33,20 +33,20 @@ export class ResizableTableColumnDirective implements OnInit, AfterViewInit {
 
   @HostListener('mousedown', ['$event'])
   onMouseDown(event: MouseEvent): void {
-    // Controlla se il resize-handle è stato cliccato.
-    if ((event.target as HTMLElement).classList.contains('resize-handle') && this.colElement) {
-      this.dragging = true;
-      this.colElement?.setAttribute('data-resized', '');
+    const target = event.target as HTMLElement;
 
-      if (this.body !== null) {
-        // Per evitare che l'icona del mouse sfarfalli cambiando icona velocemente quando il mouse esce dal
-        // resize-handle durante il trascinamento.
-        this.renderer.setStyle(this.body, 'cursor', 'var(--resize-column-cursor-style)', RendererStyleFlags2.Important);
-      }
+    if (target.classList.contains('resize-handle-active-area') && this.colElement) {
+      this.dragging = true;
+      this.colElement.setAttribute('data-resized', '');
+
+      if (this.body !== null)
+        this.renderer.addClass(this.body, 'dragging-cursor');
 
       this.startX = event.clientX;
       this.startWidth = this.colElement.getBoundingClientRect().width;
       event.preventDefault();
+    } else {
+      event.stopPropagation();
     }
   }
 
@@ -73,7 +73,7 @@ export class ResizableTableColumnDirective implements OnInit, AfterViewInit {
     this.dragging = false;
 
     if (this.body !== null) {
-      this.renderer.removeStyle(this.body, 'cursor');
+      this.renderer.removeClass(this.body, 'dragging-cursor');
     }
   }
 }

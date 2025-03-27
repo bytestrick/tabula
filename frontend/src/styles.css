@@ -51,3 +51,9 @@ tbl-sign-in form, tbl-sign-up form, tbl-otp form {
   --resize-column-cursor-style: col-resize;
 }
 
+
+body.dragging-cursor,
+body.dragging-cursor * {
+  cursor: var(--resize-column-cursor-style) !important;
+}
+
