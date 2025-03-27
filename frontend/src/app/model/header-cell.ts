@@ -1,26 +1,26 @@
 import {Cell} from './cell';
-import {DataType} from './data-type';
+import {IDataType} from './data-types/i-data-type';
 
 export class HeaderCell extends Cell {
 
   // Tipo di dato lungo la collna della cella corrispondente.
-  private _columnDataType: DataType;
+  private _columnDataType: IDataType;
 
 
 
-  constructor(cellDataType: DataType, value: any, columnDataType: DataType) {
+  constructor(cellDataType: IDataType, value: any, columnDataType: IDataType) {
     super(cellDataType, value);
     this._columnDataType = columnDataType;
   }
 
 
 
-  get columnDataType(): DataType {
+  get columnDataType(): IDataType {
     return this._columnDataType;
   }
 
 
-  set columnDataType(value: DataType) {
+  set columnDataType(value: IDataType) {
     this._columnDataType = value;
   }
 }

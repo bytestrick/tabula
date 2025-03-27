@@ -3,10 +3,10 @@ import {
   Type,
 } from '@angular/core';
 import {Table} from '../../model/table';
-import {DataType} from '../../model/data-type';
+import {IDataType} from '../../model/data-types/i-data-type';
 import {NgForOf, NgIf} from '@angular/common';
-import {TextualDataType} from '../../model/concrete-data-type/textual-data-type';
-import {InputPopUpComponent} from '../input-pop-up/input-pop-up.component';
+import {TextualDataType} from '../../model/data-types/concrete-data-type/textual-data-type';
+import {InputComponentPopUp} from '../pop-up-input-component/input-component-pop-up.component';
 import {Pair} from '../../model/pair';
 import {BaseInputComponent} from '../input-components/base-input-component';
 import {CellWrapperComponent} from './cells/cell-wrapper/cell-wrapper.component';
@@ -29,7 +29,7 @@ import {UpdateColumnsDirective} from '../../directive/update-columns.directive';
   standalone: true,
   imports: [
     NgForOf,
-    InputPopUpComponent,
+    InputComponentPopUp,
     NgIf,
     CellWrapperComponent,
     HighlightBordersDirective,
@@ -47,22 +47,26 @@ import {UpdateColumnsDirective} from '../../directive/update-columns.directive';
 })
 export class TableComponent {
 
-  private clickedCellCoords: { i: number, j: number } | null = null;
+  private clickedCellCoords: Pair<number, number> | null = null;
 
   protected isAnElementDragged: boolean = false;
 
   protected table: Table = new Table();
 
   protected isInputMethodVisible: boolean = false;
-
-  protected inputMethodPosition: Pair<number, number> = {first: 0, second: 0};
+  protected inputMethodPosition: Pair<number, number> = new Pair(0, 0);
   protected inputComponent: Type<BaseInputComponent> | null = null;
   protected inputComponentInitialValue: any = null;
+  protected doAfterInputConfirmation: ((value: any) => void) | undefined;
 
   protected hoveredRowIndex: number | null = null;
   protected hoveredColIndex: number | null = null;
 
   previewLimit: number = 5; // Preview che compare durante il drag di righe e colonne.
+
+  readonly HEADER_ROW_INDEX: number = -1;
+  readonly INVALID_CELL_INDEX: number = -2;
+
 
 
   constructor() {
@@ -72,6 +76,7 @@ export class TableComponent {
   }
 
 
+
   insertNewRowAt(rowIndex: number): void {
     if (rowIndex >= 0 && rowIndex < this.table.getRowsNumber()) {
       this.table.insertNewRowAt(rowIndex);
@@ -79,14 +84,14 @@ export class TableComponent {
   }
 
 
-  insertNewColAt(colIndex: number, dataType: DataType): void {
+  insertNewColAt(colIndex: number, dataType: IDataType): void {
     if (colIndex >= 0 && colIndex < this.table.getHeadersCellsAmount()) {
       this.table.insertNewDataTypeAt(colIndex, dataType);
     }
   }
 
 
-  addNewCol(dataType: DataType): void {
+  addNewHeader(dataType: IDataType): void {
     this.table.addNewHeader(dataType);
   }
 
@@ -101,10 +106,8 @@ export class TableComponent {
   }
 
 
-  onNewColumnAdded(): void {
-    const dataType: DataType = new TextualDataType();
+  onNewHeaderAdded(): void {
     this.showDataTypeChooser(0, 0);
-    this.addNewCol(dataType);
   }
 
 
@@ -114,43 +117,17 @@ export class TableComponent {
 
 
   private getCellFromCoords(i: number, j: number): Cell {
-    return i === -1 ?
+    return i === this.HEADER_ROW_INDEX ?
       this.table.getHeaderCell(j) :
       this.table.getCell(i, j);
   }
 
 
-  showInputMethod(x: number, y: number, rowIndex: number, columnIndex: number): void {
-    this.clickedCellCoords = { i: rowIndex, j: columnIndex };
-    const cell: Cell = this.getCellFromCoords(this.clickedCellCoords.i, this.clickedCellCoords.j);
-    this.inputComponent = cell.cellDataType.getInputComponent(); // Assegna il metodo di input corretto in base al tipo presente sulla colonna corrispondente.
-    this.inputComponentInitialValue = cell.value; // Valore di default mostrato quando compare il popup per prendere l'input.
-
-    this.isInputMethodVisible = true;
-    this.inputMethodPosition = new Pair(x, y);
-  }
-
-
-  showDataTypeChooser(x: number, y: number): void {
-    this.clickedCellCoords = null;
-    this.inputComponent = DataTypesChooserComponent;
-    this.inputComponentInitialValue = null;
-
-    this.isInputMethodVisible = true;
-    this.inputMethodPosition = new Pair(x, y);
-  }
-
-
-  hideInputMethod(): void {
-    this.clickedCellCoords = null;
-    this.isInputMethodVisible = false;
-  }
-
-
-  onInputPopUpClosed(value: any): void {
+  private setCellValue(value: any): void {
+    console.log(this.clickedCellCoords);
     if (value !== null && this.clickedCellCoords !== null) {
-      if (!this.table.isRowSelected(this.clickedCellCoords.i) && !this.table.isColumnSelected(this.clickedCellCoords.j)) {
-        const cell: Cell = this.getCellFromCoords(this.clickedCellCoords.i, this.clickedCellCoords.j);
+      if (!this.table.isRowSelected(this.clickedCellCoords.first) && !this.table.isColumnSelected(this.clickedCellCoords.second)) {
+        const cell: Cell = this.getCellFromCoords(this.clickedCellCoords.first, this.clickedCellCoords.second);
         cell.value = value;
       }
       else {
@@ -165,14 +142,49 @@ export class TableComponent {
         });
       }
     }
+  }
 
+
+  showInputMethod(x: number, y: number, rowIndex: number, columnIndex: number): void {
+    this.clickedCellCoords = new Pair(rowIndex, columnIndex);
+    const cell: Cell = this.getCellFromCoords(this.clickedCellCoords.first, this.clickedCellCoords.second);
+    this.inputComponent = cell.cellDataType.getInputComponent(); // Assegna il metodo di input corretto in base al tipo presente sulla colonna corrispondente.
+    this.inputComponentInitialValue = cell.value; // Valore di default mostrato quando compare il popup per prendere l'input.
+    this.doAfterInputConfirmation = (value: any): void => { this.setCellValue(value); };
+
+    this.isInputMethodVisible = true;
+    this.inputMethodPosition = new Pair(x, y);
+  }
+
+
+  showDataTypeChooser(x: number, y: number): void {
+    this.inputComponent = DataTypesChooserComponent;
+    this.inputComponentInitialValue = null;
+    this.doAfterInputConfirmation = (value: any): void => { this.addNewHeader(value as IDataType) };
+
+    this.isInputMethodVisible = true;
+    this.inputMethodPosition = new Pair(x, y);
+  }
+
+
+  hideInputMethod(): void {
+    this.clickedCellCoords = null;
+    this.isInputMethodVisible = false;
+    this.inputMethodPosition = new Pair(0, 0);
+    this.inputComponent = null;
+    this.inputComponentInitialValue = null;
+    this.doAfterInputConfirmation = undefined;
+  }
+
+
+  onPopUpClosed(): void {
     this.hideInputMethod();
   }
 
 
   onMouseEnteredCell(rowIndex: number, colIndex: number): void {
-    this.hoveredRowIndex = rowIndex === -1 ? null : rowIndex;
-    this.hoveredColIndex = colIndex === -1 ? null : colIndex;
+    this.hoveredRowIndex = rowIndex === this.INVALID_CELL_INDEX ? null : rowIndex;
+    this.hoveredColIndex = colIndex === this.INVALID_CELL_INDEX ? null : colIndex;
   }
 
 
@@ -183,7 +195,7 @@ export class TableComponent {
 
 
   onColumnAddedAt(colIndex: number): void {
-    const dataType: DataType = new TextualDataType();
+    const dataType: IDataType = new TextualDataType();
     this.insertNewColAt(colIndex, dataType);
   }
 

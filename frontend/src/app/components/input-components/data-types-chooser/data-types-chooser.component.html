@@ -1,5 +1,10 @@
 <div style="display: flex; flex-direction: column">
   <input type="text">
-  <button (click)="onTextual()">Textual</button>
-  <button (click)="onNumeric()">Numeric</button>
+
+  <button
+    *ngFor="let dataType of dataTypesRegistry.getDataTypes()"
+    (click)="onCreateDataType(dataType)"
+  >
+    {{ dataType.getDataTypeName() }}
+  </button>
 </div>
