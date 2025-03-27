@@ -16,12 +16,12 @@
         (cdkDropListDropped)="onColumnDropped($event)"
       >
         <!-- serve per aggiungere la cella della colonna iniziale, quella per il table-organizer delle righe -->
-        <th (mouseenter)="onMouseEnteredCell(-1, -1)"></th>
+        <th (mouseenter)="onMouseEnteredCell(INVALID_CELL_INDEX, INVALID_CELL_INDEX)"></th>
 
         <th
           *ngFor="let _ of this.table.getHeadersCells(); let colIndex = index"
           class="center-td-content-v-h"
-          (mouseenter)="onMouseEnteredCell(-1, colIndex)"
+          (mouseenter)="onMouseEnteredCell(INVALID_CELL_INDEX, colIndex)"
         >
           <app-table-organizer
             cdkDrag
@@ -47,17 +47,17 @@
         </th>
 
         <!-- serve per aggiungere la cella della colonna finale, quella dove c'è il bottone per aggiungere le colonne -->
-        <th (mouseenter)="onMouseEnteredCell(-1, -1)"></th>
+        <th (mouseenter)="onMouseEnteredCell(INVALID_CELL_INDEX, INVALID_CELL_INDEX)"></th>
       </tr>
 
       <!-- riga per i data-type -->
       <tr>
         <!-- serve per aggiungere la cella della colonna iniziale, quella per il table-organizer delle righe -->
-        <th (mouseenter)="onMouseEnteredCell(-1, -1)"></th>
+        <th (mouseenter)="onMouseEnteredCell(INVALID_CELL_INDEX, INVALID_CELL_INDEX)"></th>
         <th
           *ngFor="let headerCell of this.table.getHeadersCells(); let colIndex = index"
           class="center-td-content-v-h"
-          (mouseenter)="onMouseEnteredCell(-1, colIndex)"
+          (mouseenter)="onMouseEnteredCell(INVALID_CELL_INDEX, colIndex)"
           style="padding: 0; position: relative;"
           appResizableTableColumn [colIndex]="colIndex" [colgroup]="colgroup"
         >
@@ -65,15 +65,15 @@
             #cellWrapper
             appHighlightBorders [appHighlightBordersOf]="cellWrapper.bordersToHighLight.nativeElement" [appHighlightCanDisable]="!isInputMethodVisible"
             [headerCell]="headerCell"
-            (dblclick)="onDoubleClickedCell($event, -1, colIndex)"
+            (dblclick)="onDoubleClickedCell($event, HEADER_ROW_INDEX, colIndex)"
           ></app-cell-wrapper>
           <div class="resize-handle">
             <div class="resize-handle-active-area"></div>
           </div>
         </th>
         <!-- serve per aggiungere la cella della colonna finale, quella dove c'è il bottone per aggiungere le colonne -->
-        <th class="remove-border center-container" (mouseenter)="onMouseEnteredCell(-1, -1)">
-          <button class="btn btn-primary center" type="button" (click)="onNewColumnAdded()" title="Append new column">
+        <th class="remove-border center-container" (mouseenter)="onMouseEnteredCell(INVALID_CELL_INDEX, INVALID_CELL_INDEX)">
+          <button class="btn btn-primary center" type="button" (click)="onNewHeaderAdded()" title="Append new column">
             <i class="bi bi-plus-lg"></i>
           </button>
         </th>
@@ -88,7 +88,7 @@
         *ngFor="let row of table.getRows(); let rowIndex = index"
       >
         <!-- celle per contenere i table-organizer delle righe -->
-        <td class="remove-border center-td-content-v-h" (mouseenter)="onMouseEnteredCell(rowIndex, -1)">
+        <td class="remove-border center-td-content-v-h" (mouseenter)="onMouseEnteredCell(rowIndex, INVALID_CELL_INDEX)">
           <app-table-organizer
             [showOrganizer]="hoveredRowIndex === rowIndex && !isAnElementDragged"
             [rowIndicators]="true"
@@ -137,15 +137,15 @@
         <!--
           serve per aggiungere la cella della colonna finale, quella dove c'è il bottone per aggiungere le colonne
         -->
-        <td (mouseenter)="onMouseEnteredCell(-1, -1)"></td>
+        <td (mouseenter)="onMouseEnteredCell(INVALID_CELL_INDEX, INVALID_CELL_INDEX)"></td>
       </tr>
     </tbody>
     <tbody>
       <tr> <!-- riga dove sta il bottone di aggiunta righe -->
         <!-- serve per aggiungere la la cella della colonna iniziale, quella per il table-organizer delle righe -->
-        <td (mouseenter)="onMouseEnteredCell(-1, -1)"></td>
+        <td (mouseenter)="onMouseEnteredCell(INVALID_CELL_INDEX, INVALID_CELL_INDEX)"></td>
 
-        <td style="border-right-color: transparent; border-left-color: transparent;" class="center-td-content-v" (mouseenter)="onMouseEnteredCell(-1, -1)">
+        <td style="border-right-color: transparent; border-left-color: transparent;" class="center-td-content-v" (mouseenter)="onMouseEnteredCell(INVALID_CELL_INDEX, INVALID_CELL_INDEX)">
           <button class="btn btn-primary" type="button" (click)="onNewRowAdded()" title="Append new row">
             <i class="bi bi-plus-lg"></i>
           </button>
@@ -155,15 +155,17 @@
           aggiunge le restanti celle. Non sfora perché ci sono due colonne in più. Una per il bottone di aggiunta
           colonne e una per i table-organizer delle righe
         -->
-        <td style="border-right-color: transparent; border-left-color: transparent;" *ngFor="let cell of table.getHeadersCells()" (mouseenter)="onMouseEnteredCell(-1, -1)"></td>
+        <td style="border-right-color: transparent; border-left-color: transparent;" *ngFor="let cell of table.getHeadersCells()" (mouseenter)="onMouseEnteredCell(INVALID_CELL_INDEX, INVALID_CELL_INDEX)"></td>
       </tr>
     </tbody>
   </table>
 </div>
 
-<app-pop-up
-  *ngIf="isInputMethodVisible" (close)="onInputPopUpClosed($event)"
+<app-input-component-pop-up
+  *ngIf="isInputMethodVisible" (close)="onPopUpClosed()"
   [position]="inputMethodPosition"
   [inputComponent]="inputComponent"
-  [inputComponentInitialValue]="inputComponentInitialValue">
-</app-pop-up>
+  [inputStartingValue]="inputComponentInitialValue"
+  [doAfterInputConfirmation]="doAfterInputConfirmation"
+>
+</app-input-component-pop-up>

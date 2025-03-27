@@ -1,5 +1,5 @@
-import {DataType} from './data-type';
-import {TextualDataType} from './concrete-data-type/textual-data-type';
+import {IDataType} from './data-types/i-data-type';
+import {TextualDataType} from './data-types/concrete-data-type/textual-data-type';
 import {moveItemInArray} from '@angular/cdk/drag-drop';
 import {HeaderCell} from './header-cell';
 import {Cell} from './cell';
@@ -13,12 +13,12 @@ export class Table {
   private columnsSelected: Set<number> = new Set<number>;
 
 
-  addNewHeader(dataType: DataType): void {
+  addNewHeader(dataType: IDataType): void {
     this.headerCells.push(new HeaderCell(new TextualDataType(), null, dataType));
 
     for (let i: number = 0; i < this.getRowsNumber(); ++i) {
       while (this.table[i].length < this.getHeadersCellsAmount()) {
-        const currentDataType: DataType = this.headerCells[this.table[i].length].columnDataType;
+        const currentDataType: IDataType = this.headerCells[this.table[i].length].columnDataType;
         this.table[i].push(new Cell(currentDataType.getNewDataType(), null));
       }
     }
@@ -60,7 +60,7 @@ export class Table {
   }
 
 
-  insertNewDataTypeAt(colIndex: number, dataType: DataType): void {
+  insertNewDataTypeAt(colIndex: number, dataType: IDataType): void {
     if (colIndex >= 0 && colIndex < this.getHeadersCellsAmount()) {
       this.headerCells.splice(colIndex, 0, new HeaderCell(new TextualDataType(), null, dataType));
 
@@ -141,7 +141,7 @@ export class Table {
   }
 
 
-  getColDataType(colIndex: number): DataType {
+  getColDataType(colIndex: number): IDataType {
     return this.headerCells[colIndex].columnDataType;
   }
 

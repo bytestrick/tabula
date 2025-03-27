@@ -1,16 +1,16 @@
 import {ComponentRef} from '@angular/core';
-import {DataType} from './data-type';
+import {IDataType} from './data-types/i-data-type';
 import {BaseCellComponent} from '../components/table/cells/base-cell-component';
 
 export class Cell {
 
   protected _cellRef: ComponentRef<BaseCellComponent> | null = null;
-  protected _cellDataType: DataType;
+  protected _cellDataType: IDataType;
   protected _value: any = null;
 
 
 
-  constructor(cellDataType: DataType, value: any) {
+  constructor(cellDataType: IDataType, value: any) {
     this._cellDataType = cellDataType;
     this._value = value;
   }
@@ -27,12 +27,12 @@ export class Cell {
   }
 
 
-  get cellDataType(): DataType {
+  get cellDataType(): IDataType {
     return this._cellDataType;
   }
 
 
-  set cellDataType(value: DataType) {
+  set cellDataType(value: IDataType) {
     this._cellDataType = value;
   }
 
