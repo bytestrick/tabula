@@ -107,7 +107,7 @@ export class TableComponent {
 
 
   onNewHeaderAdded(): void {
-    this.showDataTypeChooser(0, 0);
+    this.showDataTypeChooser(0, 0, (value: any): void => this.addNewHeader(value as IDataType));
   }
 
 
@@ -157,10 +157,10 @@ export class TableComponent {
   }
 
 
-  showDataTypeChooser(x: number, y: number): void {
+  showDataTypeChooser(x: number, y: number, doAfterInputConfirmation: (value: any) => void): void {
     this.inputComponent = DataTypesChooserComponent;
     this.inputComponentInitialValue = null;
-    this.doAfterInputConfirmation = (value: any): void => { this.addNewHeader(value as IDataType) };
+    this.doAfterInputConfirmation = doAfterInputConfirmation;
 
     this.isInputMethodVisible = true;
     this.inputMethodPosition = new Pair(x, y);
@@ -195,8 +195,7 @@ export class TableComponent {
 
 
   onColumnAddedAt(colIndex: number): void {
-    const dataType: IDataType = new TextualDataType();
-    this.insertNewColAt(colIndex, dataType);
+    this.showDataTypeChooser(0, 0, (value: any): void => this.insertNewColAt(colIndex, value as IDataType));
   }
 
 
