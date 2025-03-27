@@ -67,7 +67,9 @@
             [headerCell]="headerCell"
             (dblclick)="onDoubleClickedCell($event, -1, colIndex)"
           ></app-cell-wrapper>
-          <div class="resize-handle"></div>
+          <div class="resize-handle">
+            <div class="resize-handle-active-area"></div>
+          </div>
         </th>
         <!-- serve per aggiungere la cella della colonna finale, quella dove c'è il bottone per aggiungere le colonne -->
         <th class="remove-border center-container" (mouseenter)="onMouseEnteredCell(-1, -1)">

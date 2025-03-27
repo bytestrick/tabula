@@ -1,6 +1,6 @@
 import {
-  Component, ElementRef,
-  Type, ViewChild,
+  Component,
+  Type,
 } from '@angular/core';
 import {Table} from '../../model/table';
 import {DataType} from '../../model/data-type';
