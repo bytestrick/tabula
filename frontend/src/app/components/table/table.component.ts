@@ -23,7 +23,7 @@ import {FormsModule} from '@angular/forms';
 import {Cell} from '../../model/cell';
 import {SelectDirective} from '../../directive/select.directive';
 import {ResizableTableColumnDirective} from '../../directive/resizable-table-column.directive';
-import {UpdateColumnsDirective} from '../../directive/update-columns.directive';
+import {UpdateColumnsWidthDirective} from '../../directive/update-columns-width.directive';
 @Component({
   selector: 'app-table',
   standalone: true,
@@ -40,7 +40,7 @@ import {UpdateColumnsDirective} from '../../directive/update-columns.directive';
     FormsModule,
     SelectDirective,
     ResizableTableColumnDirective,
-    UpdateColumnsDirective,
+    UpdateColumnsWidthDirective,
   ],
   templateUrl: './table.component.html',
   styleUrl: './table.component.css'
