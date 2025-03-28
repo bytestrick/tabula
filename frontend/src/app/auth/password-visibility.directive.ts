@@ -17,8 +17,9 @@ export class PasswordVisibilityDirective {
   }
 
   @HostListener('click') onClick() {
-    const input = document.querySelector('#pass-input') as HTMLInputElement;
-    const icon = document.querySelector('#pass-icon') as HTMLElement;
+    const input = this.button.previousElementSibling as HTMLInputElement;
+    const icon = this.button.firstElementChild as HTMLElement;
+    //const icon = document.querySelector('#pass-icon') as HTMLElement;
     if (input.type === 'password') {
       input.type = 'text';
       this.button.classList.add('active');
