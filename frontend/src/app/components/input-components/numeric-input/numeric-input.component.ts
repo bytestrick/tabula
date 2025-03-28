@@ -17,6 +17,7 @@ export class NumericInputComponent extends BaseInputComponent {
 
   protected override beforeShowUp(): void {
     this.input.nativeElement.value = this.getInitialValue();
+    this.value = this.getInitialValue();
   }
 
 

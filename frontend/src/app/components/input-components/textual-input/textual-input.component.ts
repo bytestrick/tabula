@@ -17,6 +17,7 @@ export class TextualInputComponent extends BaseInputComponent {
 
   protected override beforeShowUp(): void {
     this.input.nativeElement.value = this.getInitialValue();
+    this.text = this.getInitialValue();
   }
 
 

@@ -124,19 +124,21 @@ export class TableComponent {
 
 
   private setCellValue(value: any): void {
-    console.log(this.clickedCellCoords);
     if (value !== null && this.clickedCellCoords !== null) {
+      const cell: Cell = this.getCellFromCoords(this.clickedCellCoords.first, this.clickedCellCoords.second);
+
       if (!this.table.isRowSelected(this.clickedCellCoords.first) && !this.table.isColumnSelected(this.clickedCellCoords.second)) {
-        const cell: Cell = this.getCellFromCoords(this.clickedCellCoords.first, this.clickedCellCoords.second);
         cell.value = value;
       }
       else {
-        this.table.doForEachRowSelected(e => {
-          for (let r of this.table.getRow(e))
-            r.value = value;
+        this.table.doForEachRowSelected((e: number): void => {
+          for (let r of this.table.getRow(e)) {
+            if (cell.cellDataType.constructor === r.cellDataType.constructor)
+              r.value = value;
+          }
         });
 
-        this.table.doForEachColumnSelected(e => {
+        this.table.doForEachColumnSelected((e: number): void => {
           for (let c of this.table.getCol(e))
             c.value = value;
         });
