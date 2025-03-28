@@ -1,6 +1,6 @@
 <div class="table-responsive space-left-right">
   <table class="table app-table-bordered" (mouseleave)="onMouseLeaveTable()" style="width: 100%">
-    <colgroup #colgroup appUpdateColumns [colgroup]="colgroup">
+    <colgroup #colgroup appUpdateColumnsWidth [colgroup]="colgroup">
       <col class="first-column">
       <col
         *ngFor="let _ of this.table.getHeadersCells(); let columnIndex = index"

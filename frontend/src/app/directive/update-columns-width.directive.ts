@@ -8,10 +8,10 @@ import {
 } from '@angular/core';
 
 @Directive({
-  selector: '[appUpdateColumns]',
+  selector: '[appUpdateColumnsWidth]',
   standalone: true
 })
-export class UpdateColumnsDirective implements AfterViewInit, OnDestroy {
+export class UpdateColumnsWidthDirective implements AfterViewInit, OnDestroy {
 
   @Input() colgroup!: HTMLElement;
 

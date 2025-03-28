@@ -36,11 +36,28 @@ export class InputComponentPopUp implements AfterViewInit {
 
   ngAfterViewInit(): void {
     this.addInputMethod(this.inputComponent, this.inputStartingValue);
+    this.setPopUpPosition(this.position);
+  }
+
+
+  setPopUpPosition(position: Pair<number, number>): void {
+    const viewportWidth: number = window.innerWidth;
+    const viewportHeight: number = window.innerHeight;
+    const popUpWidth: number = this.popUpContainer.nativeElement.offsetWidth;
+    const popUpHeight: number = this.popUpContainer.nativeElement.offsetHeight;
+    const offScreenAmountX: number = (position.first + popUpWidth) - viewportWidth;
+    const offScreenAmountY: number = (position.second + popUpHeight) - viewportHeight;
+
+    if (offScreenAmountX > 0)
+      position.first -= offScreenAmountX;
+
+    if (offScreenAmountY > 0)
+      position.second -= offScreenAmountY;
 
     this.renderer.setStyle(
       this.popUpContainer.nativeElement,
       'transform',
-      `translate(${this.position.first}px, ${this.position.second}px)`
+      `translate(${position.first}px, ${position.second}px)`
     );
   }
 
