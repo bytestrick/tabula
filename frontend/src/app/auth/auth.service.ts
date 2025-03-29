@@ -3,6 +3,7 @@ import {inject, Injectable} from '@angular/core';
 import {BehaviorSubject, Observable} from 'rxjs';
 import {tap} from 'rxjs/operators';
 import {Router} from '@angular/router';
+import {LoginRequest} from './login/login.component';
 
 interface AuthenticationResponse {
   token: string;
@@ -37,14 +38,10 @@ export class AuthService {
   /**
    * Log in the application
    */
-  login(email: string, password: string, rememberMe: boolean): Observable<AuthenticationResponse> {
-    return this.http.post<AuthenticationResponse>(
-      '/auth/login',
-      {email, password, rememberMe},
-      {withCredentials: true}
-    ).pipe(
+  login(form: LoginRequest): Observable<AuthenticationResponse> {
+    return this.http.post<AuthenticationResponse>('/auth/login', form).pipe(
       tap(response => {
-        localStorage.setItem('currentUser', JSON.stringify({email, token: response.token}));
+        localStorage.setItem('currentUser', JSON.stringify({email: form.email, token: response.token}));
         this.currentUserSubject.next(response);
       })
     );
