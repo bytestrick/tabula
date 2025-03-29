@@ -6,6 +6,12 @@ import {PasswordVisibilityDirective} from '../password-visibility.directive';
 import {enableTooltips} from '../../../main';
 import {HttpErrorResponse} from '@angular/common/http';
 
+export interface LoginRequest {
+  email: string,
+  password: string,
+  rememberMe: boolean
+}
+
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -13,74 +19,78 @@ import {HttpErrorResponse} from '@angular/common/http';
   templateUrl: './login.component.html',
 })
 export class LoginComponent {
-  auth = inject(AuthService);
-  router = inject(Router);
-  route = inject(ActivatedRoute);
-
-  // Form fields
-  email = '';
-  password = '';
-  rememberMe = true;
-
-  returnUrl = '/';
+  private auth = inject(AuthService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  protected form = {} as LoginRequest;
+  private returnUrl = '/';
+  private emailInput?: HTMLInputElement;
+  private emailFeedback?: HTMLElement;
+  private passInput?: HTMLInputElement;
+  private passFeedback?: HTMLElement;
 
   ngOnInit() {
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
-    if (this.auth.currentUserValue) {
+    if (this.auth.isLoggedIn) {
       this.router.navigate([this.returnUrl])
         .finally(() => console.log(`Already logged in, redirecting to ${this.returnUrl} from /login`));
       return;
     }
     enableTooltips();
+    this.passInput = document.querySelector('#pass-input') as HTMLInputElement;
+    this.passFeedback = document.querySelector('#pass-feedback') as HTMLElement;
+    this.emailInput = document.querySelector('#email-input') as HTMLInputElement;
+    this.emailFeedback = document.querySelector('#email-feedback') as HTMLElement;
   }
 
-  private static credentialsAreValid(event: Event): boolean {
+  private isFormValid(event: Event): boolean {
     const form = event.target as HTMLFormElement;
     form.classList.add('was-validated');
-    if (!form.checkValidity()) {
-      event.preventDefault();
-      event.stopPropagation();
-      return false;
-    }
-    return true;
+    event.preventDefault();
+    event.stopPropagation();
+    return form.checkValidity();
   }
 
-  showAlert(message: string, type: 'success' | 'danger') {
-    const container = document.querySelector('#alert-container') as HTMLDivElement;
-    const icon = type === 'success' ? 'check-circle' : 'exclamation-triangle';
-    container.innerHTML = `
-      <div class="alert alert-${type} alert-dismissible d-flex fade show align-items-center" role="alert">
-        <i class="bi bi-${icon}-fill me-3 flex-shrink-0"></i>
-        <div>${message}</div>
-        <button aria-label="Close" class="btn-close" data-bs-dismiss="alert" type="button"></button>
-      </div>
-    `;
-    setTimeout(() => container.innerHTML = '', 4000);
+  protected onEmailInput() {
+    if (this.emailInput!.validity.valueMissing) {
+      this.emailFeedback!.textContent = 'Email required';
+    } else if (this.passInput!.validity.typeMismatch) {
+      this.passFeedback!.textContent = 'Invalid email';
+    } else {
+      this.emailInput!.setCustomValidity('');
+    }
+  }
+
+  protected onPasswordInput() {
+    if (this.passInput!.validity.valueMissing) {
+      this.passFeedback!.textContent = 'Password required';
+    } else if (this.passInput!.validity.tooShort) {
+      this.passFeedback!.textContent = `Must be at least ${this.passInput?.minLength} characters long`;
+    } else {
+      this.passInput!.setCustomValidity('');
+    }
   }
 
   /**
-   * Basic login with credentials, it's a proxy for the injected {@link AuthService}
+   * Basic login with credentials.
    */
   login(event: Event) {
-    if (LoginComponent.credentialsAreValid(event)) {
-      this.auth.login(this.email, this.password, this.rememberMe).subscribe({
+    if (this.isFormValid(event)) {
+      this.auth.login(this.form).subscribe({
         next: () => {
           this.router.navigate([this.returnUrl])
             .finally(() => console.log(`Login successful, redirecting to ${this.returnUrl}`));
         },
         error: (error: HttpErrorResponse) => {
-          let message = 'An error occurred while logging in. Please try again later.';
-          if (error.error instanceof ErrorEvent) {
-            message = 'Network error occurred. Please check your connection.';
-          } else switch (error.status) {
-            case 400:
-              message = 'Incorrect password';
-              break;
-            case 404:
-              message = 'There is no user registered with this email, please register first.';
-              break;
+          if (error.error instanceof ErrorEvent || error.error instanceof ProgressEvent) {
+            //`Can't reach the server, it might be our fault. Please check your connection.`;
+          } else if (error.status === 400 && error.error.startsWith('There is no user registered')) {
+            this.emailInput?.setCustomValidity('already-registered');
+            this.emailFeedback!.textContent = error.error;
+          } else if (error.status === 400 && error.error.startsWith('Incorrect')) {
+            this.passInput?.setCustomValidity('incorrect');
+            this.passFeedback!.textContent = error.error;
           }
-          this.showAlert(message, 'danger');
         }
       });
     }

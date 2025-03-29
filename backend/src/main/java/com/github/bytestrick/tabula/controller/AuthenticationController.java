@@ -1,7 +1,7 @@
 package com.github.bytestrick.tabula.controller;
 
-import com.github.bytestrick.tabula.controller.dto.AuthenticationResponse;
 import com.github.bytestrick.tabula.controller.dto.LoginRequest;
+import com.github.bytestrick.tabula.controller.dto.LoginResponse;
 import com.github.bytestrick.tabula.controller.dto.RegisterRequest;
 import com.github.bytestrick.tabula.model.User;
 import com.github.bytestrick.tabula.repository.UserDao;
@@ -54,20 +54,20 @@ public class AuthenticationController {
             SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (BadCredentialsException e) {
             if (userDao.findByEmail(loginRequest.email()).isEmpty()) {
-                log.info("User '{}' tried to log in but is not registered", loginRequest.email());
-                return ResponseEntity.notFound().build();
+                log.warn("User '{}' tried to log in but is not registered", loginRequest.email());
+                return ResponseEntity.badRequest().body("There is no user registered with this email");
             }
-            log.info("Bad credentials for user '{}'", loginRequest.email());
-            return ResponseEntity.badRequest().body(e);
+            log.warn("Incorrect password for user '{}'", loginRequest.email());
+            return ResponseEntity.badRequest().body("Incorrect password");
         }
         log.info("User '{}' has logged in", loginRequest.email());
-        return ResponseEntity.ok(new AuthenticationResponse(jwtProvider.generateToken(loginRequest.email())));
+        return ResponseEntity.ok(new LoginResponse(jwtProvider.generateToken(loginRequest.email())));
     }
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest) {
         if (userDao.findByEmail(registerRequest.email()).isPresent()) {
-            return ResponseEntity.badRequest().body("Email already in use.");
+            return ResponseEntity.badRequest().body("Email already registered");
         }
 
         User user = User.builder()
@@ -81,7 +81,7 @@ public class AuthenticationController {
                 .build();
         userDao.save(user);
 
-        log.info("User '{}' just signed up", user.getEmail());
+        log.info("User '{}' has signed up", user.getEmail());
         return ResponseEntity.created(URI.create("/users/" + user.getId())).build();
     }
 

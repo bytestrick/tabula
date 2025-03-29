@@ -6,8 +6,8 @@
   <div class="row mb-3">
     <label for="name-input" class="form-label p-0">Name</label>
     <div class="input-group p-0 has-validation position-relative">
-      <input id="name-input" class="form-control" placeholder="John" type="text" [(ngModel)]="user.name" name="name"
-             required>
+      <input id="name-input" class="form-control" placeholder="John" type="text" [(ngModel)]="form.name" name="name"
+             required autofocus minlength="2" maxlength="100" (input)="onNameInput($event)">
       <div class="invalid-tooltip">Name required</div>
     </div>
   </div>
@@ -15,9 +15,8 @@
   <div class="row mb-3 position-relative">
     <label for="surname-input" class="form-label p-0">Surname</label>
     <div class="input-group p-0 has-validation">
-      <input id="surname-input" class="form-control" placeholder="Doe" type="text" [(ngModel)]="user.surname"
-             name="surname"
-             required>
+      <input id="surname-input" class="form-control" placeholder="Doe" type="text" [(ngModel)]="form.surname"
+             name="surname" required minlength="2" maxlength="100" (input)="onNameInput($event)">
       <div class="invalid-tooltip">Surname required</div>
     </div>
   </div>
@@ -25,7 +24,7 @@
   <div class="row mb-3">
     <label for="country-input" class="form-label p-0">Country</label>
     <div class="input-group p-0 has-validation position-relative">
-      <select (change)="onCountryChange()" id="country-input" class="form-select" [(ngModel)]="countryIndex"
+      <select (change)="onCountrySelect($event)" id="country-input" class="form-select" [(ngModel)]="countryIndex"
               name="country" required>
         <option value="0" disabled>Select your country</option>
         <option [value]="i" *ngFor="let country of countries; index as i">
@@ -40,27 +39,50 @@
   <div class="row mb-3">
     <label for="email-input" class="form-label p-0">Email address</label>
     <div class="input-group p-0 has-validation position-relative">
-      <input id="email-input" class="form-control" type="email" [(ngModel)]="user.email" name="email"
-             placeholder="john.doe@example.com" required>
-      <div class="invalid-tooltip">A valid email address is required</div>
+      <input id="email-input" class="form-control" type="email" [(ngModel)]="form.email" name="email"
+             placeholder="john.doe@example.com" required autocomplete="username" (input)="onEmailInput()">
+      <div id="email-feedback" class="invalid-tooltip">A valid email address is required</div>
     </div>
   </div>
 
   <div class="row mb-3">
     <label for="pass-input" class="form-label p-0">Password</label>
     <div class="input-group has-validation p-0 position-relative">
-      <input id="pass-input" class="form-control" [(ngModel)]="user.password" name="password" type="password" required>
+      <input id="pass-input" class="form-control" [(ngModel)]="form.password" name="password" type="password" required
+             minlength="10" maxlength="512" (input)="onPasswordInput()" autocomplete="new-password">
       <button appPasswordVisibility type="button" class="btn btn-outline-secondary"
               data-bs-toggle="tooltip" data-bs-title="Show password">
-        <i class="bi bi-eye" id="pass-icon"></i>
+        <i class="bi bi-eye"></i>
       </button>
-      <div class="invalid-tooltip">Password required</div>
+      <div id="pass-feedback" class="invalid-tooltip">Password must respect the criteria below</div>
+    </div>
+    <div class="form-text ps-0">
+      <ul>
+        <li>At least {{ this.passInput!.minLength }} characters</li>
+        <li>At least one uppercase letter <code>A-Z</code></li>
+        <li>At least one lowercase letter <code>a-z</code></li>
+        <li>At least one number <code>0-9</code></li>
+        <li>At least one special character <code>!#$%&"'()*+,-./:;<=>?&#64;[\]^_`&#123;|&#125;~</code></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="row mb-3">
+    <label for="pass-repeat-input" class="form-label p-0">Repeat password</label>
+    <div class="input-group has-validation p-0 position-relative">
+      <input id="pass-repeat-input" class="form-control" [(ngModel)]="repeatPassword" name="password" type="password"
+             minlength="10" maxlength="512" required (input)="onPasswordInput()" autocomplete="new-password">
+      <button appPasswordVisibility type="button" class="btn btn-outline-secondary"
+              data-bs-toggle="tooltip" data-bs-title="Show password">
+        <i class="bi bi-eye"></i>
+      </button>
+      <div id="pass-repeat-feedback" class="invalid-tooltip">Please repeat the password</div>
     </div>
   </div>
 
   <div class="row mb-5">
     <div class="form-check">
-      <input id="remember-login" class="form-check-input" type="checkbox" [(ngModel)]="user.rememberMe"
+      <input id="remember-login" class="form-check-input" type="checkbox" [(ngModel)]="form.rememberMe"
              name="rememberLogin" checked>
       <label for="remember-login" class="form-check-label">Keep me logged in</label>
     </div>
@@ -70,5 +92,5 @@
     <button class="btn btn-primary">Sign up</button>
   </div>
 
-  <a class="row" routerLink="/login">Already have an account?</a>
+  <a class="row pb-5" routerLink="/login">Already have an account?</a>
 </form>
