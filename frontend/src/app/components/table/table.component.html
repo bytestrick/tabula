@@ -63,7 +63,7 @@
         >
           <app-cell-wrapper
             #cellWrapper
-            appHighlightBorders [appHighlightBordersOf]="cellWrapper.bordersToHighLight.nativeElement" [appHighlightCanDisable]="!isInputMethodVisible"
+            appHighlightBorders [appHighlightBordersOf]="cellWrapper.bordersToHighLight.nativeElement" [appHighlightCanDisable]="!isPopUpVisible"
             [headerCell]="headerCell"
             (dblclick)="onDoubleClickedCell($event, HEADER_ROW_INDEX, colIndex)"
           ></app-cell-wrapper>
@@ -121,7 +121,7 @@
         >
           <app-cell-wrapper
             #cellWrapper
-            appHighlightBorders [appHighlightBordersOf]="cellWrapper.bordersToHighLight.nativeElement" [appHighlightCanDisable]="!isInputMethodVisible"
+            appHighlightBorders [appHighlightBordersOf]="cellWrapper.bordersToHighLight.nativeElement" [appHighlightCanDisable]="!isPopUpVisible"
             appSelect [appIsSelected]="isRowSelected(rowIndex) || isColumnSelected(colIndex)" [appTargetOfSelection]="areaToSelect"
             [selectedNeighbors]="{
               top: isRowSelected(rowIndex - 1) || (rowIndex - 1 >= 0 && isColumnSelected(colIndex)),
@@ -161,11 +161,9 @@
   </table>
 </div>
 
-<app-input-component-pop-up
-  *ngIf="isInputMethodVisible" (close)="onPopUpClosed()"
-  [position]="inputMethodPosition"
-  [inputComponent]="inputComponent"
-  [inputStartingValue]="inputComponentInitialValue"
-  [doAfterInputConfirmation]="doAfterInputConfirmation"
->
-</app-input-component-pop-up>
+
+<app-pop-up
+  #popUp
+  (hidden)="onPopUpClosed()"
+  (shown)="onPopUpOpened()"
+></app-pop-up>

@@ -1,5 +1,5 @@
-import {IDataType} from './data-types/i-data-type';
-import {TextualDataType} from './data-types/concrete-data-type/textual-data-type';
+import {IDataType} from '../data-types/i-data-type';
+import {TextualDataType} from '../data-types/concrete-data-type/textual-data-type';
 import {moveItemInArray} from '@angular/cdk/drag-drop';
 import {HeaderCell} from './header-cell';
 import {Cell} from './cell';

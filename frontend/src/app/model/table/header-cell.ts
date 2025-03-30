@@ -1,5 +1,5 @@
 import {Cell} from './cell';
-import {IDataType} from './data-types/i-data-type';
+import {IDataType} from '../data-types/i-data-type';
 
 export class HeaderCell extends Cell {
 
