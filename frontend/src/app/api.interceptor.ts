@@ -1,9 +1,5 @@
 import {HttpInterceptorFn} from '@angular/common/http';
-
-/**
- * Backend API URL prefix
- */
-const BASE_URL = 'http://localhost:8080/api/v1';
+import {backendBaseUrl} from './app.config';
 
 /**
  * Interceptor that prepends the backend API URL to the request URL
@@ -11,7 +7,7 @@ const BASE_URL = 'http://localhost:8080/api/v1';
 export const apiInterceptor: HttpInterceptorFn = (req, next) => {
   if (req.url.startsWith('/')) {
     return next(req.clone({
-      url: `${BASE_URL}${req.url}`
+      url: `${backendBaseUrl}${req.url}`
     }));
   }
   return next(req);
