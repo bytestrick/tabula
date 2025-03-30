@@ -5,6 +5,8 @@ import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {PasswordVisibilityDirective} from '../password-visibility.directive';
 import {enableTooltips} from '../../../main';
 import {HttpErrorResponse} from '@angular/common/http';
+import {ToastService} from '../../toasts/toast.service';
+import {passRegExp} from '../../app.config';
 
 export interface LoginRequest {
   email: string,
@@ -22,6 +24,7 @@ export class LoginComponent {
   private auth = inject(AuthService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private toast = inject(ToastService);
   protected form = {} as LoginRequest;
   private returnUrl = '/';
   private emailInput?: HTMLInputElement;
@@ -66,6 +69,9 @@ export class LoginComponent {
       this.passFeedback!.textContent = 'Password required';
     } else if (this.passInput!.validity.tooShort) {
       this.passFeedback!.textContent = `Must be at least ${this.passInput?.minLength} characters long`;
+    } else if (!passRegExp.test(this.passInput!.value)) {
+      this.passFeedback!.textContent = `Password doesn't respect the validity criteria`;
+      this.passInput!.setCustomValidity('invalid');
     } else {
       this.passInput!.setCustomValidity('');
     }
@@ -74,22 +80,31 @@ export class LoginComponent {
   /**
    * Basic login with credentials.
    */
-  login(event: Event) {
+  protected onSubmit(event: Event) {
     if (this.isFormValid(event)) {
       this.auth.login(this.form).subscribe({
         next: () => {
-          this.router.navigate([this.returnUrl])
-            .finally(() => console.log(`Login successful, redirecting to ${this.returnUrl}`));
+          const timeoutMs = 1500;
+          this.toast.show({
+            title: 'Sign in successful',
+            body: 'You are being redirected',
+            background: 'success',
+            icon: 'check-circle-fill',
+            delay: timeoutMs
+          });
+          setTimeout(() => this.router.navigate([this.returnUrl])
+              .finally(() => console.log(`Login successful, redirecting to ${this.returnUrl}`)),
+            timeoutMs);
         },
         error: (error: HttpErrorResponse) => {
-          if (error.error instanceof ErrorEvent || error.error instanceof ProgressEvent) {
-            //`Can't reach the server, it might be our fault. Please check your connection.`;
-          } else if (error.status === 400 && error.error.startsWith('There is no user registered')) {
+          if (error.status === 400 && error.error.startsWith('There is no user registered')) {
             this.emailInput?.setCustomValidity('already-registered');
             this.emailFeedback!.textContent = error.error;
           } else if (error.status === 400 && error.error.startsWith('Incorrect')) {
             this.passInput?.setCustomValidity('incorrect');
             this.passFeedback!.textContent = error.error;
+          } else {
+            this.toast.serverError(error.error);
           }
         }
       });

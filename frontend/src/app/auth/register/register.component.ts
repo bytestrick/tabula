@@ -6,6 +6,8 @@ import {NgForOf} from '@angular/common';
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {enableTooltips} from '../../../main';
 import {AuthService} from '../auth.service';
+import {ToastService} from '../../toasts/toast.service';
+import {passRegExp} from '../../app.config';
 
 interface Country {
   name: string,
@@ -30,12 +32,10 @@ interface RegisterRequest {
   templateUrl: './register.component.html',
 })
 export class RegisterComponent {
-  private static readonly VALID_PASS = new RegExp(
-    /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!#$%&"'()*+,\-./:;<=>?@\[\\\]^_`{|}~])[A-Za-z\d!#$%&"'()*+,\-./:;<=>?@\[\\\]^_`{|}~]{10,}$/
-  );
   private http = inject(HttpClient);
   private auth = inject(AuthService);
   private router = inject(Router);
+  private toast = inject(ToastService);
   protected countryIndex = 0;
   protected countries: Country[] = [];
   protected form: RegisterRequest = {} as RegisterRequest;
@@ -83,7 +83,7 @@ export class RegisterComponent {
       this.passFeedback!.textContent = 'Password is required';
     } else if (this.passInput?.validity.tooShort) {
       this.passFeedback!.textContent = `Must be at least ${this.passInput!.minLength} characters long`;
-    } else if (!RegisterComponent.VALID_PASS.test(this.passInput!.value)) {
+    } else if (!passRegExp.test(this.passInput!.value)) {
       this.passFeedback!.textContent = 'Password must respect the criteria below';
       this.passInput!.setCustomValidity('invalid');
     } else {
@@ -141,17 +141,28 @@ export class RegisterComponent {
   private emailInput?: HTMLInputElement;
   private emailFeedback?: HTMLElement;
 
-  protected register(event: Event) {
+  protected onSubmit(event: Event) {
     if (this.isFormValid(event)) {
       this.http.post('/auth/register', this.form).subscribe({
-        next: () => this.router.navigate(['/login'])
-          .finally(() => console.log('Registered successfully, redirecting to /login from /register')),
+        next: () => {
+          const timeoutMs = 1500;
+          this.toast.show({
+            title: 'Sign up successful',
+            body: 'You are being redirected',
+            icon: 'check-circle-fill',
+            background: 'success',
+            delay: timeoutMs
+          });
+          setTimeout(() => this.router.navigate(['/login'])
+              .finally(() => console.log('Registered successfully, redirecting to /login from /register')),
+            timeoutMs);
+        },
         error: (error: HttpErrorResponse) => {
-          if (error.error instanceof ErrorEvent || error.error instanceof ProgressEvent) {
-            //`Can't reach the server, it might be our fault. Please check your connection.`;
-          } else if (error.status === 400 && error.error.startsWith('Email already registered')) {
+          if (error.status === 400 && error.error.startsWith('Email already registered')) {
             this.emailInput?.setCustomValidity('already-registered');
             this.emailFeedback!.textContent = error.error;
+          } else {
+            this.toast.serverError(error.error);
           }
         }
       });
