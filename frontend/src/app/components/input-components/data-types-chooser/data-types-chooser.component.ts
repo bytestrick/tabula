@@ -20,7 +20,6 @@ export class DataTypesChooserComponent extends BaseInputComponent {
   }
 
 
-
   protected override beforeShowUp(): void {}
 
 

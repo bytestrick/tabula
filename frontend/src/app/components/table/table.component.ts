@@ -1,12 +1,12 @@
 import {
-  Component,
-  Type,
+  Component, ComponentRef, createComponent, EnvironmentInjector,
+  ViewChild,
 } from '@angular/core';
-import {Table} from '../../model/table';
+import {Table} from '../../model/table/table';
 import {IDataType} from '../../model/data-types/i-data-type';
-import {NgForOf, NgIf} from '@angular/common';
+import {NgForOf} from '@angular/common';
 import {TextualDataType} from '../../model/data-types/concrete-data-type/textual-data-type';
-import {InputComponentPopUp} from '../pop-up-input-component/input-component-pop-up.component';
+import {PopUp} from '../pop-up-component/pop-up.component';
 import {Pair} from '../../model/pair';
 import {BaseInputComponent} from '../input-components/base-input-component';
 import {CellWrapperComponent} from './cells/cell-wrapper/cell-wrapper.component';
@@ -20,7 +20,7 @@ import {
   CdkDropList,
 } from '@angular/cdk/drag-drop';
 import {FormsModule} from '@angular/forms';
-import {Cell} from '../../model/cell';
+import {Cell} from '../../model/table/cell';
 import {SelectDirective} from '../../directive/select.directive';
 import {ResizableTableColumnDirective} from '../../directive/resizable-table-column.directive';
 import {UpdateColumnsWidthDirective} from '../../directive/update-columns-width.directive';
@@ -29,8 +29,6 @@ import {UpdateColumnsWidthDirective} from '../../directive/update-columns-width.
   standalone: true,
   imports: [
     NgForOf,
-    InputComponentPopUp,
-    NgIf,
     CellWrapperComponent,
     HighlightBordersDirective,
     TableOrganizerComponent,
@@ -41,11 +39,14 @@ import {UpdateColumnsWidthDirective} from '../../directive/update-columns-width.
     SelectDirective,
     ResizableTableColumnDirective,
     UpdateColumnsWidthDirective,
+    PopUp,
   ],
   templateUrl: './table.component.html',
   styleUrl: './table.component.css'
 })
 export class TableComponent {
+
+  @ViewChild('popUp') private popUp?: PopUp;
 
   private clickedCellCoords: Pair<number, number> | null = null;
 
@@ -53,23 +54,18 @@ export class TableComponent {
 
   protected table: Table = new Table();
 
-  protected isInputMethodVisible: boolean = false;
-  protected inputMethodPosition: Pair<number, number> = new Pair(0, 0);
-  protected inputComponent: Type<BaseInputComponent> | null = null;
-  protected inputComponentInitialValue: any = null;
-  protected doAfterInputConfirmation: ((value: any) => void) | undefined;
-
   protected hoveredRowIndex: number | null = null;
   protected hoveredColIndex: number | null = null;
 
-  previewLimit: number = 5; // Preview che compare durante il drag di righe e colonne.
+  protected readonly HEADER_ROW_INDEX: number = -1;
+  protected readonly INVALID_CELL_INDEX: number = -2;
 
-  readonly HEADER_ROW_INDEX: number = -1;
-  readonly INVALID_CELL_INDEX: number = -2;
+  protected previewLimit: number = 5; // Preview che compare durante il drag di righe e colonne.
+  protected isPopUpVisible: boolean = false; // Per mantenere la cella selezionata anche quando il pop-up compare.
 
 
 
-  constructor() {
+  constructor(private envInj: EnvironmentInjector) {
     // Inizializza il componente in modo tale da avere già una colonna e una riga.
     this.table.addNewHeader(new TextualDataType());
     this.table.addNewRow();
@@ -107,12 +103,12 @@ export class TableComponent {
 
 
   onNewHeaderAdded(): void {
-    this.showDataTypeChooser(0, 0, (value: any): void => this.addNewHeader(value as IDataType));
+    this.showDataTypeChooser(new Pair(0, 0), (value: any): void => this.addNewHeader(value as IDataType));
   }
 
 
   onDoubleClickedCell(event: MouseEvent, rowIndex: number, columnIndex: number): void {
-    this.showInputMethod(event.x, event.y, rowIndex, columnIndex);
+    this.showInputMethod(new Pair(event.x, event.y), rowIndex, columnIndex);
   }
 
 
@@ -147,40 +143,29 @@ export class TableComponent {
   }
 
 
-  showInputMethod(x: number, y: number, rowIndex: number, columnIndex: number): void {
+  showInputMethod(position: Pair<number, number>, rowIndex: number, columnIndex: number): void {
     this.clickedCellCoords = new Pair(rowIndex, columnIndex);
     const cell: Cell = this.getCellFromCoords(this.clickedCellCoords.first, this.clickedCellCoords.second);
-    this.inputComponent = cell.cellDataType.getInputComponent(); // Assegna il metodo di input corretto in base al tipo presente sulla colonna corrispondente.
-    this.inputComponentInitialValue = cell.value; // Valore di default mostrato quando compare il popup per prendere l'input.
-    this.doAfterInputConfirmation = (value: any): void => { this.setCellValue(value); };
 
-    this.isInputMethodVisible = true;
-    this.inputMethodPosition = new Pair(x, y);
+    const inputComponent: ComponentRef<BaseInputComponent> = createComponent<BaseInputComponent>(
+      cell.cellDataType.getInputComponent(),
+      { environmentInjector: this.envInj }
+    );
+    inputComponent.setInput('startingValue', cell.value);
+    inputComponent.setInput('doAfterInputConfirmation', (value: any): void => this.setCellValue(value));
+
+    this.popUp?.show(inputComponent, position);
   }
 
 
-  showDataTypeChooser(x: number, y: number, doAfterInputConfirmation: (value: any) => void): void {
-    this.inputComponent = DataTypesChooserComponent;
-    this.inputComponentInitialValue = null;
-    this.doAfterInputConfirmation = doAfterInputConfirmation;
+  showDataTypeChooser(position: Pair<number, number>, doAfterInputConfirmation: (value: any) => void): void {
+    const dataTypeChooser: ComponentRef<BaseInputComponent> = createComponent<BaseInputComponent>(
+      DataTypesChooserComponent,
+      { environmentInjector: this.envInj }
+    );
+    dataTypeChooser.setInput('doAfterInputConfirmation', doAfterInputConfirmation);
 
-    this.isInputMethodVisible = true;
-    this.inputMethodPosition = new Pair(x, y);
-  }
-
-
-  hideInputMethod(): void {
-    this.clickedCellCoords = null;
-    this.isInputMethodVisible = false;
-    this.inputMethodPosition = new Pair(0, 0);
-    this.inputComponent = null;
-    this.inputComponentInitialValue = null;
-    this.doAfterInputConfirmation = undefined;
-  }
-
-
-  onPopUpClosed(): void {
-    this.hideInputMethod();
+    this.popUp?.show(dataTypeChooser, position);
   }
 
 
@@ -197,7 +182,7 @@ export class TableComponent {
 
 
   onColumnAddedAt(colIndex: number): void {
-    this.showDataTypeChooser(0, 0, (value: any): void => this.insertNewColAt(colIndex, value as IDataType));
+    this.showDataTypeChooser(new Pair(0, 0), (value: any): void => this.insertNewColAt(colIndex, value as IDataType));
   }
 
 
@@ -245,5 +230,15 @@ export class TableComponent {
 
   isRowSelected(rowIndex: number): boolean {
     return this.table.isRowSelected(rowIndex)
+  }
+
+
+  onPopUpClosed(): void {
+    this.isPopUpVisible = false;
+  }
+
+
+  onPopUpOpened(): void {
+    this.isPopUpVisible = true;
   }
 }

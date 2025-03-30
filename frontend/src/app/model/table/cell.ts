@@ -1,6 +1,6 @@
 import {ComponentRef} from '@angular/core';
-import {IDataType} from './data-types/i-data-type';
-import {BaseCellComponent} from '../components/table/cells/base-cell-component';
+import {IDataType} from '../data-types/i-data-type';
+import {BaseCellComponent} from '../../components/table/cells/base-cell-component';
 
 export class Cell {
 

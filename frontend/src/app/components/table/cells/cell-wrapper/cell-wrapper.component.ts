@@ -7,8 +7,8 @@ import {
   ViewContainerRef
 } from '@angular/core';
 import {DataTypeCellComponent} from '../data-type-cell/data-type-cell.component';
-import {HeaderCell} from '../../../../model/header-cell';
-import {Cell} from '../../../../model/cell';
+import {HeaderCell} from '../../../../model/table/header-cell';
+import {Cell} from '../../../../model/table/cell';
 
 @Component({
   selector: 'app-cell-wrapper',
