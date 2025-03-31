@@ -1,7 +1,8 @@
 import {
+  AfterViewInit, ChangeDetectorRef,
   Component, ComponentRef,
   ElementRef,
-  EventEmitter,
+  EventEmitter, OnDestroy, OnInit,
   Output,
   Renderer2,
   ViewChild, ViewContainerRef
@@ -16,18 +17,58 @@ import {IPopUpContent} from '../../model/i-pop-up-content';
   templateUrl: './pop-up.component.html',
   styleUrl: './pop-up.component.css',
 })
-export class PopUp {
+export class PopUp implements OnInit, OnDestroy, AfterViewInit {
 
-  @ViewChild('popUpContainer') popUpContainer!: ElementRef;
-  @ViewChild('contentContainer', { read: ViewContainerRef }) contentContainer!: ViewContainerRef;
+  @ViewChild('popUpContainer', { static: true }) private popUpContainer!: ElementRef;
+  @ViewChild('contentContainer', { read: ViewContainerRef, static: true }) private contentContainer!: ViewContainerRef;
+  @ViewChild('root', { static: true }) private root!: ElementRef;
 
   @Output() hidden: EventEmitter<void> = new EventEmitter<void>();
   @Output() shown: EventEmitter<void> = new EventEmitter<void>();
 
-  protected isVisible: boolean = false
+  protected isVisible: boolean = false;
+  private content: ComponentRef<IPopUpContent> | null = null;
+  private visibilityObserver!: MutationObserver;
+
+  private isInitialized: boolean = false;
+  private pendingCall: (() => void)[] = [];
 
 
-  constructor(private renderer: Renderer2) {}
+  constructor(private renderer: Renderer2, private changeDetector: ChangeDetectorRef) {}
+
+
+  ngOnInit(): void {
+    this.visibilityObserver = new MutationObserver(mutations => {
+      mutations.forEach(mutation => {
+        if (mutation.attributeName === 'hidden') {
+          const currentlyHidden: boolean = this.root.nativeElement.hidden;
+
+          if (!currentlyHidden) {
+            this.content?.instance.beforeContentShowUp();
+            this.shown.emit();
+          }
+          else
+            this.hidden.emit();
+        }
+      });
+    });
+
+    this.visibilityObserver.observe(this.root.nativeElement, {
+      attributes: true,
+      attributeFilter: ['hidden']
+    });
+  }
+
+
+  ngAfterViewInit(): void {
+    this.isInitialized = true;
+    this.pendingCall.forEach(callback => callback());
+  }
+
+
+  ngOnDestroy(): void {
+    this.visibilityObserver.disconnect();
+  }
 
 
   setPopUpPosition(position: Pair<number, number>): void {
@@ -52,24 +93,40 @@ export class PopUp {
   }
 
 
-  private addContent(content: ComponentRef<IPopUpContent>): void {
-    this.contentContainer?.clear();
+  setContent(content: ComponentRef<IPopUpContent>): void {
+    this.contentContainer.clear();
     content.instance.popUpRef = this;
-    this.contentContainer?.insert(content.hostView);
+    this.contentContainer.insert(content.hostView);
+    this.content = content;
   }
 
 
-  show(content: ComponentRef<IPopUpContent>, position: Pair<number, number>): void {
-    this.addContent(content);
-    this.setPopUpPosition(position);
-    this.isVisible = true;
-    this.shown.emit();
+  private callAfterInit(callback: () => void): void {
+    if (this.isInitialized)
+      callback();
+    else
+      this.pendingCall.push(callback);
+  }
+
+
+  show(position: Pair<number, number>): void {
+    this.callAfterInit(
+      (): void => {
+        this.setPopUpPosition(position);
+        this.isVisible = true;
+        this.changeDetector.detectChanges();
+      }
+    );
+  }
+
+
+  hasContent(content: ComponentRef<IPopUpContent> | null): boolean {
+    return this.content?.instance instanceof (content?.instance.constructor ?? Object);
   }
 
 
   hide(): void {
     this.isVisible = false;
-    this.hidden.emit();
   }
 
 

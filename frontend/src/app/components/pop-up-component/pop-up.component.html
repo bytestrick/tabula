@@ -1,4 +1,4 @@
-<div class="popup-overlay" [hidden]="!isVisible" (click)="onHidePopUp()">
+<div #root class="popup-overlay" [hidden]="!isVisible" (click)="onHidePopUp()">
   <div #popUpContainer class="popup-content" (click)="$event.stopPropagation()">
     <ng-container #contentContainer></ng-container>
   </div>
