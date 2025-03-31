@@ -1,12 +1,10 @@
 import {
   Component, ComponentRef, createComponent, EnvironmentInjector,
-  ViewChild,
 } from '@angular/core';
 import {Table} from '../../model/table/table';
 import {IDataType} from '../../model/data-types/i-data-type';
 import {NgForOf} from '@angular/common';
 import {TextualDataType} from '../../model/data-types/concrete-data-type/textual-data-type';
-import {PopUp} from '../pop-up-component/pop-up.component';
 import {Pair} from '../../model/pair';
 import {BaseInputComponent} from '../input-components/base-input-component';
 import {CellWrapperComponent} from './cells/cell-wrapper/cell-wrapper.component';
@@ -24,6 +22,7 @@ import {Cell} from '../../model/table/cell';
 import {SelectDirective} from '../../directive/select.directive';
 import {ResizableTableColumnDirective} from '../../directive/resizable-table-column.directive';
 import {UpdateColumnsWidthDirective} from '../../directive/update-columns-width.directive';
+import {PopUpManagerService} from '../../services/pop-up-manager.service';
 @Component({
   selector: 'app-table',
   standalone: true,
@@ -39,14 +38,11 @@ import {UpdateColumnsWidthDirective} from '../../directive/update-columns-width.
     SelectDirective,
     ResizableTableColumnDirective,
     UpdateColumnsWidthDirective,
-    PopUp,
   ],
   templateUrl: './table.component.html',
   styleUrl: './table.component.css'
 })
 export class TableComponent {
-
-  @ViewChild('popUp') private popUp?: PopUp;
 
   private clickedCellCoords: Pair<number, number> | null = null;
 
@@ -59,18 +55,17 @@ export class TableComponent {
 
   protected readonly HEADER_ROW_INDEX: number = -1;
   protected readonly INVALID_CELL_INDEX: number = -2;
+  protected readonly INPUT_METHOD_POP_UP: string = 'inputMethod';
+  protected readonly DATA_TYPE_CHOOSER_POP_UP: string = 'dataTypeChooser';
 
   protected previewLimit: number = 5; // Preview che compare durante il drag di righe e colonne.
-  protected isPopUpVisible: boolean = false; // Per mantenere la cella selezionata anche quando il pop-up compare.
 
 
-
-  constructor(private envInj: EnvironmentInjector) {
+  constructor(private envInj: EnvironmentInjector, protected popUpManagerService: PopUpManagerService) {
     // Inizializza il componente in modo tale da avere già una colonna e una riga.
     this.table.addNewHeader(new TextualDataType());
     this.table.addNewRow();
   }
-
 
 
   insertNewRowAt(rowIndex: number): void {
@@ -154,7 +149,7 @@ export class TableComponent {
     inputComponent.setInput('startingValue', cell.value);
     inputComponent.setInput('doAfterInputConfirmation', (value: any): void => this.setCellValue(value));
 
-    this.popUp?.show(inputComponent, position);
+    this.popUpManagerService.getOrCreatePopUp(this.INPUT_METHOD_POP_UP, inputComponent)?.instance.show(position);
   }
 
 
@@ -165,7 +160,7 @@ export class TableComponent {
     );
     dataTypeChooser.setInput('doAfterInputConfirmation', doAfterInputConfirmation);
 
-    this.popUp?.show(dataTypeChooser, position);
+    this.popUpManagerService.getOrCreatePopUp(this.DATA_TYPE_CHOOSER_POP_UP, dataTypeChooser)?.instance.show(position);
   }
 
 
@@ -230,15 +225,5 @@ export class TableComponent {
 
   isRowSelected(rowIndex: number): boolean {
     return this.table.isRowSelected(rowIndex)
-  }
-
-
-  onPopUpClosed(): void {
-    this.isPopUpVisible = false;
-  }
-
-
-  onPopUpOpened(): void {
-    this.isPopUpVisible = true;
   }
 }
