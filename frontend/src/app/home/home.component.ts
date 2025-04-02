@@ -1,4 +1,13 @@
-import {Component, ViewChild, ViewContainerRef, AfterViewInit, OnInit} from '@angular/core';
+import {
+  Component,
+  ViewChild,
+  ViewContainerRef,
+  AfterViewInit,
+  OnInit,
+  HostListener,
+  QueryList,
+  ViewChildren, ElementRef
+} from '@angular/core';
 import { CreateTableCardComponent } from './create-table-card/create-table-card.component';
 import {FormsModule} from '@angular/forms';
 import {ModalCreateTableCardComponent} from './modal/modal-create-table-card/modal-create-table-card.component';
@@ -7,6 +16,7 @@ import {HomeMediatorService} from './home-mediator.service';
 import {HomeService} from './home.service';
 import {TableCardComponent} from './table-card/table-card.component';
 import {TableCard} from './table-card/table-card.interface';
+import {NgIf} from '@angular/common';
 
 @Component({
   selector: 'app-table-cards-container',
@@ -16,35 +26,66 @@ import {TableCard} from './table-card/table-card.interface';
     FormsModule,
     ModalCreateTableCardComponent,
     ModalEditTableCardComponent,
+    NgIf
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
 export class HomeComponent implements AfterViewInit, OnInit {
   @ViewChild('tableCardContainer', { read: ViewContainerRef }) private tableCardContainerRef!: ViewContainerRef;
+  protected currentPage: number = 1;
+  private pageSize: number = 20;
+  public isLoading: boolean = false;
 
 
   constructor(private homeMediatorService: HomeMediatorService, private homeService: HomeService) {}
 
 
   public ngOnInit(): void {
-    // popola la scermata con le tableCard presenti nel DB
-    this.homeService.loadTableCard(0, 10).subscribe({
+    this.loadMoreItems(this.currentPage - 1, this.pageSize);
+  }
+
+  public ngAfterViewInit(): void {
+    this.homeMediatorService.setTableCardContainerRef(this.tableCardContainerRef);
+  }
+
+  public loadMoreItems(page: number, size: number): void {
+    this.isLoading = true;
+    this.homeService.loadTableCard(page, size).subscribe({
       next: (data: TableCard[]): void => {
         console.log('TableCard loaded successfully');
         console.debug(data);
+
+        if (data.length !== 0) {
+          this.tableCardContainerRef.clear();
+        }
 
         data.forEach((tc: TableCard): void => {
           let tableCard: TableCardComponent = this.homeMediatorService.createTableCard(tc.id);
           tableCard.setTitle(tc.title);
           tableCard.setDescription(tc.description);
         });
+
+        this.isLoading = false;
       },
       error: (err: any): void => console.error('Error:', err)
     });
   }
 
-  public ngAfterViewInit(): void {
-    this.homeMediatorService.setTableCardContainerRef(this.tableCardContainerRef);
+  public onPreviousPage(): void {
+    if (this.currentPage - 1 >= 1) {
+      this.currentPage -= 1;
+      this.loadMoreItems(this.currentPage - 1, this.pageSize);
+    }
+  }
+
+  public onNextPage(): void {
+    console.log(typeof this.currentPage)
+    this.currentPage = Number(this.currentPage) + 1;
+    this.loadMoreItems(this.currentPage - 1, this.pageSize);
+  }
+
+  public onManualPageSelected(): void {
+    this.loadMoreItems(this.currentPage - 1, this.pageSize);
   }
 }
