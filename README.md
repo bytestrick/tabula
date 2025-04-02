@@ -8,7 +8,7 @@ TODO: add command to bootstrap-run the whole project.
 ### How does authentication work?
 
 We use Spring Security and JSON Web Tokens to authenticate users. Initially a client sends a `POST` request to the
-`/api/v1/auth/login` endpoint with username, password in clear text (we assume the use of TLS) and a flag to remember
+`/api/v1/auth/sign-in` endpoint with username, password in clear text (we assume the use of TLS) and a flag to remember
 the session. It is the responsibility of the `AuthenticationManager` to authenticate the user credentials in the form of
 a `UsernamePasswordAuthenticationToken`. To do this it uses a `DaoAuthenticationProvider` which in turn obtains the
 stored user data from a `DaoUserDetailsService`. The `DaoUserDetailsService` retrieves the user data from the underlying
@@ -22,9 +22,8 @@ All subsequent requests to the server will have the `Authorization` header set t
 extract the JWT from them and verify it with the `JwtProvider`. If the verification is successful the request is
 accepted otherwise it is rejected.
 
-`JwtProvider` uses a `SecretKey` to sign the JWT, this key is generated every time from an high entropy secret stored in
-`application.properties` as clear text. In a production environment an encrypted property file should be used
-instead to store the secrets.
+`JwtProvider` uses a `SecretKey` to sign the JWT, this key is generated every time from a high entropy secret stored in
+`application.properties`.
 
 ## Credits
 

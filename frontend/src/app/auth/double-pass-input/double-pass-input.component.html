@@ -1,0 +1,34 @@
+<div class="row mb-3">
+  <label for="pass-input" class="form-label p-0">Password</label>
+  <div class="input-group has-validation p-0 position-relative">
+    <input id="pass-input" class="form-control" name="password" type="password" required
+           minlength="10" maxlength="512" (input)="onPasswordInput()" autocomplete="new-password">
+    <button appPasswordVisibility type="button" class="btn btn-outline-secondary"
+            data-bs-toggle="tooltip" data-bs-title="Show password">
+      <i class="bi bi-eye"></i>
+    </button>
+    <div id="pass-feedback" class="invalid-tooltip">Password must respect the criteria below</div>
+  </div>
+  <div class="form-text ps-0">
+    <ul>
+      <li>At least {{ passInput!.minLength }} characters</li>
+      <li>At least one uppercase letter <code>A-Z</code></li>
+      <li>At least one lowercase letter <code>a-z</code></li>
+      <li>At least one number <code>0-9</code></li>
+      <li>At least one special character <code>!#$%&"'()*+,-./:;<=>?&#64;[\]^_\`&#123;|&#125;~</code></li>
+    </ul>
+  </div>
+</div>
+
+<div class="row mb-3">
+  <label for="pass-repeat-input" class="form-label p-0">Repeat password</label>
+  <div class="input-group has-validation p-0 position-relative">
+    <input id="pass-repeat-input" class="form-control" name="password" type="password"
+           minlength="10" maxlength="512" required (input)="onPasswordInput()" autocomplete="new-password">
+    <button appPasswordVisibility type="button" class="btn btn-outline-secondary"
+            data-bs-toggle="tooltip" data-bs-title="Show password">
+      <i class="bi bi-eye"></i>
+    </button>
+    <div id="pass-repeat-feedback" class="invalid-tooltip">Please repeat the password</div>
+  </div>
+</div>

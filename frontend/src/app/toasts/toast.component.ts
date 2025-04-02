@@ -41,7 +41,7 @@ export interface ToastOptions {
   standalone: true,
   imports: [],
   template: `
-    <div class="toast-container top-0 end-0 p-3"></div>
+    <div class="toast-container top-0 end-0 p-3 position-fixed"></div>
   `
 })
 export class ToastComponent {
@@ -67,6 +67,7 @@ export class ToastComponent {
 
     const el = document.createElement('div');
     el.classList.add('toast');
+    el.classList.add('z-3');
     let iconColor = '';
     if (options.background) {
       el.classList.add(`bg-${options.background}`);
