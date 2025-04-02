@@ -6,11 +6,11 @@ import {inject} from '@angular/core';
  * A route guard that regulates which parts of the application the user can
  * access based on the authentication state.
  */
-export const authGuard: CanActivateFn = (route, state) => {
+export const authGuard: CanActivateFn = (_, state) => {
   if (inject(AuthService).isLoggedIn) {
     return true;
   }
-  inject(Router).navigate(['/login'], {queryParams: {returnUrl: state.url}})
-    .finally(() => console.warn(`Can't access ${state.url} while not logged in`));
+  inject(Router).navigate(['/sign-in'], {queryParams: {returnUrl: state.url}})
+    .finally(() => console.warn(`Can't access ${state.url} while not signed in`));
   return false;
 };

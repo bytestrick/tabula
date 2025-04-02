@@ -5,7 +5,7 @@
 
   <div class="row mb-3">
     <label for="name-input" class="form-label p-0">Name</label>
-    <div class="input-group p-0 has-validation position-relative">
+    <div class="input-group p-0 has-validation">
       <input id="name-input" class="form-control" placeholder="John" type="text" [(ngModel)]="form.name" name="name"
              required autofocus minlength="2" maxlength="100" (input)="onNameInput($event)">
       <div class="invalid-tooltip">Name required</div>
@@ -45,46 +45,13 @@
     </div>
   </div>
 
-  <div class="row mb-3">
-    <label for="pass-input" class="form-label p-0">Password</label>
-    <div class="input-group has-validation p-0 position-relative">
-      <input id="pass-input" class="form-control" [(ngModel)]="form.password" name="password" type="password" required
-             minlength="10" maxlength="512" (input)="onPasswordInput()" autocomplete="new-password">
-      <button appPasswordVisibility type="button" class="btn btn-outline-secondary"
-              data-bs-toggle="tooltip" data-bs-title="Show password">
-        <i class="bi bi-eye"></i>
-      </button>
-      <div id="pass-feedback" class="invalid-tooltip">Password must respect the criteria below</div>
-    </div>
-    <div class="form-text ps-0">
-      <ul>
-        <li>At least {{ this.passInput!.minLength }} characters</li>
-        <li>At least one uppercase letter <code>A-Z</code></li>
-        <li>At least one lowercase letter <code>a-z</code></li>
-        <li>At least one number <code>0-9</code></li>
-        <li>At least one special character <code>!#$%&"'()*+,-./:;<=>?&#64;[\]^_`&#123;|&#125;~</code></li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="row mb-3">
-    <label for="pass-repeat-input" class="form-label p-0">Repeat password</label>
-    <div class="input-group has-validation p-0 position-relative">
-      <input id="pass-repeat-input" class="form-control" [(ngModel)]="repeatPassword" name="password" type="password"
-             minlength="10" maxlength="512" required (input)="onPasswordInput()" autocomplete="new-password">
-      <button appPasswordVisibility type="button" class="btn btn-outline-secondary"
-              data-bs-toggle="tooltip" data-bs-title="Show password">
-        <i class="bi bi-eye"></i>
-      </button>
-      <div id="pass-repeat-feedback" class="invalid-tooltip">Please repeat the password</div>
-    </div>
-  </div>
+  <app-double-pass-input/>
 
   <div class="row mb-5">
     <div class="form-check">
       <input id="remember-login" class="form-check-input" type="checkbox" [(ngModel)]="form.rememberMe"
              name="rememberLogin" checked>
-      <label for="remember-login" class="form-check-label">Keep me logged in</label>
+      <label for="remember-login" class="form-check-label">Keep me signed in</label>
     </div>
   </div>
 
@@ -92,5 +59,5 @@
     <button class="btn btn-primary">Sign up</button>
   </div>
 
-  <a class="row pb-5" routerLink="/login">Already have an account?</a>
+  <a class="row pb-5" routerLink="/sign-in">Already have an account?</a>
 </form>

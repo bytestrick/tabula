@@ -4,11 +4,12 @@ import {AuthService} from '../auth.service';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {PasswordVisibilityDirective} from '../password-visibility.directive';
 import {enableTooltips} from '../../../main';
-import {HttpErrorResponse} from '@angular/common/http';
+import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {ToastService} from '../../toasts/toast.service';
 import {passRegExp} from '../../app.config';
+import {Reason} from '../otp/otp.component';
 
-export interface LoginRequest {
+export interface SignInRequest {
   email: string,
   password: string,
   rememberMe: boolean
@@ -18,15 +19,17 @@ export interface LoginRequest {
   selector: 'app-login',
   standalone: true,
   imports: [FormsModule, RouterLink, PasswordVisibilityDirective],
-  templateUrl: './login.component.html',
+  templateUrl: './sign-in.component.html',
 })
-export class LoginComponent {
+export class SignInComponent {
   private auth = inject(AuthService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private toast = inject(ToastService);
-  protected form = {} as LoginRequest;
+  private http = inject(HttpClient)
+  protected form = {} as SignInRequest;
   private returnUrl = '/';
+
   private emailInput?: HTMLInputElement;
   private emailFeedback?: HTMLElement;
   private passInput?: HTMLInputElement;
@@ -36,7 +39,7 @@ export class LoginComponent {
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
     if (this.auth.isLoggedIn) {
       this.router.navigate([this.returnUrl])
-        .finally(() => console.log(`Already logged in, redirecting to ${this.returnUrl} from /login`));
+        .finally(() => console.log(`Already logged in, redirecting to ${this.returnUrl} from /sign-in`));
       return;
     }
     enableTooltips();
@@ -77,24 +80,20 @@ export class LoginComponent {
     }
   }
 
-  /**
-   * Basic login with credentials.
-   */
   protected onSubmit(event: Event) {
     if (this.isFormValid(event)) {
-      this.auth.login(this.form).subscribe({
+      this.auth.signIn(this.form).subscribe({
         next: () => {
+          // FIXME: if the user is not enabled redirect to OtpComponent
           const timeoutMs = 1500;
           this.toast.show({
             title: 'Sign in successful',
-            body: 'You are being redirected',
+            body: 'Welcome back!',
             background: 'success',
             icon: 'check-circle-fill',
             delay: timeoutMs
           });
-          setTimeout(() => this.router.navigate([this.returnUrl])
-              .finally(() => console.log(`Login successful, redirecting to ${this.returnUrl}`)),
-            timeoutMs);
+          this.router.navigate([this.returnUrl]).then();
         },
         error: (error: HttpErrorResponse) => {
           if (error.status === 400 && error.error.startsWith('There is no user registered')) {
@@ -108,6 +107,31 @@ export class LoginComponent {
           }
         }
       });
+    }
+  }
+
+  protected onForgotPassword() {
+    if (this.emailInput!.checkValidity()) {
+      this.http.post('/auth/send-otp', {email: this.form.email, reason: Reason.ResetPassword.toLowerCase()}).subscribe({
+        next: () => {
+          localStorage.setItem('otpData', JSON.stringify({email: this.form.email, reason: Reason.ResetPassword}));
+          this.router.navigate(['/otp']).then()
+        },
+        error: (error: HttpErrorResponse) => {
+          if (error.status === 404) {
+            this.toast.show({
+              title: `Couldn't send verification code`,
+              body: 'No user is registered with that email',
+              background: 'danger',
+              icon: 'person-x'
+            })
+          } else {
+            this.toast.serverError(error.error);
+          }
+        }
+      })
+    } else {
+      document.querySelector('div:has(#email-input)')!.classList.add('was-validated');
     }
   }
 }

@@ -1,11 +1,11 @@
 package com.github.bytestrick.tabula.controller;
 
-import com.github.bytestrick.tabula.controller.dto.LoginRequest;
-import com.github.bytestrick.tabula.controller.dto.LoginResponse;
-import com.github.bytestrick.tabula.controller.dto.RegisterRequest;
+import com.github.bytestrick.tabula.controller.dto.*;
+import com.github.bytestrick.tabula.exception.InvalidOtpException;
 import com.github.bytestrick.tabula.model.User;
 import com.github.bytestrick.tabula.repository.UserDao;
 import com.github.bytestrick.tabula.service.JwtProvider;
+import com.github.bytestrick.tabula.service.OtpProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -22,10 +22,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Note: all endpoints under {@code /auth} don't require authentication to be accessed
+ */
 @Slf4j
 @RestController
 @RequestMapping("/auth")
@@ -34,64 +36,125 @@ public class AuthenticationController {
     private final JwtProvider jwtProvider;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
+    private final OtpProvider otpProvider;
 
     public AuthenticationController(UserDao userDao,
                                     JwtProvider jwtProvider,
                                     AuthenticationManager authenticationManager,
-                                    PasswordEncoder passwordEncoder) {
+                                    PasswordEncoder passwordEncoder,
+                                    OtpProvider otpProvider) {
         this.userDao = userDao;
         this.jwtProvider = jwtProvider;
         this.authenticationManager = authenticationManager;
         this.passwordEncoder = passwordEncoder;
+        this.otpProvider = otpProvider;
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
+    @PostMapping("/sign-in")
+    public ResponseEntity<?> signIn(@Valid @RequestBody SignInRequest signInRequest) {
         try {
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(loginRequest.email(), loginRequest.password())
+                    new UsernamePasswordAuthenticationToken(signInRequest.email(), signInRequest.password())
             );
             SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (BadCredentialsException e) {
-            if (userDao.findByEmail(loginRequest.email()).isEmpty()) {
-                log.warn("User '{}' tried to log in but is not registered", loginRequest.email());
+            if (userDao.findByEmail(signInRequest.email()).isEmpty()) {
+                log.warn("User '{}' tried to log in but is not registered", signInRequest.email());
                 return ResponseEntity.badRequest().body("There is no user registered with this email");
             }
-            log.warn("Incorrect password for user '{}'", loginRequest.email());
+            log.warn("Incorrect password for user '{}'", signInRequest.email());
             return ResponseEntity.badRequest().body("Incorrect password");
         }
-        log.info("User '{}' has logged in", loginRequest.email());
-        return ResponseEntity.ok(new LoginResponse(jwtProvider.generateToken(loginRequest.email())));
+        log.info("User '{}' has logged in", signInRequest.email());
+        return ResponseEntity.ok(new SignInResponse(jwtProvider.generateToken(signInRequest.email())));
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest) {
-        if (userDao.findByEmail(registerRequest.email()).isPresent()) {
+    @PostMapping("/sign-up")
+    public ResponseEntity<?> signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
+        if (userDao.findByEmail(signUpRequest.email()).isPresent()) {
             return ResponseEntity.badRequest().body("Email already registered");
         }
 
         User user = User.builder()
                 .id(UUID.randomUUID())
-                .email(registerRequest.email())
-                .encodedPassword(passwordEncoder.encode(registerRequest.password()))
-                .name(registerRequest.name())
-                .surname(registerRequest.surname())
-                .country(registerRequest.country())
+                .email(signUpRequest.email())
+                .encodedPassword(passwordEncoder.encode(signUpRequest.password()))
+                .name(signUpRequest.name())
+                .surname(signUpRequest.surname())
+                .country(signUpRequest.country())
                 .roles(List.of(new SimpleGrantedAuthority("USER")))
                 .build();
+
+        otpProvider.sendOtp(user, OtpProvider.Reason.VERIFY_EMAIL.getReason());
         userDao.save(user);
 
         log.info("User '{}' has signed up", user.getEmail());
-        return ResponseEntity.created(URI.create("/users/" + user.getId())).build();
+        return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/logout")
+    @PostMapping("/verify-email-otp")
+    public ResponseEntity<?> verifyEmail(@Valid @RequestBody VerifyOtpRequest body) {
+        try {
+            return otpProvider.verifyOtp(body.email(), body.otp()).map(user -> {
+                user.setEnabled(true);
+                user.setOtp(null);
+                user.setOtpExpiration(null);
+                userDao.updateEmailVerification(user);
+                log.info("{} has verified their email", body.email());
+                return ResponseEntity.ok().build();
+            }).orElse(ResponseEntity.notFound().build());
+        } catch (InvalidOtpException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/verify-reset-password-otp")
+    public ResponseEntity<?> verifyResetPassword(@Valid @RequestBody VerifyOtpRequest body) {
+        try {
+            return otpProvider.verifyOtp(body.email(), body.otp())
+                    .map((User u) -> ResponseEntity.ok().build())
+                    .orElse(ResponseEntity.notFound().build());
+        } catch (InvalidOtpException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest body) {
+        try {
+            return userDao.findByEmail(body.email())
+                    .map(user -> {
+                        // check the OTP again so that a single request can't hijack the password
+                        otpProvider.verifyOtp(body.email(), body.otp());
+
+                        user.setOtp(null);
+                        user.setOtpExpiration(null);
+                        userDao.updatePassword(user.getId(), passwordEncoder.encode(body.newPassword()));
+                        log.info("password reset for {}", body.email());
+                        return ResponseEntity.ok().build();
+                    })
+                    .orElse(ResponseEntity.notFound().build());
+        } catch (InvalidOtpException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/send-otp")
+    public ResponseEntity<?> resendOtp(@Valid @RequestBody ResendOtpRequest body) {
+        return userDao.findByEmail(body.email()).map(user -> {
+            otpProvider.sendOtp(user, body.reason());
+            userDao.updateOtp(user);
+            return ResponseEntity.ok().build();
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/sign-out")
     public ResponseEntity<?> logout(HttpServletRequest request) {
         String token = JwtProvider.fromRequest(request);
         if (token != null) {
             jwtProvider.invalidateToken(token);
             SecurityContextHolder.clearContext();
-            return ResponseEntity.ok().body("Logged out successfully.");
+            return ResponseEntity.ok().body("Signed out successfully.");
         }
         return ResponseEntity.badRequest().body("No token found.");
     }

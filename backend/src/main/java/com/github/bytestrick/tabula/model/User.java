@@ -1,5 +1,6 @@
 package com.github.bytestrick.tabula.model;
 
+import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
@@ -9,6 +10,7 @@ import lombok.Builder;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,4 +43,15 @@ public class User {
     @Valid
     @NotNull
     private Country country;
+
+    /**
+     * Whether the email was verified
+     */
+    private boolean enabled;
+
+    @Nullable
+    private String otp;
+
+    @Nullable
+    private LocalDateTime otpExpiration;
 }

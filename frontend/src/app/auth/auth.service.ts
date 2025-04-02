@@ -3,7 +3,7 @@ import {inject, Injectable} from '@angular/core';
 import {BehaviorSubject, Observable} from 'rxjs';
 import {tap} from 'rxjs/operators';
 import {Router} from '@angular/router';
-import {LoginRequest} from './login/login.component';
+import {SignInRequest} from './sign-in/sign-in.component';
 
 interface AuthenticationResponse {
   token: string;
@@ -35,11 +35,8 @@ export class AuthService {
     return this.currentUserValue !== null;
   }
 
-  /**
-   * Log in the application
-   */
-  login(form: LoginRequest): Observable<AuthenticationResponse> {
-    return this.http.post<AuthenticationResponse>('/auth/login', form).pipe(
+  signIn(form: SignInRequest): Observable<AuthenticationResponse> {
+    return this.http.post<AuthenticationResponse>('/auth/sign-in', form).pipe(
       tap(response => {
         localStorage.setItem('currentUser', JSON.stringify({email: form.email, token: response.token}));
         this.currentUserSubject.next(response);
@@ -47,12 +44,9 @@ export class AuthService {
     );
   }
 
-  /**
-   * Log out from the app
-   */
-  logout() {
+  signOut() {
     if (this.isLoggedIn) {
-      this.http.post('/auth/logout', {}).subscribe(console.log);
+      this.http.post('/auth/sign-out', {}).subscribe(console.log);
     }
     localStorage.removeItem('currentUser');
     this.currentUserSubject.next(null);

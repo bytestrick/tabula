@@ -1,13 +1,13 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, ViewChild} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {Router, RouterLink} from '@angular/router';
-import {PasswordVisibilityDirective} from '../password-visibility.directive';
 import {NgForOf} from '@angular/common';
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {enableTooltips} from '../../../main';
 import {AuthService} from '../auth.service';
 import {ToastService} from '../../toasts/toast.service';
-import {passRegExp} from '../../app.config';
+import {Reason} from '../otp/otp.component';
+import {DoublePassInputComponent} from '../double-pass-input/double-pass-input.component';
 
 interface Country {
   name: string,
@@ -16,7 +16,7 @@ interface Country {
   dialCode: number
 }
 
-interface RegisterRequest {
+interface SignUpRequest {
   email: string,
   name: string,
   surname: string,
@@ -28,32 +28,29 @@ interface RegisterRequest {
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [FormsModule, RouterLink, PasswordVisibilityDirective, NgForOf],
-  templateUrl: './register.component.html',
+  imports: [FormsModule, RouterLink, NgForOf, DoublePassInputComponent],
+  templateUrl: './sign-up.component.html',
 })
-export class RegisterComponent {
+export class SignUpComponent {
   private http = inject(HttpClient);
   private auth = inject(AuthService);
   private router = inject(Router);
   private toast = inject(ToastService);
   protected countryIndex = 0;
   protected countries: Country[] = [];
-  protected form: RegisterRequest = {} as RegisterRequest;
-  protected repeatPassword = '';
+  protected form: SignUpRequest = {} as SignUpRequest;
+
+  @ViewChild(DoublePassInputComponent) private pass!: DoublePassInputComponent;
 
   ngOnInit() {
     if (this.auth.isLoggedIn) {
       this.router.navigate(['/'])
-        .finally(() => console.log('Already logged in, redirecting to / from /register'));
+        .finally(() => console.log('Already signed in in, redirecting to / from /register'));
       return;
     }
 
     enableTooltips();
 
-    this.passInput = document.querySelector('#pass-input') as HTMLInputElement;
-    this.passFeedback = document.querySelector('#pass-feedback') as HTMLElement;
-    this.passRepFeedback = document.querySelector('#pass-repeat-feedback') as HTMLElement;
-    this.passRepInput = document.querySelector('#pass-repeat-input') as HTMLInputElement;
     this.emailInput = document.querySelector('#email-input') as HTMLInputElement;
     this.emailFeedback = document.querySelector('#email-feedback') as HTMLElement;
 
@@ -70,39 +67,6 @@ export class RegisterComponent {
       feedback.textContent = `${input.name.charAt(0).toUpperCase() + input.name.slice(1)} is required`;
     } else if (input.validity.tooShort) {
       feedback.textContent = `Must be at least ${input.minLength} characters long`;
-    }
-  }
-
-  protected passInput?: HTMLInputElement;
-  private passFeedback?: HTMLElement;
-  private passRepFeedback?: HTMLElement;
-  private passRepInput?: HTMLInputElement;
-
-  protected onPasswordInput() {
-    if (this.passInput?.validity.valueMissing) {
-      this.passFeedback!.textContent = 'Password is required';
-    } else if (this.passInput?.validity.tooShort) {
-      this.passFeedback!.textContent = `Must be at least ${this.passInput!.minLength} characters long`;
-    } else if (!passRegExp.test(this.passInput!.value)) {
-      this.passFeedback!.textContent = 'Password must respect the criteria below';
-      this.passInput!.setCustomValidity('invalid');
-    } else {
-      this.passInput!.setCustomValidity('');
-    }
-
-    if (this.passInput?.validity.valid) {
-      if (this.passInput?.value === this.passRepInput?.value) {
-        this.passInput!.setCustomValidity('');
-        this.passRepInput!.setCustomValidity('');
-      } else {
-        this.passFeedback!.textContent = 'Passwords do not match';
-        this.passRepFeedback!.textContent = 'Passwords do not match';
-        this.passInput!.setCustomValidity('no-match');
-        this.passRepInput!.setCustomValidity('no-match');
-      }
-    } else {
-      this.passRepFeedback!.textContent = 'Invalid password';
-      this.passRepInput!.setCustomValidity('invalid');
     }
   }
 
@@ -134,6 +98,7 @@ export class RegisterComponent {
     if (country.value === '0') {
       country.setCustomValidity('Country is required')
     }
+    this.form.password = this.pass.passInput!.value;
 
     return form.checkValidity();
   }
@@ -143,19 +108,10 @@ export class RegisterComponent {
 
   protected onSubmit(event: Event) {
     if (this.isFormValid(event)) {
-      this.http.post('/auth/register', this.form).subscribe({
+      this.http.post('/auth/sign-up', this.form).subscribe({
         next: () => {
-          const timeoutMs = 1500;
-          this.toast.show({
-            title: 'Sign up successful',
-            body: 'You are being redirected',
-            icon: 'check-circle-fill',
-            background: 'success',
-            delay: timeoutMs
-          });
-          setTimeout(() => this.router.navigate(['/login'])
-              .finally(() => console.log('Registered successfully, redirecting to /login from /register')),
-            timeoutMs);
+          localStorage.setItem('otpData', JSON.stringify({email: this.form.email, reason: Reason.VerifyEmail}));
+          this.router.navigate(['/otp']).then();
         },
         error: (error: HttpErrorResponse) => {
           if (error.status === 400 && error.error.startsWith('Email already registered')) {

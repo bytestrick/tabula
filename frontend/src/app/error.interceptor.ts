@@ -1,5 +1,5 @@
 import {HttpErrorResponse, HttpInterceptorFn} from '@angular/common/http';
-import {catchError, throwError} from 'rxjs';
+import {catchError, Observable, throwError} from 'rxjs';
 import {ToastService} from './toasts/toast.service';
 import {inject} from '@angular/core';
 
@@ -18,6 +18,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
           icon: 'plug-fill',
           background: 'danger'
         });
+        return new Observable<never>();
       }
       return throwError(() => error); // propagate the error to the consumer
     })

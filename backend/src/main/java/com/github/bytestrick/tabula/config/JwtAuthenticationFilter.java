@@ -1,5 +1,7 @@
-package com.github.bytestrick.tabula.service;
+package com.github.bytestrick.tabula.config;
 
+import com.github.bytestrick.tabula.service.DaoUserDetailsService;
+import com.github.bytestrick.tabula.service.JwtProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
