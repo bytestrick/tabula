@@ -22,6 +22,8 @@ export class TableCardComponent {
 
   public static create(id: string, containerRef: ViewContainerRef): TableCardComponent {
     let newTableCard: ComponentRef<TableCardComponent> = containerRef.createComponent(TableCardComponent);
+    containerRef.insert(newTableCard.hostView, 0);
+
     newTableCard.instance.id = id;
     newTableCard.instance.ref = newTableCard;
     return newTableCard.instance;

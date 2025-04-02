@@ -18,8 +18,8 @@ export class HomeService {
     });
 
     const params: HttpParams = new HttpParams()
-      .set('page', page.toString())
-      .set('size', size.toString());
+      .set('page', page)
+      .set('size', size);
 
     return this.http.get<TableCard[]>(
       '/table-card',
