@@ -1,10 +1,15 @@
-<div style="display: flex; flex-direction: column">
-  <input type="text">
+<div class="d-flex flex-column">
+  <div class="d-flex">
+    <input class="mb-3" type="search" placeholder="Search">
+    <button class="btn btn-primary my-button d-flex justify-content-center align-items-center"><i class="bi bi-search p-0"></i></button>
+  </div>
 
-  <button
-    *ngFor="let dataType of dataTypesRegistry.getDataTypes()"
-    (click)="onCreateDataType(dataType)"
-  >
-    {{ dataType.getDataTypeName() }}
-  </button>
+  <div class="list-group">
+    <button class="list-group-item list-group-item-action p-1"
+      *ngFor="let dataType of dataTypesRegistry.getDataTypes()"
+      (click)="onCreateDataType(dataType)"
+    >
+      {{ dataType.getDataTypeName() }}
+    </button>
+  </div>
 </div>

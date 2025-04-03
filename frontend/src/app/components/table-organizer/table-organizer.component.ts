@@ -25,7 +25,7 @@ export class TableOrganizerComponent implements AfterViewInit {
   @Input() rowIndicators: boolean = true;
   @Input() showOrganizer: boolean = false;
 
-  @Output() addAt: EventEmitter<void> = new EventEmitter<void>;
+  @Output() addAt: EventEmitter<MouseEvent> = new EventEmitter<MouseEvent>;
   @Output() selectionToggle: EventEmitter<boolean> = new EventEmitter<boolean>;
 
 
@@ -43,7 +43,7 @@ export class TableOrganizerComponent implements AfterViewInit {
   }
 
 
-  onAddedAt(): void {
-    this.addAt.emit();
+  onAddedAt(event: MouseEvent): void {
+    this.addAt.emit(event);
   }
 }

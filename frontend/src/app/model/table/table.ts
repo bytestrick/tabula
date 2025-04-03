@@ -12,9 +12,11 @@ export class Table {
   private rowsSelected: Set<number> = new Set<number>;
   private columnsSelected: Set<number> = new Set<number>;
 
+  private readonly HEADER_CELL_DEFAULT_NAME: string = 'New Column';
+
 
   addNewHeader(dataType: IDataType): void {
-    this.headerCells.push(new HeaderCell(new TextualDataType(), 'New Column', dataType));
+    this.headerCells.push(new HeaderCell(new TextualDataType(), this.HEADER_CELL_DEFAULT_NAME, dataType));
 
     for (let i: number = 0; i < this.getRowsNumber(); ++i) {
       while (this.table[i].length < this.getHeadersCellsAmount()) {
@@ -62,7 +64,7 @@ export class Table {
 
   insertNewDataTypeAt(colIndex: number, dataType: IDataType): void {
     if (colIndex >= 0 && colIndex < this.getHeadersCellsAmount()) {
-      this.headerCells.splice(colIndex, 0, new HeaderCell(new TextualDataType(), null, dataType));
+      this.headerCells.splice(colIndex, 0, new HeaderCell(new TextualDataType(), this.HEADER_CELL_DEFAULT_NAME, dataType));
 
       for (let i: number = 0; i < this.getRowsNumber(); ++i) {
         this.table[i].splice(colIndex, 0, new Cell(this.headerCells[colIndex].columnDataType.getNewDataType(), null));
@@ -234,12 +236,11 @@ export class Table {
 
 
   deleteSelectedRow(): void {
-    // Otteniamo gli indici delle righe selezionate e li ordiniamo in ordine decrescente
     const rowsToDelete = Array.from(this.rowsSelected).sort((a, b) => b - a);
     for (const rowIndex of rowsToDelete) {
       this.deleteRow(rowIndex);
     }
-    // Svuota la selezione
+
     this.rowsSelected.clear();
   }
 
@@ -260,12 +261,11 @@ export class Table {
 
 
   deleteSelectedColumn(): void {
-    // Otteniamo gli indici delle colonne selezionate e li ordiniamo in ordine decrescente
     const colsToDelete = Array.from(this.columnsSelected).sort((a, b) => b - a);
     for (const colIndex of colsToDelete) {
       this.deleteColumn(colIndex);
     }
-    // Svuota la selezione
+
     this.columnsSelected.clear();
   }
 
