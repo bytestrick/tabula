@@ -92,7 +92,7 @@ export class OtpComponent {
             background: 'danger',
           });
         } else {
-          this.toast.serverError(error.error);
+          this.toast.serverError(error.error?.message);
         }
       }
     })
@@ -159,7 +159,7 @@ export class OtpComponent {
                 if (error.status === 404) {
                   this.userNotFound();
                 } else {
-                  this.toast.serverError(error.error)
+                  this.toast.serverError(error.error?.message)
                 }
               },
             });
@@ -188,7 +188,7 @@ export class OtpComponent {
   private handleVerifyOtpError(error: HttpErrorResponse) {
     if (error.status === 404) {
       this.userNotFound();
-    } else switch (error.error) {
+    } else switch (error.error?.message) {
       case 'Expired':
         // FIXME: OTPs don't seem to expire
         this.toast.show({
@@ -216,7 +216,7 @@ export class OtpComponent {
         input.setCustomValidity('incorrect');
         break;
       default:
-        this.toast.serverError(error.error);
+        this.toast.serverError(error.error?.message);
     }
   }
 }

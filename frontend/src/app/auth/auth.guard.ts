@@ -7,7 +7,7 @@ import {inject} from '@angular/core';
  * access based on the authentication state.
  */
 export const authGuard: CanActivateFn = (_, state) => {
-  if (inject(AuthService).isLoggedIn) {
+  if (inject(AuthService).isAuthenticated) {
     return true;
   }
   inject(Router).navigate(['/sign-in'], {queryParams: {returnUrl: state.url}})

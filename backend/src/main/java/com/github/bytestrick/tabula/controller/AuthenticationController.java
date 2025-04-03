@@ -9,6 +9,7 @@ import com.github.bytestrick.tabula.service.OtpProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -30,7 +31,11 @@ import java.util.UUID;
  */
 @Slf4j
 @RestController
-@RequestMapping("/auth")
+@RequestMapping(
+        value = "/auth",
+        consumes = MediaType.APPLICATION_JSON_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE
+)
 public class AuthenticationController {
     private final UserDao userDao;
     private final JwtProvider jwtProvider;
@@ -60,10 +65,12 @@ public class AuthenticationController {
         } catch (BadCredentialsException e) {
             if (userDao.findByEmail(signInRequest.email()).isEmpty()) {
                 log.warn("User '{}' tried to log in but is not registered", signInRequest.email());
-                return ResponseEntity.badRequest().body("There is no user registered with this email");
+                return ResponseEntity.badRequest().body(
+                        new InformativeResponse("There is no user registered with this email")
+                );
             }
             log.warn("Incorrect password for user '{}'", signInRequest.email());
-            return ResponseEntity.badRequest().body("Incorrect password");
+            return ResponseEntity.badRequest().body(new InformativeResponse("Incorrect password"));
         }
         log.info("User '{}' has logged in", signInRequest.email());
         return ResponseEntity.ok(new SignInResponse(jwtProvider.generateToken(signInRequest.email())));
@@ -72,7 +79,7 @@ public class AuthenticationController {
     @PostMapping("/sign-up")
     public ResponseEntity<?> signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
         if (userDao.findByEmail(signUpRequest.email()).isPresent()) {
-            return ResponseEntity.badRequest().body("Email already registered");
+            return ResponseEntity.badRequest().body(new InformativeResponse("Email already registered"));
         }
 
         User user = User.builder()
@@ -104,7 +111,7 @@ public class AuthenticationController {
                 return ResponseEntity.ok().build();
             }).orElse(ResponseEntity.notFound().build());
         } catch (InvalidOtpException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(new InformativeResponse(e.getMessage()));
         }
     }
 
@@ -115,7 +122,7 @@ public class AuthenticationController {
                     .map((User u) -> ResponseEntity.ok().build())
                     .orElse(ResponseEntity.notFound().build());
         } catch (InvalidOtpException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(new InformativeResponse(e.getMessage()));
         }
     }
 
@@ -135,7 +142,7 @@ public class AuthenticationController {
                     })
                     .orElse(ResponseEntity.notFound().build());
         } catch (InvalidOtpException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(new InformativeResponse(e.getMessage()));
         }
     }
 
@@ -154,8 +161,8 @@ public class AuthenticationController {
         if (token != null) {
             jwtProvider.invalidateToken(token);
             SecurityContextHolder.clearContext();
-            return ResponseEntity.ok().body("Signed out successfully.");
+            return ResponseEntity.ok().build();
         }
-        return ResponseEntity.badRequest().body("No token found.");
+        return ResponseEntity.badRequest().body(new InformativeResponse("No token found"));
     }
 }

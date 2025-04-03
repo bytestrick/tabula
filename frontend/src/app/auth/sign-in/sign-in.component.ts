@@ -37,7 +37,7 @@ export class SignInComponent {
 
   ngOnInit() {
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
-    if (this.auth.isLoggedIn) {
+    if (this.auth.isAuthenticated) {
       this.router.navigate([this.returnUrl])
         .finally(() => console.log(`Already logged in, redirecting to ${this.returnUrl} from /sign-in`));
       return;
@@ -96,14 +96,14 @@ export class SignInComponent {
           this.router.navigate([this.returnUrl]).then();
         },
         error: (error: HttpErrorResponse) => {
-          if (error.status === 400 && error.error.startsWith('There is no user registered')) {
+          if (error.status === 400 && error.error?.message.startsWith('There is no user registered')) {
             this.emailInput?.setCustomValidity('already-registered');
-            this.emailFeedback!.textContent = error.error;
-          } else if (error.status === 400 && error.error.startsWith('Incorrect')) {
+            this.emailFeedback!.textContent = error.error?.message;
+          } else if (error.status === 400 && error.error?.message.startsWith('Incorrect')) {
             this.passInput?.setCustomValidity('incorrect');
-            this.passFeedback!.textContent = error.error;
+            this.passFeedback!.textContent = error.error?.message;
           } else {
-            this.toast.serverError(error.error);
+            this.toast.serverError(error.error?.message);
           }
         }
       });
@@ -126,7 +126,7 @@ export class SignInComponent {
               icon: 'person-x'
             })
           } else {
-            this.toast.serverError(error.error);
+            this.toast.serverError(error.error?.message);
           }
         }
       })

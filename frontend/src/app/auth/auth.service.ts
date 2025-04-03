@@ -1,11 +1,17 @@
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {inject, Injectable} from '@angular/core';
-import {BehaviorSubject, Observable} from 'rxjs';
+import {Observable} from 'rxjs';
 import {tap} from 'rxjs/operators';
-import {Router} from '@angular/router';
 import {SignInRequest} from './sign-in/sign-in.component';
+import {ToastService} from '../toast/toast.service';
+import {Router} from '@angular/router';
 
 interface AuthenticationResponse {
+  token: string;
+}
+
+interface Authentication {
+  email: string;
   token: string;
 }
 
@@ -17,37 +23,63 @@ interface AuthenticationResponse {
 })
 export class AuthService {
   private http = inject(HttpClient);
+  private toast = inject(ToastService);
+  private router = inject(Router);
 
-  private currentUserSubject: BehaviorSubject<any>;
-  private currentUser: Observable<any>;
+  authentication: Authentication | null;
 
   constructor() {
-    this.currentUserSubject = new BehaviorSubject<any>(JSON.parse(localStorage.getItem('currentUser') || '{}'));
-    this.currentUser = this.currentUserSubject.asObservable();
+    const authenticationRaw = localStorage.getItem('authentication');
+    this.authentication = authenticationRaw ? JSON.parse(authenticationRaw) : null;
   }
 
-  get currentUserValue() {
-    return this.currentUserSubject.value;
-  }
-
-  get isLoggedIn(): boolean {
-    return this.currentUserValue !== null;
+  get isAuthenticated(): boolean {
+    return this.authentication !== null;
   }
 
   signIn(form: SignInRequest): Observable<AuthenticationResponse> {
+    if (this.isAuthenticated) {
+      throw new Error('Already signed-in');
+    }
+
     return this.http.post<AuthenticationResponse>('/auth/sign-in', form).pipe(
       tap(response => {
-        localStorage.setItem('currentUser', JSON.stringify({email: form.email, token: response.token}));
-        this.currentUserSubject.next(response);
+        this.authentication = {email: form.email, token: response.token}
+        localStorage.setItem('authentication', JSON.stringify(this.authentication));
       })
     );
   }
 
   signOut() {
-    if (this.isLoggedIn) {
-      this.http.post('/auth/sign-out', {}).subscribe(console.log);
+    if (this.isAuthenticated) {
+      this.http.post('/auth/sign-out', {}).subscribe({
+        next: () => {
+          this.clearAuthentication();
+          this.toast.show({body: 'Sign-out successful', background: 'success'});
+        },
+        error: (error: HttpErrorResponse) => {
+          if (error.error?.message.startsWith('No token found')) {
+            // this is improbable
+            this.toast.show({
+              title: 'Invalid sign-out request',
+              body: 'Your authentication state was invalid. We signed you out anyway.',
+              background: 'warning',
+              icon: 'person-x'
+            });
+            this.clearAuthentication();
+          } else {
+            this.toast.serverError(error.error?.message);
+          }
+        }
+      });
+    } else {
+      throw new Error(`Can't sign-out without being signed-in`);
     }
-    localStorage.removeItem('currentUser');
-    this.currentUserSubject.next(null);
+  }
+
+  private clearAuthentication() {
+    localStorage.removeItem('authentication');
+    this.authentication = null;
+    this.router.navigate(['/sign-in']).then();
   }
 }
