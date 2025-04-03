@@ -5,6 +5,7 @@ import com.github.bytestrick.tabula.model.User;
 import com.github.bytestrick.tabula.repository.UserDao;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -16,15 +17,11 @@ import java.util.Random;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class OtpProvider {
     private static final Random RANDOM = new Random();
     private final JavaMailSender javaMailSender;
     private final UserDao userDao;
-
-    public OtpProvider(JavaMailSender javaMailSender, UserDao userDao) {
-        this.javaMailSender = javaMailSender;
-        this.userDao = userDao;
-    }
 
     /**
      * Generate and send an otp for a user

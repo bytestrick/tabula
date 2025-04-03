@@ -2,6 +2,7 @@ package com.github.bytestrick.tabula.service;
 
 import com.github.bytestrick.tabula.model.User;
 import com.github.bytestrick.tabula.repository.UserDao;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -12,12 +13,9 @@ import org.springframework.stereotype.Service;
  * Retrieves a user through the {@link UserDao} and returns a {@link UserDetails} object.
  */
 @Service
+@RequiredArgsConstructor
 public class DaoUserDetailsService implements UserDetailsService {
     private final UserDao userDao;
-
-    public DaoUserDetailsService(UserDao userDao) {
-        this.userDao = userDao;
-    }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {

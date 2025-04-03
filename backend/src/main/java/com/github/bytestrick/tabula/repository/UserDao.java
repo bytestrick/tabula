@@ -3,6 +3,7 @@ package com.github.bytestrick.tabula.repository;
 import com.github.bytestrick.tabula.model.Country;
 import com.github.bytestrick.tabula.model.User;
 import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -20,12 +21,9 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Repository
+@RequiredArgsConstructor
 public class UserDao {
     private final JdbcClient jdbcClient;
-
-    public UserDao(JdbcClient jdbcClient) {
-        this.jdbcClient = jdbcClient;
-    }
 
     /**
      * Map all the colums from the {@code users} table to all the fields of a {@link User} object.
