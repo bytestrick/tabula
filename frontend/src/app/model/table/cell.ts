@@ -6,7 +6,7 @@ export class Cell {
 
   protected _cellRef: ComponentRef<BaseCellComponent> | null = null;
   protected _cellDataType: IDataType;
-  protected _value: any = null;
+  protected _value: string | null = null;
 
 
 
@@ -37,12 +37,12 @@ export class Cell {
   }
 
 
-  get value(): any {
-    return this._value === null ? this.cellRef?.instance.getValue() : this._value;
+  get value(): string | null {
+    return this._value;
   }
 
 
-  set value(value: any) {
+  set value(value: string | null) {
     this._value = value;
     this.cellRef?.instance.setValue(value);
   }

@@ -14,7 +14,7 @@ export class Table {
 
 
   addNewHeader(dataType: IDataType): void {
-    this.headerCells.push(new HeaderCell(new TextualDataType(), null, dataType));
+    this.headerCells.push(new HeaderCell(new TextualDataType(), 'New Column', dataType));
 
     for (let i: number = 0; i < this.getRowsNumber(); ++i) {
       while (this.table[i].length < this.getHeadersCellsAmount()) {
@@ -76,11 +76,14 @@ export class Table {
   }
 
 
-  swapCol(fromIndex: number, toIndex: number): void {
+  moveColumn(fromIndex: number, toIndex: number): void {
     if (fromIndex < 0 || fromIndex >= this.getHeadersCellsAmount())
       return;
 
     if (toIndex < 0 || toIndex >= this.getHeadersCellsAmount())
+      return;
+
+    if (fromIndex === toIndex)
       return;
 
     for (let row of this.table) {
@@ -90,34 +93,47 @@ export class Table {
     moveItemInArray(this.headerCells, fromIndex, toIndex);
 
     if (this.isColumnSelected(fromIndex) && !this.isColumnSelected(toIndex)) {
-      this.columnsSelected.delete(fromIndex);
-      this.columnsSelected.add(toIndex);
+      this.deselectColumn(fromIndex);
+      this.selectColumn(toIndex);
     }
     else if (!this.isColumnSelected(fromIndex) && this.isColumnSelected(toIndex)) {
-      this.columnsSelected.delete(toIndex);
-      this.columnsSelected.add(fromIndex);
+      this.deselectColumn(toIndex);
+      this.selectColumn(fromIndex);
     }
   }
 
 
-  swapRow(fromIndex: number, toIndex: number): void {
+  moveRow(fromIndex: number, toIndex: number): void {
     if (fromIndex < 0 || fromIndex >= this.getRowsNumber())
       return;
 
     if (toIndex < 0 || toIndex >= this.getRowsNumber())
       return;
 
+    if (fromIndex === toIndex)
+      return;
+
     moveItemInArray(this.table, fromIndex, toIndex);
 
     if (this.isRowSelected(fromIndex) && !this.isRowSelected(toIndex)) {
-      this.rowsSelected.delete(fromIndex);
-      this.rowsSelected.add(toIndex);
+      this.deselectRow(fromIndex);
+      this.selectRow(toIndex);
     }
     else if (!this.isRowSelected(fromIndex) && this.isRowSelected(toIndex)) {
-      this.rowsSelected.delete(toIndex);
-      this.rowsSelected.add(fromIndex);
+      this.deselectRow(toIndex);
+      this.selectRow(fromIndex);
     }
   }
+
+
+  // TODO: Sposta in blocco le righe selezionate, inserendole a partire da toIndex.
+  moveSelectedRows(toIndex: number): void {
+  }
+
+// TODO: Sposta in blocco le colonne selezionate, inserendole a partire da toIndex.
+  moveSelectedColumns(toIndex: number): void {
+  }
+
 
 
   getCol(colIndex: number, limit: number = this.getRowsNumber()): Cell[] {
@@ -146,19 +162,23 @@ export class Table {
   }
 
 
-  selectRow(value: boolean, rowIndex: number): void {
-    if (value)
-      this.rowsSelected.add(rowIndex);
-    else
-      this.rowsSelected.delete(rowIndex);
+  selectRow(rowIndex: number): void {
+    this.rowsSelected.add(rowIndex);
   }
 
 
-  selectColumn(value: boolean, columnIndex: number): void {
-    if (value)
-      this.columnsSelected.add(columnIndex);
-    else
-      this.columnsSelected.delete(columnIndex);
+  deselectRow(rowIndex: number): void {
+    this.rowsSelected.delete(rowIndex);
+  }
+
+
+  selectColumn(columnIndex: number): void {
+    this.columnsSelected.add(columnIndex);
+  }
+
+
+  deselectColumn(columnIndex: number): void {
+    this.columnsSelected.delete(columnIndex);
   }
 
 
@@ -199,5 +219,85 @@ export class Table {
 
   getHeaderCell(columnIndex: number): HeaderCell {
     return this.headerCells[columnIndex];
+  }
+
+
+  deleteRow(rowIndex: number): void {
+    if (rowIndex < 0 || rowIndex >= this.getRowsNumber())
+      return;
+
+    this.table.splice(rowIndex, 1);
+
+    if (this.isRowSelected(rowIndex))
+      this.deselectRow(rowIndex);
+  }
+
+
+  deleteSelectedRow(): void {
+    // Otteniamo gli indici delle righe selezionate e li ordiniamo in ordine decrescente
+    const rowsToDelete = Array.from(this.rowsSelected).sort((a, b) => b - a);
+    for (const rowIndex of rowsToDelete) {
+      this.deleteRow(rowIndex);
+    }
+    // Svuota la selezione
+    this.rowsSelected.clear();
+  }
+
+
+  deleteColumn(columnIndex: number): void {
+    if (columnIndex < 0 || columnIndex >= this.getHeadersCellsAmount())
+      return;
+
+    this.headerCells.splice(columnIndex, 1);
+
+    for (const row of this.table) {
+      row.splice(columnIndex, 1);
+    }
+
+    if (this.isColumnSelected(columnIndex))
+      this.deselectColumn(columnIndex);
+  }
+
+
+  deleteSelectedColumn(): void {
+    // Otteniamo gli indici delle colonne selezionate e li ordiniamo in ordine decrescente
+    const colsToDelete = Array.from(this.columnsSelected).sort((a, b) => b - a);
+    for (const colIndex of colsToDelete) {
+      this.deleteColumn(colIndex);
+    }
+    // Svuota la selezione
+    this.columnsSelected.clear();
+  }
+
+
+  duplicateRow(rowIndex: number): void {
+    if (rowIndex < 0 || rowIndex >= this.getRowsNumber())
+      return;
+
+    const clonedRow: Cell[] = [];
+
+    for (let j: number = 0; j < this.getHeadersCellsAmount(); ++j)
+      clonedRow.push(new Cell(this.getColDataType(j).getNewDataType(), this.table[rowIndex][j].value));
+
+    this.table.splice(rowIndex, 0, clonedRow);
+  }
+
+
+  duplicateColumn(columnIndex: number): void {
+    if (columnIndex < 0 || columnIndex >= this.getHeadersCellsAmount())
+      return;
+
+    this.headerCells.splice(
+      columnIndex,
+      0,
+      new HeaderCell(
+        this.getHeaderCell(columnIndex).cellDataType.getNewDataType(),
+        this.getHeaderCell(columnIndex).value,
+        this.getHeaderCell(columnIndex).columnDataType.getNewDataType()
+      )
+    );
+
+    for (let i: number = 0; i < this.getRowsNumber(); ++i)
+      this.table[i].splice(columnIndex, 0, new Cell(this.getColDataType(columnIndex).getNewDataType(), this.table[i][columnIndex].value));
   }
 }

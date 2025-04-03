@@ -101,6 +101,11 @@ export class PopUp implements OnInit, OnDestroy, AfterViewInit {
   }
 
 
+  getContent(): ComponentRef<IPopUpContent> | null {
+    return this.content;
+  }
+
+
   private callAfterInit(callback: () => void): void {
     if (this.isInitialized)
       callback();

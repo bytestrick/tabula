@@ -10,17 +10,7 @@ import {BaseCellComponent} from '../base-cell-component';
 })
 export class DataTypeCellComponent extends BaseCellComponent {
 
-  private readonly defaultValue: string = 'New Column';
-
-  override value: any = this.defaultValue;
+  override value: string | null = null;
 
   @Input() iconName: string = '';
-
-
-  override setValue(value: any): void {
-    if (value === null || value === '')
-      this.value = this.defaultValue;
-    else
-      this.value = value;
-  }
 }

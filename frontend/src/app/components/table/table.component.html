@@ -63,7 +63,7 @@
         >
           <app-cell-wrapper
             #cellWrapper
-            appHighlightBorders [appHighlightBordersOf]="cellWrapper.bordersToHighLight.nativeElement" [appHighlightCanDisable]="!popUpManagerService.isPopUpShown(INPUT_METHOD_POP_UP)"
+            appHighlightBorders [appHighlightBordersOf]="cellWrapper.bordersToHighLight.nativeElement" [appHighlightCanDisable]="canDisableCellHighlight()"
             [headerCell]="headerCell"
             (dblclick)="onDoubleClickedCell($event, HEADER_ROW_INDEX, colIndex)"
           ></app-cell-wrapper>
@@ -121,7 +121,7 @@
         >
           <app-cell-wrapper
             #cellWrapper
-            appHighlightBorders [appHighlightBordersOf]="cellWrapper.bordersToHighLight.nativeElement" [appHighlightCanDisable]="!popUpManagerService.isPopUpShown(INPUT_METHOD_POP_UP)"
+            appHighlightBorders [appHighlightBordersOf]="cellWrapper.bordersToHighLight.nativeElement" [appHighlightCanDisable]="canDisableCellHighlight()"
             appSelect [appIsSelected]="isRowSelected(rowIndex) || isColumnSelected(colIndex)" [appTargetOfSelection]="areaToSelect"
             [selectedNeighbors]="{
               top: isRowSelected(rowIndex - 1) || (rowIndex - 1 >= 0 && isColumnSelected(colIndex)),
