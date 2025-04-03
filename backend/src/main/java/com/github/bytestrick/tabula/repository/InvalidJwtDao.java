@@ -1,16 +1,14 @@
 package com.github.bytestrick.tabula.repository;
 
 import com.github.bytestrick.tabula.service.JwtProvider;
+import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
 @Repository
+@RequiredArgsConstructor
 public class InvalidJwtDao {
     private final JdbcClient jdbcClient;
-
-    public InvalidJwtDao(JdbcClient jdbcClient) {
-        this.jdbcClient = jdbcClient;
-    }
 
     public void save(String token) {
         jdbcClient.sql("INSERT INTO invalid_jwt VALUES (:token, :expiration_date)")

@@ -8,6 +8,7 @@ import com.github.bytestrick.tabula.service.JwtProvider;
 import com.github.bytestrick.tabula.service.OtpProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -36,24 +37,13 @@ import java.util.UUID;
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE
 )
+@RequiredArgsConstructor
 public class AuthenticationController {
     private final UserDao userDao;
     private final JwtProvider jwtProvider;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
     private final OtpProvider otpProvider;
-
-    public AuthenticationController(UserDao userDao,
-                                    JwtProvider jwtProvider,
-                                    AuthenticationManager authenticationManager,
-                                    PasswordEncoder passwordEncoder,
-                                    OtpProvider otpProvider) {
-        this.userDao = userDao;
-        this.jwtProvider = jwtProvider;
-        this.authenticationManager = authenticationManager;
-        this.passwordEncoder = passwordEncoder;
-        this.otpProvider = otpProvider;
-    }
 
     @PostMapping("/sign-in")
     public ResponseEntity<?> signIn(@Valid @RequestBody SignInRequest signInRequest) {
@@ -156,7 +146,8 @@ public class AuthenticationController {
     }
 
     @PostMapping("/sign-out")
-    public ResponseEntity<?> logout(HttpServletRequest request) {
+    public ResponseEntity<?> signOut(HttpServletRequest request) {
+        // TODO: all tokens for this user should be invalidated
         String token = JwtProvider.fromRequest(request);
         if (token != null) {
             jwtProvider.invalidateToken(token);

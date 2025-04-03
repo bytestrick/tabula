@@ -5,6 +5,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -17,6 +18,7 @@ import java.util.Date;
  * Service that manages JSON Web Tokens
  */
 @Service
+@RequiredArgsConstructor
 public class JwtProvider {
     private final InvalidJwtDao invalidJwtDao;
     @Value("${app.jwt.expiration-ms}")
@@ -28,10 +30,6 @@ public class JwtProvider {
      */
     private SecretKey secretKey;
 
-    public JwtProvider(InvalidJwtDao invalidJwtDao) {
-        this.invalidJwtDao = invalidJwtDao;
-    }
-
     /**
      * Extract a JSON Web Token from an HTTP request
      */
@@ -41,6 +39,17 @@ public class JwtProvider {
             return bearerToken.substring(7);
         }
         return null;
+    }
+
+    /**
+     * Extract the expiration timestamp from a JSON Web Token
+     */
+    public static Date getExpiration(String token) {
+        return Jwts.parser()
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getExpiration();
     }
 
     @PostConstruct
@@ -87,16 +96,5 @@ public class JwtProvider {
      */
     public void invalidateToken(String token) {
         invalidJwtDao.save(token);
-    }
-
-    /**
-     * Extract the expiration timestamp from a JSON Web Token
-     */
-    public static Date getExpiration(String token) {
-        return Jwts.parser()
-                .build()
-                .parseSignedClaims(token)
-                .getPayload()
-                .getExpiration();
     }
 }
