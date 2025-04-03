@@ -8,7 +8,7 @@
 
 .popup-content {
   display: inline-flex;
-  background-color: #fff;
+  background-color: var(--bs-white);
   padding: 6px;
   border-radius: 8px;
   text-align: center;

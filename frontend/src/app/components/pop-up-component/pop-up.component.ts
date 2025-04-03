@@ -32,6 +32,8 @@ export class PopUp implements OnInit, OnDestroy, AfterViewInit {
 
   private isInitialized: boolean = false;
   private pendingCall: (() => void)[] = [];
+  private popUpPosition: Pair<number, number> = new Pair(0, 0);
+  private readonly OFFSET_TO_SCREEN_SIDES: number = 6;
 
 
   constructor(private renderer: Renderer2, private changeDetector: ChangeDetectorRef) {}
@@ -45,6 +47,7 @@ export class PopUp implements OnInit, OnDestroy, AfterViewInit {
 
           if (!currentlyHidden) {
             this.content?.instance.beforeContentShowUp();
+            this.updatePositionToFitScreen(); // Chiamata qui perché il content deve essere inserito prima di poter calcolare la posizione adatta.
             this.shown.emit();
           }
           else
@@ -72,23 +75,34 @@ export class PopUp implements OnInit, OnDestroy, AfterViewInit {
 
 
   setPopUpPosition(position: Pair<number, number>): void {
-    const viewportWidth: number = window.innerWidth;
-    const viewportHeight: number = window.innerHeight;
-    const popUpWidth: number = this.popUpContainer.nativeElement.offsetWidth;
-    const popUpHeight: number = this.popUpContainer.nativeElement.offsetHeight;
-    const offScreenAmountX: number = (position.first + popUpWidth) - viewportWidth;
-    const offScreenAmountY: number = (position.second + popUpHeight) - viewportHeight;
-
-    if (offScreenAmountX > 0)
-      position.first -= offScreenAmountX;
-
-    if (offScreenAmountY > 0)
-      position.second -= offScreenAmountY;
+    this.popUpPosition = position;
 
     this.renderer.setStyle(
       this.popUpContainer.nativeElement,
       'transform',
       `translate(${position.first}px, ${position.second}px)`
+    );
+  }
+
+
+  private updatePositionToFitScreen(): void {
+    const viewportWidth: number = window.innerWidth;
+    const viewportHeight: number = window.innerHeight;
+    const popUpWidth: number = this.popUpContainer.nativeElement.offsetWidth + this.OFFSET_TO_SCREEN_SIDES;
+    const popUpHeight: number = this.popUpContainer.nativeElement.offsetHeight + this.OFFSET_TO_SCREEN_SIDES;
+    const offScreenAmountX: number = (this.popUpPosition.first + popUpWidth) - viewportWidth;
+    const offScreenAmountY: number = (this.popUpPosition.second + popUpHeight) - viewportHeight;
+
+    if (offScreenAmountX > 0)
+      this.popUpPosition.first -= offScreenAmountX;
+
+    if (offScreenAmountY > 0)
+      this.popUpPosition.second -= offScreenAmountY;
+
+    this.renderer.setStyle(
+      this.popUpContainer.nativeElement,
+      'transform',
+      `translate(${this.popUpPosition.first}px, ${this.popUpPosition.second}px)`
     );
   }
 
@@ -117,7 +131,7 @@ export class PopUp implements OnInit, OnDestroy, AfterViewInit {
   show(position: Pair<number, number>): void {
     this.callAfterInit(
       (): void => {
-        this.setPopUpPosition(position);
+        this.setPopUpPosition(position); // deve essere chiamata dopo che il content viene inserito
         this.isVisible = true;
         this.changeDetector.detectChanges();
       }

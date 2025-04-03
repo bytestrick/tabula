@@ -7,6 +7,7 @@
         [attr.data-index]="columnIndex"
         class="column"
       >
+      <col style="var(--cell-table-min-width)">
     </colgroup>
     <thead>
       <!-- riga per i table-organizer -->
@@ -30,7 +31,7 @@
 
             [showOrganizer]="hoveredColIndex === colIndex && !isAnElementDragged"
             [rowIndicators]="false"
-            (addAt)="onColumnAddedAt(colIndex)"
+            (addAt)="onColumnAddedAt($event, colIndex)"
             (selectionToggle)="onColumnSelectionToggled($event, colIndex)"
           >
             <!-- Preview della colonna durante il drag and drop -->
@@ -73,7 +74,7 @@
         </th>
         <!-- serve per aggiungere la cella della colonna finale, quella dove c'è il bottone per aggiungere le colonne -->
         <th class="remove-border center-container" (mouseenter)="onMouseEnteredCell(INVALID_CELL_INDEX, INVALID_CELL_INDEX)">
-          <button class="btn btn-primary center" type="button" (click)="onNewHeaderAdded()" title="Append new column">
+          <button class="btn btn-primary center" type="button" (click)="onNewHeaderAdded($event)" title="Append new column">
             <i class="bi bi-plus-lg"></i>
           </button>
         </th>

@@ -166,8 +166,8 @@ export class TableComponent implements OnInit, OnDestroy {
   }
 
 
-  onNewHeaderAdded(): void {
-    this.showDataTypeChooser(new Pair(0, 0), (value: any): void => this.addNewHeader(value as IDataType));
+  onNewHeaderAdded(event: MouseEvent): void {
+    this.showDataTypeChooser(new Pair(event.x, event.y), (value: any): void => this.addNewHeader(value as IDataType));
   }
 
 
@@ -242,8 +242,8 @@ export class TableComponent implements OnInit, OnDestroy {
   }
 
 
-  onColumnAddedAt(colIndex: number): void {
-    this.showDataTypeChooser(new Pair(0, 0), (value: any): void => this.insertNewColAt(colIndex, value as IDataType));
+  onColumnAddedAt(event: MouseEvent, colIndex: number): void {
+    this.showDataTypeChooser(new Pair(event.x, event.y), (value: any): void => this.insertNewColAt(colIndex, value as IDataType));
   }
 
 

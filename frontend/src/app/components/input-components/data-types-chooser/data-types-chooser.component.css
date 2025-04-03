@@ -1,0 +1,28 @@
+:host {
+  --search-bar-height: 34px;
+  --search-bar-border-radius: 6px;
+}
+
+
+input {
+  height: var(--search-bar-height);
+  border: none;
+  border-radius: var(--search-bar-border-radius);
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+
+  box-shadow: inset 0 0 3px 1px rgba(0.0, 0.0, 0.0, 0.2);
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #232323;
+}
+
+
+.my-button {
+  height: var(--search-bar-height);
+  width: var(--search-bar-height);
+
+  border-radius: var(--search-bar-border-radius);
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
