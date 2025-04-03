@@ -43,7 +43,7 @@ export class SignUpComponent {
   @ViewChild(DoublePassInputComponent) private pass!: DoublePassInputComponent;
 
   ngOnInit() {
-    if (this.auth.isLoggedIn) {
+    if (this.auth.isAuthenticated) {
       this.router.navigate(['/'])
         .finally(() => console.log('Already signed in in, redirecting to / from /register'));
       return;
@@ -114,11 +114,11 @@ export class SignUpComponent {
           this.router.navigate(['/otp']).then();
         },
         error: (error: HttpErrorResponse) => {
-          if (error.status === 400 && error.error.startsWith('Email already registered')) {
+          if (error.status === 400 && error.error?.messsage.startsWith('Email already registered')) {
             this.emailInput?.setCustomValidity('already-registered');
-            this.emailFeedback!.textContent = error.error;
+            this.emailFeedback!.textContent = error.error?.message;
           } else {
-            this.toast.serverError(error.error);
+            this.toast.serverError(error.error?.message);
           }
         }
       });
