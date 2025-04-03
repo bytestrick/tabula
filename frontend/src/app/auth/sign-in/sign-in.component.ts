@@ -5,7 +5,7 @@ import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {PasswordVisibilityDirective} from '../password-visibility.directive';
 import {enableTooltips} from '../../../main';
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
-import {ToastService} from '../../toasts/toast.service';
+import {ToastService} from '../../toast/toast.service';
 import {passRegExp} from '../../app.config';
 import {Reason} from '../otp/otp.component';
 

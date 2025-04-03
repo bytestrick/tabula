@@ -15,7 +15,7 @@ import {enableTooltips} from '../../../main';
   templateUrl: './double-pass-input.component.html',
 })
 export class DoublePassInputComponent {
-  public passInput?: HTMLInputElement;
+  passInput?: HTMLInputElement;
   private passFeedback?: HTMLElement;
   private passRepFeedback?: HTMLElement;
   private passRepInput?: HTMLInputElement;

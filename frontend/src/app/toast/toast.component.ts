@@ -28,9 +28,9 @@ export interface ToastOptions {
  *
  * Usage example
  * ```typescript
- * import {ToastsService} from './toasts.service';
+ * import {ToastService} from './toast.service';
  *
- * inject(ToastsService).show({title: 'Important!', body: 'A quick message'});
+ * inject(ToastService).show({title: 'Important!', body: 'A quick message'});
  * ```
  *
  * @see {@link ToastOptions} for the toast options

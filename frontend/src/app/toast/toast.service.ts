@@ -5,7 +5,7 @@ import {Subject} from 'rxjs';
 /**
  * The notification service that displays toast messages across the app.
  *
- * We need a service because we can't import/inject the ToatsComponent in other components.
+ * We need a service because we can't import/inject the ToatComponent in other components.
  * This service effectively mediates between components in order to provide toats notification.
  *
  * @see {@link ToastComponent}
@@ -14,7 +14,7 @@ import {Subject} from 'rxjs';
   providedIn: 'root'
 })
 export class ToastService {
-  public subject = new Subject<ToastOptions>();
+  subject = new Subject<ToastOptions>();
 
   show(data: ToastOptions) {
     this.subject.next(data);
