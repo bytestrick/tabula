@@ -16,22 +16,21 @@ interface AuthenticationResponse {
   providedIn: 'root'
 })
 export class AuthService {
-  http = inject(HttpClient);
-  router = inject(Router);
+  private http = inject(HttpClient);
 
   private currentUserSubject: BehaviorSubject<any>;
-  public currentUser: Observable<any>;
+  private currentUser: Observable<any>;
 
   constructor() {
-    this.currentUserSubject = new BehaviorSubject<any>(JSON.parse(localStorage.getItem('currentUser') || 'null'));
+    this.currentUserSubject = new BehaviorSubject<any>(JSON.parse(localStorage.getItem('currentUser') || '{}'));
     this.currentUser = this.currentUserSubject.asObservable();
   }
 
-  public get currentUserValue() {
+  get currentUserValue() {
     return this.currentUserSubject.value;
   }
 
-  public get isLoggedIn(): boolean {
+  get isLoggedIn(): boolean {
     return this.currentUserValue !== null;
   }
 

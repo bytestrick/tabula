@@ -5,7 +5,7 @@ import {NgForOf} from '@angular/common';
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {enableTooltips} from '../../../main';
 import {AuthService} from '../auth.service';
-import {ToastService} from '../../toasts/toast.service';
+import {ToastService} from '../../toast/toast.service';
 import {Reason} from '../otp/otp.component';
 import {DoublePassInputComponent} from '../double-pass-input/double-pass-input.component';
 

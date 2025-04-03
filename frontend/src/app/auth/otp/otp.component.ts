@@ -1,7 +1,7 @@
 import {Component, inject, ViewChild} from '@angular/core';
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {Router} from '@angular/router';
-import {ToastService} from '../../toasts/toast.service';
+import {ToastService} from '../../toast/toast.service';
 import {Subscription} from 'rxjs';
 import {ReactiveFormsModule} from '@angular/forms';
 import {DoublePassInputComponent} from '../double-pass-input/double-pass-input.component';
