@@ -1,6 +1,6 @@
 import {
   AfterViewInit,
-  Component,
+  Component, ComponentRef,
   ElementRef,
   Input,
   ViewChild,
@@ -9,6 +9,7 @@ import {
 import {DataTypeCellComponent} from '../data-type-cell/data-type-cell.component';
 import {HeaderCell} from '../../../../model/table/header-cell';
 import {Cell} from '../../../../model/table/cell';
+import {BaseCellComponent} from '../base-cell-component';
 
 @Component({
   selector: 'app-cell-wrapper',
@@ -38,12 +39,15 @@ export class CellWrapperComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     if (this.cell !== null) {
-      this.cell.cellRef = this.container.createComponent(this.cell.cellDataType.getCellComponent());
+      const cellRef: ComponentRef<BaseCellComponent> = this.container.createComponent(this.cell.cellDataType.getCellComponent());
+      this.cell.cellRef = cellRef;
+      cellRef.setInput('value', this.cell.value);
     }
 
     if (this.headerCell !== null) {
       this.headerCell.cellRef = this.container.createComponent(DataTypeCellComponent);
-      this.headerCell.cellRef?.setInput('iconName', this.headerCell.columnDataType.getIconName());
+      this.headerCell.cellRef.setInput('iconName', this.headerCell.columnDataType.getIconName());
+      this.headerCell.cellRef.setInput('value', this.headerCell.value);
     }
   }
 }

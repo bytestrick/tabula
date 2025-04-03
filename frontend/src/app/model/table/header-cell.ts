@@ -3,7 +3,7 @@ import {IDataType} from '../data-types/i-data-type';
 
 export class HeaderCell extends Cell {
 
-  // Tipo di dato lungo la collna della cella corrispondente.
+  // Tipo di dato lungo la colonna della cella corrispondente.
   private _columnDataType: IDataType;
 
 

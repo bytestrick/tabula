@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
 import {BaseInputComponent} from '../base-input-component';
 import {DataTypeRegistryService} from '../../../services/data-type-registry.service';
 import {NgForOf} from '@angular/common';

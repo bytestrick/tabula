@@ -45,8 +45,7 @@ export class PopUpManagerService {
     if (this.popUps.has(popUpName)) {
       const popUp: ComponentRef<PopUp> | undefined = this.getPopUp(popUpName);
 
-      if (!popUp?.instance.hasContent(content))
-        popUp?.instance.setContent(content);
+      popUp?.instance.setContent(content);
 
       return popUp;
     }

@@ -1,5 +1,5 @@
 import {
-  Component, ComponentRef, createComponent, EnvironmentInjector,
+  Component, ComponentRef, createComponent, ElementRef, EnvironmentInjector, HostListener, OnDestroy, OnInit,
 } from '@angular/core';
 import {Table} from '../../model/table/table';
 import {IDataType} from '../../model/data-types/i-data-type';
@@ -23,6 +23,8 @@ import {SelectDirective} from '../../directive/select.directive';
 import {ResizableTableColumnDirective} from '../../directive/resizable-table-column.directive';
 import {UpdateColumnsWidthDirective} from '../../directive/update-columns-width.directive';
 import {PopUpManagerService} from '../../services/pop-up-manager.service';
+import {ContextualMenuComponent} from '../contextual-menu/contextual-menu.component';
+import {PopUp} from '../pop-up-component/pop-up.component';
 @Component({
   selector: 'app-table',
   standalone: true,
@@ -42,7 +44,7 @@ import {PopUpManagerService} from '../../services/pop-up-manager.service';
   templateUrl: './table.component.html',
   styleUrl: './table.component.css'
 })
-export class TableComponent {
+export class TableComponent implements OnInit, OnDestroy {
 
   private clickedCellCoords: Pair<number, number> | null = null;
 
@@ -55,16 +57,83 @@ export class TableComponent {
 
   protected readonly HEADER_ROW_INDEX: number = -1;
   protected readonly INVALID_CELL_INDEX: number = -2;
+
   protected readonly INPUT_METHOD_POP_UP: string = 'inputMethod';
   protected readonly DATA_TYPE_CHOOSER_POP_UP: string = 'dataTypeChooser';
+  protected readonly TABLE_CONTEXTUAL_MENU: string = 'contextualMenu';
 
   protected previewLimit: number = 5; // Preview che compare durante il drag di righe e colonne.
 
 
-  constructor(private envInj: EnvironmentInjector, protected popUpManagerService: PopUpManagerService) {
+  constructor(private tableRef: ElementRef, private envInj: EnvironmentInjector, protected popUpManagerService: PopUpManagerService) {
     // Inizializza il componente in modo tale da avere già una colonna e una riga.
     this.table.addNewHeader(new TextualDataType());
     this.table.addNewRow();
+  }
+
+
+  ngOnDestroy(): void {
+    this.popUpManagerService.deletePopUp(this.INPUT_METHOD_POP_UP);
+    this.popUpManagerService.deletePopUp(this.DATA_TYPE_CHOOSER_POP_UP);
+    this.popUpManagerService.deletePopUp(this.TABLE_CONTEXTUAL_MENU);
+  }
+
+
+  ngOnInit(): void {
+    this.createTableContextualMenu();
+    this.createDataTypeChooser();
+  }
+
+
+  private createTableContextualMenu(): void {
+    const tableContextualMenu: ComponentRef<ContextualMenuComponent> = createComponent<ContextualMenuComponent>(
+      ContextualMenuComponent,
+      { environmentInjector: this.envInj }
+    );
+    tableContextualMenu.setInput('doOnDelete', (cellCord: Pair<number | null, number | null>, actionTarget: string): void => {
+      switch (actionTarget) {
+        case tableContextualMenu.instance.TARGET_ROW: {
+          if (cellCord.first !== null && this.table.getRowsNumber() >= 2) {
+            this.table.deleteRow(cellCord.first);
+          }
+          break;
+        }
+        case tableContextualMenu.instance.TARGET_COLUMN: {
+          if (cellCord.second !== null && this.table.getHeadersCellsAmount() >= 2) {
+            this.table.deleteColumn(cellCord.second);
+          }
+          break;
+        }
+      }
+    });
+    tableContextualMenu.setInput('doOnDuplicate', (cellCord: Pair<number | null, number | null>, actionTarget: string): void => {
+      switch (actionTarget) {
+        case tableContextualMenu.instance.TARGET_ROW: {
+          if (cellCord.first !== null) {
+            this.table.duplicateRow(cellCord.first);
+          }
+          break;
+        }
+        case tableContextualMenu.instance.TARGET_COLUMN: {
+          if (cellCord.second !== null) {
+            this.table.duplicateColumn(cellCord.second);
+          }
+          break;
+        }
+      }
+    });
+
+    this.popUpManagerService.createPopUp(this.TABLE_CONTEXTUAL_MENU, tableContextualMenu);
+  }
+
+
+  private createDataTypeChooser(): void {
+    const dataTypeChooser: ComponentRef<BaseInputComponent> = createComponent<BaseInputComponent>(
+      DataTypesChooserComponent,
+      { environmentInjector: this.envInj }
+    );
+
+    this.popUpManagerService.createPopUp(this.DATA_TYPE_CHOOSER_POP_UP, dataTypeChooser);
   }
 
 
@@ -154,13 +223,10 @@ export class TableComponent {
 
 
   showDataTypeChooser(position: Pair<number, number>, doAfterInputConfirmation: (value: any) => void): void {
-    const dataTypeChooser: ComponentRef<BaseInputComponent> = createComponent<BaseInputComponent>(
-      DataTypesChooserComponent,
-      { environmentInjector: this.envInj }
-    );
-    dataTypeChooser.setInput('doAfterInputConfirmation', doAfterInputConfirmation);
+    const dataTypeChooserPopUpRef: ComponentRef<PopUp> | undefined = this.popUpManagerService.getPopUp(this.DATA_TYPE_CHOOSER_POP_UP);
+    dataTypeChooserPopUpRef?.instance.getContent()?.setInput('doAfterInputConfirmation', doAfterInputConfirmation);
 
-    this.popUpManagerService.getOrCreatePopUp(this.DATA_TYPE_CHOOSER_POP_UP, dataTypeChooser)?.instance.show(position);
+    dataTypeChooserPopUpRef?.instance.show(position);
   }
 
 
@@ -187,14 +253,30 @@ export class TableComponent {
 
 
   onColumnDropped(event: CdkDragDrop<any, any>): void {
-    if (this.hoveredColIndex !== null && event.previousIndex !== this.hoveredColIndex)
-      this.table.swapCol(event.previousIndex, this.hoveredColIndex);
+    if (this.hoveredColIndex === null)
+      return;
+
+    if (!this.table.hasColumnSelected()) {
+      if (event.previousIndex !== this.hoveredColIndex)
+        this.table.moveColumn(event.previousIndex, this.hoveredColIndex);
+    }
+    else {
+      this.table.moveSelectedColumns(this.hoveredColIndex);
+    }
   }
 
 
   onRowDropped(event: CdkDragDrop<any, any>): void {
-    if (this.hoveredRowIndex !== null && event.previousIndex !== this.hoveredRowIndex)
-      this.table.swapRow(event.previousIndex, this.hoveredRowIndex);
+    if (this.hoveredRowIndex === null)
+      return;
+
+    if (!this.table.hasRowsSelected()) {
+      if (event.previousIndex !== this.hoveredRowIndex)
+        this.table.moveRow(event.previousIndex, this.hoveredRowIndex);
+    }
+    else {
+      this.table.moveSelectedRows(this.hoveredRowIndex);
+    }
   }
 
 
@@ -209,12 +291,18 @@ export class TableComponent {
 
 
   onColumnSelectionToggled(value: boolean, columnIndex: number): void {
-    this.table.selectColumn(value, columnIndex);
+    if (value)
+      this.table.selectColumn(columnIndex);
+    else
+      this.table.deselectColumn(columnIndex);
   }
 
 
   onRowSelectionToggled(value: boolean, rowIndex: number): void {
-    this.table.selectRow(value, rowIndex);
+    if (value)
+      this.table.selectRow(rowIndex);
+    else
+      this.table.deselectRow(rowIndex);
   }
 
 
@@ -225,5 +313,26 @@ export class TableComponent {
 
   isRowSelected(rowIndex: number): boolean {
     return this.table.isRowSelected(rowIndex)
+  }
+
+
+  protected canDisableCellHighlight(): boolean {
+    return (
+      !this.popUpManagerService.isPopUpShown(this.INPUT_METHOD_POP_UP) &&
+      !this.popUpManagerService.isPopUpShown(this.TABLE_CONTEXTUAL_MENU)
+    );
+  }
+
+
+  @HostListener('document:contextmenu', ['$event'])
+  onContextMenu(event: MouseEvent): void {
+    if (!this.tableRef.nativeElement.contains(event.target))
+      return;
+
+    event.preventDefault();
+
+    const contextualMenuRef: ComponentRef<PopUp> | undefined = this.popUpManagerService.getPopUp(this.TABLE_CONTEXTUAL_MENU);
+    contextualMenuRef?.instance.getContent()?.setInput('cellCord', new Pair(this.hoveredRowIndex, this.hoveredColIndex));
+    contextualMenuRef?.instance.show(new Pair(event.x, event.y));
   }
 }

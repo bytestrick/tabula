@@ -1,9 +1,15 @@
-import {Directive, EventEmitter, Input, Output} from '@angular/core';
+import {
+  Directive,
+  EventEmitter,
+  Input,
+  Output,
+} from '@angular/core';
 import {IPopUpContent} from '../../model/i-pop-up-content';
 import {PopUp} from '../pop-up-component/pop-up.component';
 
 @Directive()
 export abstract class BaseInputComponent implements IPopUpContent {
+
   @Output() inputAborted: EventEmitter<void> = new EventEmitter<void>;
   @Output() inputConfirmed: EventEmitter<any> = new EventEmitter<any>;
 
