@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component, ElementRef, inject, viewChild} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {AuthService} from '../auth.service';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
@@ -6,7 +6,7 @@ import {PasswordVisibilityDirective} from '../password-visibility.directive';
 import {enableTooltips} from '../../../main';
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {ToastService} from '../../toast/toast.service';
-import {passRegExp} from '../../app.config';
+import {passwordRegExp} from '../../app.config';
 import {Reason} from '../otp/otp.component';
 
 export interface SignInRequest {
@@ -16,7 +16,7 @@ export interface SignInRequest {
 }
 
 @Component({
-  selector: 'app-login',
+  selector: 'app-sign-in',
   standalone: true,
   imports: [FormsModule, RouterLink, PasswordVisibilityDirective],
   templateUrl: './sign-in.component.html',
@@ -29,24 +29,18 @@ export class SignInComponent {
   private http = inject(HttpClient)
   protected form = {} as SignInRequest;
   private returnUrl = '/';
-
-  private emailInput?: HTMLInputElement;
-  private emailFeedback?: HTMLElement;
-  private passInput?: HTMLInputElement;
-  private passFeedback?: HTMLElement;
+  private emailInput = viewChild.required<ElementRef<HTMLInputElement>>('emailInput');
+  private emailFeedback = viewChild.required<ElementRef<HTMLElement>>('emailFeedback');
+  private passwordInput = viewChild.required<ElementRef<HTMLInputElement>>('passwordInput');
+  private passwordFeedback = viewChild.required<ElementRef<HTMLElement>>('passwordFeedback');
 
   ngOnInit() {
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
     if (this.auth.isAuthenticated) {
-      this.router.navigate([this.returnUrl])
-        .finally(() => console.log(`Already logged in, redirecting to ${this.returnUrl} from /sign-in`));
+      this.router.navigate([this.returnUrl]).finally(() => console.log('Already authenticated'));
       return;
     }
     enableTooltips();
-    this.passInput = document.querySelector('#pass-input') as HTMLInputElement;
-    this.passFeedback = document.querySelector('#pass-feedback') as HTMLElement;
-    this.emailInput = document.querySelector('#email-input') as HTMLInputElement;
-    this.emailFeedback = document.querySelector('#email-feedback') as HTMLElement;
   }
 
   private isFormValid(event: Event): boolean {
@@ -58,25 +52,27 @@ export class SignInComponent {
   }
 
   protected onEmailInput() {
-    if (this.emailInput!.validity.valueMissing) {
-      this.emailFeedback!.textContent = 'Email required';
-    } else if (this.passInput!.validity.typeMismatch) {
-      this.passFeedback!.textContent = 'Invalid email';
+    const [input, feedback] = [this.emailInput().nativeElement, this.emailFeedback().nativeElement];
+    if (input.validity.valueMissing) {
+      feedback.textContent = 'Email required';
+    } else if (input.validity.typeMismatch) {
+      feedback.textContent = 'Invalid email';
     } else {
-      this.emailInput!.setCustomValidity('');
+      input.setCustomValidity('');
     }
   }
 
   protected onPasswordInput() {
-    if (this.passInput!.validity.valueMissing) {
-      this.passFeedback!.textContent = 'Password required';
-    } else if (this.passInput!.validity.tooShort) {
-      this.passFeedback!.textContent = `Must be at least ${this.passInput?.minLength} characters long`;
-    } else if (!passRegExp.test(this.passInput!.value)) {
-      this.passFeedback!.textContent = `Password doesn't respect the validity criteria`;
-      this.passInput!.setCustomValidity('invalid');
+    const [input, feedback] = [this.passwordInput().nativeElement, this.passwordFeedback().nativeElement];
+    if (input.validity.valueMissing) {
+      feedback.textContent = 'Password required';
+    } else if (input!.validity.tooShort) {
+      feedback.textContent = `Must be at least ${input.minLength} characters long`;
+    } else if (!passwordRegExp.test(input.value)) {
+      feedback.textContent = `Password doesn't respect the validity criteria`;
+      input.setCustomValidity('invalid');
     } else {
-      this.passInput!.setCustomValidity('');
+      input.setCustomValidity('');
     }
   }
 
@@ -97,11 +93,11 @@ export class SignInComponent {
         },
         error: (error: HttpErrorResponse) => {
           if (error.status === 400 && error.error?.message.startsWith('There is no user registered')) {
-            this.emailInput?.setCustomValidity('already-registered');
-            this.emailFeedback!.textContent = error.error?.message;
+            this.emailInput().nativeElement.setCustomValidity('already-registered');
+            this.emailFeedback().nativeElement.textContent = error.error?.message;
           } else if (error.status === 400 && error.error?.message.startsWith('Incorrect')) {
-            this.passInput?.setCustomValidity('incorrect');
-            this.passFeedback!.textContent = error.error?.message;
+            this.passwordInput().nativeElement.setCustomValidity('incorrect');
+            this.passwordFeedback().nativeElement.textContent = error.error?.message;
           } else {
             this.toast.serverError(error.error?.message);
           }
@@ -111,7 +107,8 @@ export class SignInComponent {
   }
 
   protected onForgotPassword() {
-    if (this.emailInput!.checkValidity()) {
+    const emailInput = this.emailInput().nativeElement;
+    if (emailInput.checkValidity()) {
       this.http.post('/auth/send-otp', {email: this.form.email, reason: Reason.ResetPassword.toLowerCase()}).subscribe({
         next: () => {
           localStorage.setItem('otpData', JSON.stringify({email: this.form.email, reason: Reason.ResetPassword}));
@@ -131,7 +128,7 @@ export class SignInComponent {
         }
       })
     } else {
-      document.querySelector('div:has(#email-input)')!.classList.add('was-validated');
+      emailInput.parentElement!.classList.add('was-validated'); // only validate the email input
     }
   }
 }

@@ -15,7 +15,7 @@ export const appConfig: ApplicationConfig = {
 };
 
 /** Regular expression that validates passwords */
-export const passRegExp = new RegExp(
+export const passwordRegExp = new RegExp(
   /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!#$%&"'()*+,\-./:;<=>?@\[\\\]^_`{|}~])[A-Za-z\d!#$%&"'()*+,\-./:;<=>?@\[\\\]^_`{|}~]{10,}$/
 );
 

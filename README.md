@@ -13,9 +13,9 @@ the session. It is the responsibility of the `AuthenticationManager` to authenti
 a `UsernamePasswordAuthenticationToken`. To do this it uses a `DaoAuthenticationProvider` which in turn obtains the
 stored user data from a `DaoUserDetailsService`. The `DaoUserDetailsService` retrieves the user data from the underlying
 database through the `UserDao`. If the `AuthenticationManager` can retrieve the `UserDetails` then it will compare them
-with the ones from the login request with a `BCryptPasswordEncoder`. If the authentication is successful we store the
+with the ones from the sign-in request with a `BCryptPasswordEncoder`. If the authentication is successful we store the
 `UserDetails` in the `SecurityContext`, this will be the `Principal`, then we use the `JwtProvider` to generate a new
-token which is sent back as the response to the login request. The client will store the token in the `localStorage`.
+token which is sent back as the response to the sign-in request. The client will store the token in the `localStorage`.
 
 All subsequent requests to the server will have the `Authorization` header set to `Bearer <token>`, this is done by the
 `authInterceptor`. On the server side the `JwtAuthenticationFilter` will intercept all requests that need authorization,

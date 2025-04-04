@@ -24,7 +24,7 @@
   <div class="row mb-3">
     <label for="country-input" class="form-label p-0">Country</label>
     <div class="input-group p-0 has-validation position-relative">
-      <select (change)="onCountrySelect($event)" id="country-input" class="form-select" [(ngModel)]="countryIndex"
+      <select #countryInput (change)="onCountrySelect($event)" class="form-select" [(ngModel)]="countryIndex"
               name="country" required>
         <option value="0" disabled>Select your country</option>
         <option [value]="i" *ngFor="let country of countries; index as i">
@@ -39,9 +39,9 @@
   <div class="row mb-3">
     <label for="email-input" class="form-label p-0">Email address</label>
     <div class="input-group p-0 has-validation position-relative">
-      <input id="email-input" class="form-control" type="email" [(ngModel)]="form.email" name="email"
+      <input #emailInput id="email-input" class="form-control" type="email" [(ngModel)]="form.email" name="email"
              placeholder="john.doe@example.com" required autocomplete="username" (input)="onEmailInput()">
-      <div id="email-feedback" class="invalid-tooltip">A valid email address is required</div>
+      <div #emailFeedback class="invalid-tooltip">A valid email address is required</div>
     </div>
   </div>
 

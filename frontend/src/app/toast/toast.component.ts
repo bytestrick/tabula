@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component, ElementRef, inject, viewChild} from '@angular/core';
 import {Toast} from 'bootstrap';
 import {Subscription} from 'rxjs';
 import {ToastService} from './toast.service';
@@ -41,16 +41,16 @@ export interface ToastOptions {
   standalone: true,
   imports: [],
   template: `
-    <div class="toast-container top-0 end-0 p-3 position-fixed"></div>
+    <div #container class="toast-container top-0 end-0 p-3 position-fixed"></div>
   `
 })
 export class ToastComponent {
   private service = inject(ToastService);
   private subscription?: Subscription;
-  private container?: HTMLElement;
+  private container = viewChild.required<ElementRef<HTMLDivElement>>('container');
 
   ngOnInit() {
-    this.subscription = this.service.subject.subscribe(this.show);
+    this.subscription = this.service.subject.subscribe(data => this.show(data));
   }
 
   ngOnDestroy() {
@@ -61,10 +61,6 @@ export class ToastComponent {
    * Show a toast notification
    */
   private show(options: ToastOptions) {
-    if (!this.container) {
-      this.container = document.querySelector('.toast-container') as HTMLDivElement;
-    }
-
     const el = document.createElement('div');
     el.classList.add('toast');
     el.classList.add('z-3');
@@ -94,7 +90,14 @@ export class ToastComponent {
         <button aria-label="Close" class="btn-close me-2 m-auto" data-bs-dismiss="toast" type="button"></button>
       </div>`;
     }
-    this.container?.appendChild(el);
-    Toast.getOrCreateInstance(el, {autohide: options.delay !== 0, delay: options.delay || 5000}).show()
+    this.container().nativeElement.appendChild(el);
+
+    options.delay = options.delay || 5000;
+    const toast = Toast.getOrCreateInstance(el, {autohide: options.delay !== 0, delay: options.delay});
+    if (options.delay > 0) {
+      // endless growth is unsustainable
+      setTimeout(() => this.container().nativeElement.removeChild(el), options.delay * 2);
+    }
+    toast.show();
   }
 }

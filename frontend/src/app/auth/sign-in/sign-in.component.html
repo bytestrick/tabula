@@ -6,30 +6,31 @@
   <div class="row mb-3">
     <label for="email-input" class="form-label p-0">Email address</label>
     <div class="input-group p-0 has-validation">
-      <input id="email-input" class="form-control" type="email" [(ngModel)]="form.email" name="email"
+      <input #emailInput id="email-input" class="form-control" type="email" [(ngModel)]="form.email" name="email"
              placeholder="john.doe@example.com" required autocomplete="username" (input)="onEmailInput()">
-      <div id="email-feedback" class="invalid-tooltip">Valid email required</div>
+      <div #emailFeedback class="invalid-tooltip">Valid email required</div>
     </div>
   </div>
 
   <div class="row mb-3">
     <label for="pass-input" class="form-label p-0">Password</label>
     <div class="input-group p-0 has-validation">
-      <input id="pass-input" class="form-control" [(ngModel)]="form.password" name="password" type="password" required
-             autocomplete="current-password" minlength="10" maxlength="512" (input)="onPasswordInput()">
+      <input #passwordInput id="pass-input" class="form-control" [(ngModel)]="form.password" name="password"
+             type="password" required autocomplete="current-password" minlength="10" maxlength="512"
+             (input)="onPasswordInput()">
       <button appPasswordVisibility id="pass-visible" type="button" class="btn btn-outline-secondary"
               data-bs-toggle="tooltip" data-bs-title="Show password">
         <i class="bi bi-eye" id="pass-icon"></i>
       </button>
-      <div id="pass-feedback" class="invalid-tooltip">Password required</div>
+      <div #passwordFeedback class="invalid-tooltip">Password required</div>
     </div>
   </div>
 
   <div class="row mb-5">
     <div class="col form-check">
-      <input id="remember-login" class="form-check-input" type="checkbox" [(ngModel)]="form.rememberMe"
+      <input id="remember-me" class="form-check-input" type="checkbox" [(ngModel)]="form.rememberMe"
              name="rememberLogin" checked>
-      <label for="remember-login" class="form-check-label">Keep me signed in</label>
+      <label for="remember-me" class="form-check-label">Keep me signed in</label>
     </div>
     <button (click)="onForgotPassword()" type="button" class="col btn btn-link d-flex justify-content-end p-0">Forgot
       Password?
