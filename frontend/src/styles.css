@@ -4,14 +4,14 @@ html, body {
   height: 100%;
 }
 
-/* If the body contains either the login or the register component, center it */
-body:has(app-login, app-register, app-page-not-found, app-otp) {
+/* If the body contains either the sign-in or the sign-up component, center it */
+body:has(app-sign-in, app-sign-up, app-page-not-found, app-otp) {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-app-login form, app-register form, app-otp form {
+app-sign-in form, app-sign-up form, app-otp form {
   max-width: 500px !important;
   padding: 2em;
   max-height: 80vh;

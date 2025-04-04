@@ -1,10 +1,9 @@
-import {Component, inject, ViewChild} from '@angular/core';
+import {Component, ElementRef, inject, viewChild} from '@angular/core';
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {Router} from '@angular/router';
 import {ToastService} from '../../toast/toast.service';
-import {Subscription} from 'rxjs';
-import {ReactiveFormsModule} from '@angular/forms';
-import {DoublePassInputComponent} from '../double-pass-input/double-pass-input.component';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {PasswordInputComponent} from '../password-input/password-input.component';
 
 /**
  * One Time Passwords are used to verify the email at sign
@@ -18,21 +17,20 @@ export enum Reason {
 @Component({
   selector: 'app-otp',
   standalone: true,
-  imports: [ReactiveFormsModule, DoublePassInputComponent],
+  imports: [ReactiveFormsModule, PasswordInputComponent, FormsModule],
   templateUrl: './otp.component.html',
 })
 export class OtpComponent {
   private http = inject(HttpClient);
   private router = inject(Router);
   private toast = inject(ToastService);
-  private otpInputElement?: HTMLInputElement;
-  private feedback?: HTMLElement;
   protected reason?: Reason;
   protected email?: string | null;
-  private routerSubscription?: Subscription;
+  protected otp = '';
   protected showOtpInput = true;
-
-  @ViewChild(DoublePassInputComponent) pass!: DoublePassInputComponent;
+  private passwordInput = viewChild(PasswordInputComponent);
+  private otpFeedback = viewChild<ElementRef<HTMLElement>>('otpFeedback');
+  private otpInput = viewChild<ElementRef<HTMLInputElement>>('otpInput');
 
   ngOnInit() {
     const stringData = localStorage.getItem('otpData');
@@ -43,27 +41,7 @@ export class OtpComponent {
     } else {
       console.error('Invalid navigation to /otp');
       this.router.navigate(['/sign-in']).then();
-      return;
     }
-  }
-
-  // FIXME: HTML elements getters are always undefined
-  get otpInput(): HTMLInputElement {
-    if (!this.otpInputElement) {
-      this.otpInputElement = document.querySelector('#otp')!
-    }
-    return this.otpInputElement;
-  }
-
-  get otpFeedback(): HTMLElement {
-    if (!this.feedback) {
-      this.feedback = document.querySelector('#otp-feedback')!;
-    }
-    return this.feedback;
-  }
-
-  ngOnDestroy() {
-    this.routerSubscription?.unsubscribe();
   }
 
   private isFormValid(event: Event, form: HTMLFormElement): boolean {
@@ -99,16 +77,65 @@ export class OtpComponent {
   }
 
   protected onCodeInput() {
-    if (this.otpInput.validity.tooShort) {
-      this.otpFeedback.textContent = 'Must be 6 digits long';
-    } else if (this.otpInput.validity.valueMissing) {
-      this.otpFeedback.textContent = 'Please insert the code';
-    } else if (!/^\d{6}$/.test(this.otpInput.value)) {
-      this.otpFeedback.textContent = 'Only digits are accepted';
-      this.otpInput.setCustomValidity('only-digits');
+    const [otpInput, otpFeedback] = [this.otpInput()!.nativeElement, this.otpFeedback()!.nativeElement];
+    if (otpInput.validity.tooShort) {
+      otpFeedback.textContent = 'Must be 6 digits long';
+    } else if (otpInput.validity.valueMissing) {
+      otpFeedback.textContent = 'Please insert the code';
+    } else if (!/^\d{6}$/.test(this.otp)) {
+      otpFeedback.textContent = 'Only digits are accepted';
+      otpInput.setCustomValidity('only-digits');
     } else {
-      this.otpInput.setCustomValidity('');
+      otpInput.setCustomValidity('');
     }
+  }
+
+  private verifyEmail() {
+    this.http.post('/auth/verify-email-otp', {email: this.email, otp: this.otp}).subscribe({
+      next: () => {
+        this.toast.show({
+          title: 'Sign up successful',
+          body: 'You can sign in into your new account',
+          icon: 'check-circle-fill',
+          background: 'success',
+        });
+        this.afterVerification();
+      },
+      error: (error: HttpErrorResponse) => this.handleVerifyOtpError(error)
+    });
+  }
+
+  private resetPassword() {
+    this.http.post('/auth/reset-password', {
+      email: this.email,
+      newPassword: this.passwordInput()!.password,
+      otp: this.otp
+    }).subscribe({
+      next: () => {
+        this.toast.show({body: 'Password reset successfully', background: 'success'});
+        this.afterVerification();
+      },
+      error: (error: HttpErrorResponse) => {
+        if (error.status === 404) {
+          this.handleUserNotFound();
+        } else {
+          this.toast.serverError(error.error?.message)
+        }
+      },
+    });
+  }
+
+  private verifyResetPasswordOtp(form: HTMLFormElement) {
+    this.http.post('/auth/verify-reset-password-otp', {
+      email: this.email,
+      otp: this.otp
+    }).subscribe({
+      next: () => {
+        form.classList.remove('was-validated');
+        this.showOtpInput = false
+      },
+      error: (error: HttpErrorResponse) => this.handleVerifyOtpError(error)
+    });
   }
 
   protected onSubmit(event: Event) {
@@ -116,53 +143,13 @@ export class OtpComponent {
     if (this.isFormValid(event, form)) {
       switch (this.reason) {
         case Reason.VerifyEmail:
-          this.http.post('/auth/verify-email-otp', {email: this.email, otp: this.otpInput.value}).subscribe({
-            next: () => {
-              this.toast.show({
-                title: 'Sign up successful',
-                body: 'You can sign in into your new account',
-                icon: 'check-circle-fill',
-                background: 'success',
-              });
-              this.afterVerification();
-            },
-            error: this.handleVerifyOtpError
-          });
+          this.verifyEmail();
           break;
         case Reason.ResetPassword:
-          console.log('case is verify reset password');
           if (this.showOtpInput) {
-            console.log('verification of OTP')
-            this.http.post('/auth/verify-reset-password-otp', {
-              email: this.email,
-              otp: this.otpInput.value
-            }).subscribe({
-              next: () => {
-                form.classList.remove('was-validated');
-                this.showOtpInput = false
-              },
-              error: this.handleVerifyOtpError
-            });
-            return;
+            this.verifyResetPasswordOtp(form);
           } else {
-            console.log('resetting password');
-            this.http.post('/auth/reset-password', {
-              email: this.email,
-              newPassword: this.pass.passInput!.value,
-              otp: this.otpInput.value
-            }).subscribe({
-              next: () => {
-                this.toast.show({body: 'Password reset successfully', background: 'success'});
-                this.afterVerification();
-              },
-              error: (error: HttpErrorResponse) => {
-                if (error.status === 404) {
-                  this.userNotFound();
-                } else {
-                  this.toast.serverError(error.error?.message)
-                }
-              },
-            });
+            this.resetPassword();
           }
           break;
         default:
@@ -176,7 +163,7 @@ export class OtpComponent {
     localStorage.removeItem('otpData');
   }
 
-  private userNotFound() {
+  private handleUserNotFound() {
     this.toast.show({
       title: 'User not found',
       body: 'There is not user registered with that email',
@@ -187,7 +174,7 @@ export class OtpComponent {
 
   private handleVerifyOtpError(error: HttpErrorResponse) {
     if (error.status === 404) {
-      this.userNotFound();
+      this.handleUserNotFound();
     } else switch (error.error?.message) {
       case 'Expired':
         // FIXME: OTPs don't seem to expire
@@ -207,13 +194,8 @@ export class OtpComponent {
         });
         break;
       case 'Incorrect':
-        //this.otpFeedback.textContent = 'This code is not correct';
-        //this.otpInput.setCustomValidity('incorrect');
-
-        const feedback = document.querySelector('#otp-feedback') as HTMLElement;
-        feedback.textContent = 'Incorrect code';
-        const input = document.querySelector('#otp') as HTMLInputElement;
-        input.setCustomValidity('incorrect');
+        this.otpFeedback()!.nativeElement.textContent = 'Incorrect code';
+        this.otpInput()!.nativeElement.setCustomValidity('incorrect');
         break;
       default:
         this.toast.serverError(error.error?.message);

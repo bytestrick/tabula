@@ -1,4 +1,4 @@
-import {Component, inject, ViewChild} from '@angular/core';
+import {Component, ElementRef, inject, viewChild} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {Router, RouterLink} from '@angular/router';
 import {NgForOf} from '@angular/common';
@@ -7,7 +7,7 @@ import {enableTooltips} from '../../../main';
 import {AuthService} from '../auth.service';
 import {ToastService} from '../../toast/toast.service';
 import {Reason} from '../otp/otp.component';
-import {DoublePassInputComponent} from '../double-pass-input/double-pass-input.component';
+import {PasswordInputComponent} from '../password-input/password-input.component';
 
 interface Country {
   name: string,
@@ -26,9 +26,9 @@ interface SignUpRequest {
 }
 
 @Component({
-  selector: 'app-register',
+  selector: 'app-sign-un',
   standalone: true,
-  imports: [FormsModule, RouterLink, NgForOf, DoublePassInputComponent],
+  imports: [FormsModule, RouterLink, NgForOf, PasswordInputComponent],
   templateUrl: './sign-up.component.html',
 })
 export class SignUpComponent {
@@ -36,27 +36,25 @@ export class SignUpComponent {
   private auth = inject(AuthService);
   private router = inject(Router);
   private toast = inject(ToastService);
+  private passwordInput = viewChild.required(PasswordInputComponent);
+  private emailInput = viewChild.required<ElementRef<HTMLInputElement>>('emailInput');
+  private emailFeedback = viewChild.required<ElementRef<HTMLElement>>('emailFeedback');
+  private countryInput = viewChild.required<ElementRef<HTMLSelectElement>>('countryInput');
   protected countryIndex = 0;
   protected countries: Country[] = [];
   protected form: SignUpRequest = {} as SignUpRequest;
 
-  @ViewChild(DoublePassInputComponent) private pass!: DoublePassInputComponent;
-
   ngOnInit() {
     if (this.auth.isAuthenticated) {
-      this.router.navigate(['/'])
-        .finally(() => console.log('Already signed in in, redirecting to / from /register'));
+      this.router.navigate(['/']).finally(() => console.log('Already authenticated.'));
       return;
     }
 
     enableTooltips();
 
-    this.emailInput = document.querySelector('#email-input') as HTMLInputElement;
-    this.emailFeedback = document.querySelector('#email-feedback') as HTMLElement;
-
     this.http.get<Country[]>('countries.json').subscribe({
       next: data => this.countries = data,
-      error: err => console.error('Error getting countries data: ' + err),
+      error: console.error,
     });
   }
 
@@ -79,12 +77,13 @@ export class SignUpComponent {
   }
 
   protected onEmailInput() {
-    if (this.emailInput?.validity.valueMissing) {
-      this.emailFeedback!.textContent = 'Email is required';
-    } else if (this.emailInput?.validity.typeMismatch) {
-      this.emailFeedback!.textContent = 'Invalid email address';
+    const [emailInput, emailFeedback] = [this.emailInput().nativeElement, this.emailFeedback().nativeElement];
+    if (emailInput.validity.valueMissing) {
+      emailFeedback.textContent = 'Email is required';
+    } else if (emailInput.validity.typeMismatch) {
+      emailFeedback.textContent = 'Invalid email address';
     } else {
-      this.emailInput!.setCustomValidity('');
+      emailInput.setCustomValidity('');
     }
   }
 
@@ -94,17 +93,14 @@ export class SignUpComponent {
     event.preventDefault();
     event.stopPropagation();
 
-    const country = form.querySelector('#country-input') as HTMLSelectElement;
+    const country = this.countryInput().nativeElement;
     if (country.value === '0') {
       country.setCustomValidity('Country is required')
     }
-    this.form.password = this.pass.passInput!.value;
+    this.form.password = this.passwordInput().password;
 
     return form.checkValidity();
   }
-
-  private emailInput?: HTMLInputElement;
-  private emailFeedback?: HTMLElement;
 
   protected onSubmit(event: Event) {
     if (this.isFormValid(event)) {
@@ -115,8 +111,8 @@ export class SignUpComponent {
         },
         error: (error: HttpErrorResponse) => {
           if (error.status === 400 && error.error?.messsage.startsWith('Email already registered')) {
-            this.emailInput?.setCustomValidity('already-registered');
-            this.emailFeedback!.textContent = error.error?.message;
+            this.emailInput().nativeElement.setCustomValidity('already-registered');
+            this.emailFeedback().nativeElement.textContent = error.error?.message;
           } else {
             this.toast.serverError(error.error?.message);
           }

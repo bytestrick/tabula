@@ -1,5 +1,6 @@
 <form (submit)="onSubmit($event)" class="needs-validation" novalidate>
   <h3 class="mb-5 text-center">{{ reason }}</h3>
+
   @if (showOtpInput) {
     <h5 class="row mb-4 justify-content-center text-center">Insert the 6 digits code that was sent to<br><span
       class="text-primary-emphasis">{{ email }}</span></h5>
@@ -7,9 +8,9 @@
     <div class="m-auto" style="max-width: 80%">
       <div class="row mb-5">
         <div class="input-group has-validation p-0">
-          <input class="font-monospace form-control text-center" id="otp" minlength="6" maxlength="6"
-                 required (input)="onCodeInput()" autocomplete="off">
-          <div id="otp-feedback" class="invalid-tooltip">Code required</div>
+          <input #otpInput class="font-monospace form-control text-center" minlength="6" maxlength="6"
+                 required (input)="onCodeInput()" autocomplete="off" [(ngModel)]="otp" name="otp">
+          <div #otpFeedback class="invalid-tooltip">Code required</div>
         </div>
       </div>
 
