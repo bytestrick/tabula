@@ -35,13 +35,21 @@
             (selectionToggle)="onColumnSelectionToggled($event, colIndex)"
           >
             <!-- Preview della colonna durante il drag and drop -->
-            <div *cdkDragPreview class="drag-preview column-preview">
-              <i class="bi bi-arrow-left-right"></i>
-              <div
-                *ngFor="let cell of table.getCol(colIndex, previewLimit)"
-                class="preview-cell"
-              >
-                {{ cell.value }}
+            <div *cdkDragPreview class="drag-preview-column card m-1 opacity-75">
+              <div class="card-body p-0 rounded-2 elevated-shadow d-flex flex-column align-items-center">
+                <i class="bi bi-arrow-left-right my-2"></i>
+
+                <ul class="list-group w-100">
+                  <li
+                    *ngFor="let cell of table.getCol(colIndex, previewLimit)"
+                    class="list-group-item d-inline-flex align-items-center"
+                    style="min-height: var(--cell-table-min-height)"
+                  >
+                    <p class="d-inline-block overflow-hidden text-truncate m-0">
+                      {{ cell.value }}
+                    </p>
+                  </li>
+                </ul>
               </div>
             </div>
           </app-table-organizer>
@@ -102,13 +110,21 @@
             (cdkDragEnded)="onDragEnded()"
           >
             <!-- Preview della riga durante il drag and drop -->
-            <div *cdkDragPreview class="drag-preview row-preview">
-              <i class="bi bi-arrow-down-up"></i>
-              <div
-                *ngFor="let cell of table.getRow(rowIndex, previewLimit)"
-                class="preview-cell"
-              >
-                {{ cell.value }}
+            <div *cdkDragPreview class="drag-preview-row card m-1 opacity-75">
+              <div class="card-body p-0 rounded-2 elevated-shadow d-flex align-items-center">
+                <i class="bi bi-arrow-down-up mx-2"></i>
+
+                <ul class="list-group list-group-horizontal">
+                  <li
+                    *ngFor="let cell of table.getRow(rowIndex, previewLimit)"
+                    class="list-group-item d-inline-flex align-items-center"
+                    style="min-width: var(--cell-table-min-width); max-width: var(--cell-table-min-width); min-height: var(--cell-table-min-height)"
+                  >
+                    <p class="d-inline-block overflow-hidden text-truncate m-0">
+                      {{ cell.value }}
+                    </p>
+                  </li>
+                </ul>
               </div>
             </div>
           </app-table-organizer>

@@ -5,7 +5,7 @@
   </div>
 
   <div class="list-group overflow-y-auto" style="max-height: max(100vh - 420px, 120px);">
-    <button class="list-group-item list-group-item-action p-1"
+    <button class="list-group-item list-group-item-action py-1 px-2"
       *ngFor="let dataType of dataTypesRegistry.getDataTypes()"
       (click)="onCreateDataType(dataType)"
     >

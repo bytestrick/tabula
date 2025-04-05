@@ -81,47 +81,35 @@ table {
 * Classi per la preview del drag di righe e colonne.
 */
 
-.drag-preview {
-  background: #fff;
-  border: 1px solid #ccc;
-  padding: 4px;
-  opacity: 0.8;
-
+.drag-preview-column {
   min-width: var(--cell-table-min-width);
-  min-height: var(--cell-table-min-height);
-
-  box-shadow: var(--elevated-shadow);
-}
-
-.drag-preview i {
-  margin-right: 8px;
-  margin-left: 3px;
-}
-
-.column-preview {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-
+  max-width: var(--cell-table-min-width);
   border-top: 3px solid var(--bs-primary);
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
 }
 
-.row-preview {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  align-items: center;
 
+.drag-preview-column li {
+  border-left: none;
+  border-right: none;
+}
+
+.drag-preview-column li:last-child {
+  border-bottom: none;
+}
+
+
+.drag-preview-row {
+  min-height: var(--cell-table-min-height);
   border-left: 3px solid var(--bs-primary);
-  border-top-left-radius: 4px;
-  border-bottom-left-radius: 4px;
 }
 
-.preview-cell {
-  padding: 2px 4px;
+.drag-preview-row li {
+  border-top: none;
+  border-bottom: none;
+}
+
+.drag-preview-row li:last-child {
+  border-right: none;
 }
 
 /**************************************/
