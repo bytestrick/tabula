@@ -4,9 +4,7 @@ import com.github.bytestrick.tabula.model.TableCard;
 import com.github.bytestrick.tabula.repository.HomeDao;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class FuzzySearchTableCard {
@@ -17,25 +15,53 @@ public class FuzzySearchTableCard {
         this.homeDao = homeDao;
     }
 
-    public List<TableCard> fuzzySearch(String pattern, int distance) {
-        List<TableCard> result = new ArrayList<>();
+    public List<TableCard> fuzzySearch(String pattern) {
+        List<TableCardWithSimilarity> result = new ArrayList<>();
+
         int page = 0;
         int pageSize = 50;
         List<TableCard> tableCards = homeDao.findTableCardPaginated(page, pageSize);
 
         while (!tableCards.isEmpty()) {
-            Iterator<TableCard> iterator = tableCards.iterator();
-            while (iterator.hasNext()) {
-                TableCard tableCard = iterator.next();
-                if (FuzzySearch.levenshtein(pattern, tableCard.getTitle(), distance)) {
-                    TableCard element = iterator.next();
-                    iterator.remove();
-                    result.add(element);
+            for (TableCard tableCard : tableCards) {
+                float threshold = (float) pattern.length() / tableCard.getTitle().length() * 0.749f;
+                float similarity = FuzzySearch.similarity(pattern, tableCard.getTitle());
+
+                if (similarity >= threshold) {
+                    result.add(new TableCardWithSimilarity(tableCard, similarity));
                 }
             }
+
             page += 1;
             tableCards = homeDao.findTableCardPaginated(page, pageSize);
         }
-        return result;
+
+        result.sort(Comparator.comparingDouble(TableCardWithSimilarity::getSimilarity));
+
+        List<TableCard> sortedTableCards = new ArrayList<>();
+        for (TableCardWithSimilarity entry : result) {
+            sortedTableCards.add(entry.getTableCard());
+        }
+
+        return sortedTableCards;
+    }
+
+
+    public static class TableCardWithSimilarity {
+        private TableCard tableCard;
+        private float similarity;
+
+        public TableCardWithSimilarity(TableCard tableCard, float similarity) {
+            this.tableCard = tableCard;
+            this.similarity = similarity;
+        }
+
+        public TableCard getTableCard() {
+            return tableCard;
+        }
+
+        public float getSimilarity() {
+            return similarity;
+        }
     }
 }

@@ -2,16 +2,24 @@ package com.github.bytestrick.tabula.service;
 
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
+
 import static java.lang.Math.abs;
 
 @Service
 public class FuzzySearch {
 
+    public static float similarity(String a, String b) {
+        return (1 - (float) levenshtein(a, b) / Math.max(a.length(), b.length()));
+    }
+
     public static int levenshtein(String a, String b) {
         return distance(a, b, -1);
     }
+
     public static boolean levenshtein(String a, String b, int max) {
-        return distance(a, b, max) <= max;
+        int d = distance(a, b, max);
+        return d <= max;
     }
 
     private static int min(int ... a) {
@@ -25,7 +33,10 @@ public class FuzzySearch {
     }
 
     private static int distance(String a, String b, int max) {
-        if (a == b) return 0;
+        if (Objects.equals(a, b)) return 0;
+
+        a = a.toLowerCase();
+        b = b.toLowerCase();
 
         int lenA = a.length();
         int lenB = b.length();
@@ -45,6 +56,7 @@ public class FuzzySearch {
         }
 
         int[] cost = new int[lenB + 1];
+
         for (int i = 0; i <= lenB; i += 1) {
             cost[i] = i;
         }
@@ -53,14 +65,20 @@ public class FuzzySearch {
             cost[0] = i;
             int prv = i - 1;
             int min = prv;
+
             for (int j = 1; j <= lenB; j += 1) {
-                int act = prv + (a.charAt(i-1) == b.charAt(j-1) ? 0 : 1);
+                int act = prv + (a.charAt(i - 1) == b.charAt(j - 1) ? 0 : 1);
                 cost[j] = min(1+(prv = cost[j]), 1+cost[j - 1], act);
                 if (prv < min) min = prv;
             }
-            if (max >= 0 && min > max) return max+1;
+
+            if (max >= 0 && min > max)
+                return max + 1;
         }
-        if (max >= 0 && cost[lenB] > max) return max+1;
+
+        if (max >= 0 && cost[lenB] > max)
+            return max + 1;
+
         return cost[lenB];
     }
 }
