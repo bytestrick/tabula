@@ -1,4 +1,4 @@
-import {Component, ElementRef, inject, viewChild} from '@angular/core';
+import {Component, ElementRef, inject, OnDestroy, OnInit, viewChild} from '@angular/core';
 import {Toast} from 'bootstrap';
 import {Subscription} from 'rxjs';
 import {ToastService} from './toast.service';
@@ -44,7 +44,7 @@ export interface ToastOptions {
     <div #container class="toast-container top-0 end-0 p-3 position-fixed"></div>
   `
 })
-export class ToastComponent {
+export class ToastComponent implements OnInit, OnDestroy {
   private service = inject(ToastService);
   private subscription?: Subscription;
   private container = viewChild.required<ElementRef<HTMLDivElement>>('container');

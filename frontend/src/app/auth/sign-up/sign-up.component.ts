@@ -1,4 +1,4 @@
-import {Component, ElementRef, inject, viewChild} from '@angular/core';
+import {Component, ElementRef, inject, OnInit, viewChild} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {Router, RouterLink} from '@angular/router';
 import {NgForOf} from '@angular/common';
@@ -31,7 +31,7 @@ interface SignUpRequest {
   imports: [FormsModule, RouterLink, NgForOf, PasswordInputComponent],
   templateUrl: './sign-up.component.html',
 })
-export class SignUpComponent {
+export class SignUpComponent implements OnInit {
   private http = inject(HttpClient);
   private auth = inject(AuthService);
   private router = inject(Router);

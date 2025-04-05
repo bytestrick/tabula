@@ -1,4 +1,4 @@
-import {Component, ElementRef, model, viewChild} from '@angular/core';
+import {Component, ElementRef, model, OnInit, viewChild} from '@angular/core';
 import {PasswordVisibilityDirective} from '../password-visibility.directive';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {passwordRegExp} from '../../app.config';
@@ -14,7 +14,7 @@ import {enableTooltips} from '../../../main';
   imports: [PasswordVisibilityDirective, ReactiveFormsModule, FormsModule],
   templateUrl: './password-input.component.html',
 })
-export class PasswordInputComponent {
+export class PasswordInputComponent implements OnInit {
   private passInput = viewChild.required<ElementRef<HTMLInputElement>>('passInput');
   private passFeedback = viewChild.required<ElementRef<HTMLElement>>('passFeedback');
   private passRepFeedback = viewChild.required<ElementRef<HTMLElement>>('passRepFeedback');
