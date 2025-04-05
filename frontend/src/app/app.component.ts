@@ -14,12 +14,13 @@ import {PopUpManagerService} from './services/pop-up-manager.service';
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
+
   _ = inject(ThemeService);
 
-  @ViewChild('popUpContainer', { read: ViewContainerRef }) popUpContainer!: ViewContainerRef;
-  
+  @ViewChild('popUpContainer', { read: ViewContainerRef, static: true }) popUpContainer!: ViewContainerRef;
 
+  
   ngOnInit() {
     AppComponent.updateColorScheme();
     this.popUpManager.setPopUpContainer(this.popUpContainer);
