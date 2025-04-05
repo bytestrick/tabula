@@ -1,4 +1,4 @@
-import {AfterViewInit, Directive, HostListener, Input, OnInit, Renderer2, RendererStyleFlags2} from '@angular/core';
+import {AfterViewInit, Directive, HostListener, Input, OnInit, Renderer2} from '@angular/core';
 
 @Directive({
   selector: '[appResizableTableColumn]',

@@ -53,13 +53,23 @@
 
 table {
   table-layout: fixed;
+  width: 100%
 }
 
 .first-column {
-  min-width: auto;
-  width: 105px;
-  max-width: 105px;
+  --width: 80px;
+
+  min-width: var(--width);
+  width: var(--width);
+  max-width: var(--width);
 }
+
+
+.last-column {
+  min-width: var(--cell-table-min-width);
+  width: auto;
+}
+
 
 .column {
   width: var(--cell-table-min-width);
@@ -127,7 +137,7 @@ table {
 
 .resize-handle-active-area {
   margin: 0 auto;
-  width: 5px; /* mette 2px di deadzone resize-handle.width - resize-handle-active-area.width */
+  width: 5px; /* mette 2px di dead zone resize-handle.width - resize-handle-active-area.width */
   height: 100%;
   cursor: var(--resize-column-cursor-style);
   background-color: transparent;

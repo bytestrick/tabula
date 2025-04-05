@@ -1,36 +1,8 @@
-div {
-  display: inline-flex;
-  align-items: center;
-  justify-content: space-around;
-  background-color: lightgray;
-  border-radius: 6px;
-  padding: 2px;
-
-  min-width: 78px;
-  min-height: 30px;
-
-  opacity: 0;
+.add-icon {
+  font-size: large;
+  cursor: pointer;
 }
 
-
-div > *:not(:last-child) {
-  margin-right: 0;
-}
-
-
-div > *:last-child {
-  margin-right: 4px;
-}
-
-
-i {
-  border: none;
-  width: 24px;
-  height: 24px;
-  padding: 0;
-}
-
-
-input {
-  margin: 0;
+.drag-icon {
+  cursor: grab;
 }

@@ -38,6 +38,7 @@ export class UpdateColumnsWidthDirective implements AfterViewInit, OnDestroy {
         this.updateColumnsWidths();
       });
 
+      // Per calcolare la dimensione inziale di una nuova colonna aggiunta
       this.mutationObserver.observe(this.colgroup, { childList: true });
     }
   }

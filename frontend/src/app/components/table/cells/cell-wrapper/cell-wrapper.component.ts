@@ -16,16 +16,14 @@ import {BaseCellComponent} from '../base-cell-component';
   standalone: true,
   imports: [],
   template: `
-    <div #borders>
+    <div #borders class="d-flex align-items-center overflow-auto p-2">
       <ng-container #container></ng-container>
     </div>`,
   styles: [`
     div {
-      display: flex;
-      overflow: auto;
-      align-items: center;
-      margin: var(--cell-table-margin);
       height: var(--cell-table-min-height);
+      margin: var(--cell-table-margin);
+      min-height: var(--cell-table-min-height);
     }
   `]
 })

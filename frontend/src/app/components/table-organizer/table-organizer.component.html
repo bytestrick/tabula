@@ -4,8 +4,11 @@
     {'opacity': showOrganizer ? '1' : '0',
     'transition': 'opacity 200ms cubic-bezier(0, 0, 0.2, 1)',
     'pointer-events': showOrganizer ? 'auto' : 'none'}"
+  class="d-flex justify-content-center align-items-center"
 >
-  <i class="btn btn-outline-primary bi bi-plus" (click)="onAddedAt($event)"></i>
-  <i class="bi bi-grip-horizontal" cdkDragHandle></i>
-  <input class="form-check-input" type="checkbox" (change)="onSelectionToggled($event)">
+  <span class="input-group-text p-0 d-flex justify-content-evenly align-items-center">
+    <i class="add-icon bi bi-plus mx-1" (click)="onAddedAt($event)"></i>
+    <i class="drag-icon bi bi-grip-horizontal ms-0 me-1" cdkDragHandle></i>
+    <input class="form-check-input m-0 me-2 ms-1" type="checkbox" (change)="onSelectionToggled($event)">
+  </span>
 </div>

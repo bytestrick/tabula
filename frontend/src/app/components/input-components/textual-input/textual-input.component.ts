@@ -6,7 +6,6 @@ import {BaseInputComponent} from '../base-input-component';
   standalone: true,
   imports: [],
   templateUrl: './textual-input.component.html',
-  styleUrl: './textual-input.component.css'
 })
 export class TextualInputComponent extends BaseInputComponent {
 
