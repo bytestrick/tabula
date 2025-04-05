@@ -12,6 +12,7 @@ export class HomeService {
 
   constructor(private http: HttpClient) {}
 
+
   public loadTableCard(page: number, size: number): Observable<TableCard[]> {
     const headers = new HttpHeaders({
       'Authorization': 'Bearer ' + ''
@@ -27,25 +28,18 @@ export class HomeService {
     );
   }
 
-  public createTableCard(title: string, description: string): Observable<TableCard> {
+  public createTableCard(tableCard: TableCard): Observable<TableCard> {
     return this.http.post<TableCard>(
       '/table-card',
-      {
-        title: title,
-        description: description
-      },
-      {responseType: 'json'}
+      tableCard,
+      { responseType: 'json' }
     );
   }
 
-  public editTableCard(tableCardComponent: TableCardComponent) : Observable<string> {
+  public editTableCard(tableCard: TableCard) : Observable<string> {
     return this.http.put<string>(
       '/table-card',
-      {
-        id: tableCardComponent.getId(),
-        title: tableCardComponent.getTitle(),
-        description: tableCardComponent.getDescription(),
-      },
+      tableCard,
       { responseType: 'text' as 'json' }
     );
   }

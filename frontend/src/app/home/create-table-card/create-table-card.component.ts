@@ -1,5 +1,4 @@
-import {Component} from '@angular/core';
-import {HomeMediatorService} from '../home-mediator.service';
+import {Component, EventEmitter, Output} from '@angular/core';
 
 @Component({
   selector: 'app-create-table-card',
@@ -10,10 +9,9 @@ import {HomeMediatorService} from '../home-mediator.service';
 })
 export class CreateTableCardComponent {
 
-  constructor(private homeMediatorService: HomeMediatorService) { }
+  @Output() createTableCard: EventEmitter<void> = new EventEmitter;
 
-
-  protected create(): void {
-    this.homeMediatorService.showModalCreateTableCard();
+  create(): void {
+    this.createTableCard.emit();
   }
 }

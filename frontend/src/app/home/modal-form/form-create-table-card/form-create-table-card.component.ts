@@ -1,6 +1,8 @@
-import {AfterViewInit, Component, ElementRef, signal, Signal, ViewChild, viewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, EventEmitter, Output, ViewChild} from '@angular/core';
 import {ModalForm} from '../modal-form';
 import {FormsModule} from '@angular/forms';
+import {HomeService} from "../../home.service";
+import {TableCard} from "../../table-card/table-card.interface";
 
 @Component({
   selector: 'app-form-create-table-card',
@@ -17,14 +19,29 @@ export class FormCreateTableCardComponent extends ModalForm implements AfterView
   @ViewChild('modal') private modalRef!: ElementRef;
   titleField: string = '';
   descriptionField: string = '';
+  @Output('addTableCard') addTableCard: EventEmitter<TableCard> = new EventEmitter;
+
+
+  constructor(private homeService: HomeService) {
+    super();
+  }
 
 
   ngAfterViewInit(): void {
-    super.init(this.formRef, this.modalRef);
+    this.init(this.formRef, this.modalRef);
   }
 
   protected doOnSubmit(): void {
-    // this.createTableCard(this.titleField, this.descriptionField);
+    let tableCard: TableCard = {
+      title: this.titleField,
+      description: this.descriptionField
+    }
+    this.homeService.createTableCard(tableCard).subscribe({
+      next: (data: TableCard): void => {
+        this.addTableCard.emit(data);
+      },
+      error: (err: any): any => console.debug(err)
+    });
   }
 
   protected doOnModalHide(): void {

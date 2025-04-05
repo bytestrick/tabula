@@ -1,7 +1,3 @@
-.btn-hover:hover {
-  background-color: var(--bs-border-color-translucent);
-}
-
 #create-card-button {
   height: 128px;
   width: 128px;

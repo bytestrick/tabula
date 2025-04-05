@@ -1,5 +1,5 @@
 export interface TableCard {
-  id: string;
+  id?: string;
   title: string;
   description: string;
 }
