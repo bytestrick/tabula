@@ -1,5 +1,5 @@
 import {
-  Component, ComponentRef, createComponent, ElementRef, EnvironmentInjector, HostListener, OnDestroy, OnInit,
+  Component, ComponentRef, createComponent, ElementRef, EnvironmentInjector, HostListener, inject, OnDestroy, OnInit,
 } from '@angular/core';
 import {Table} from '../../model/table/table';
 import {IDataType} from '../../model/data-types/i-data-type';
@@ -25,6 +25,7 @@ import {UpdateColumnsWidthDirective} from '../../directive/update-columns-width.
 import {PopUpManagerService} from '../../services/pop-up-manager.service';
 import {ContextualMenuComponent} from '../contextual-menu/contextual-menu.component';
 import {PopUp} from '../pop-up-component/pop-up.component';
+import {ToastService} from '../../toast/toast.service';
 @Component({
   selector: 'app-table',
   standalone: true,
@@ -47,6 +48,7 @@ import {PopUp} from '../pop-up-component/pop-up.component';
 export class TableComponent implements OnInit, OnDestroy {
 
   private clickedCellCoords: Pair<number, number> | null = null;
+  private toastService: ToastService = inject(ToastService);
 
   protected isAnElementDragged: boolean = false;
 
@@ -91,15 +93,32 @@ export class TableComponent implements OnInit, OnDestroy {
       { environmentInjector: this.envInj }
     );
     tableContextualMenu.setInput('doOnDelete', (cellCord: Pair<number | null, number | null>, actionTarget: string): void => {
+      if (cellCord.first == null && cellCord.second == null) {
+        this.toastService.actionNotAllowed('You can\'t perform this operation here');
+        return;
+      }
+
       switch (actionTarget) {
         case tableContextualMenu.instance.TARGET_ROW: {
-          if (cellCord.first !== null && this.table.getRowsNumber() >= 2) {
+          if (cellCord.first == null) {
+            this.toastService.actionNotAllowed('you can\'t delete this row');
+          }
+          else if (this.table.getRowsNumber() <= 1) {
+            this.toastService.actionNotAllowed('There must be at least one row');
+          }
+          else {
             this.table.deleteRow(cellCord.first);
           }
           break;
         }
         case tableContextualMenu.instance.TARGET_COLUMN: {
-          if (cellCord.second !== null && this.table.getHeadersCellsAmount() >= 2) {
+          if (cellCord.second == null) {
+            this.toastService.actionNotAllowed('you can\'t delete this column');
+          }
+          else if (this.table.getHeadersCellsAmount() <= 1) {
+            this.toastService.actionNotAllowed('There must be at least one column');
+          }
+          else {
             this.table.deleteColumn(cellCord.second);
           }
           break;
@@ -107,15 +126,26 @@ export class TableComponent implements OnInit, OnDestroy {
       }
     });
     tableContextualMenu.setInput('doOnDuplicate', (cellCord: Pair<number | null, number | null>, actionTarget: string): void => {
+      if (cellCord.first == null && cellCord.second == null) {
+        this.toastService.actionNotAllowed('You can\'t perform this operation here');
+        return;
+      }
+
       switch (actionTarget) {
         case tableContextualMenu.instance.TARGET_ROW: {
-          if (cellCord.first !== null) {
+          if (cellCord.first == null) {
+            this.toastService.actionNotAllowed('you can\'t duplicate this row');
+          }
+          else {
             this.table.duplicateRow(cellCord.first);
           }
           break;
         }
         case tableContextualMenu.instance.TARGET_COLUMN: {
-          if (cellCord.second !== null) {
+          if (cellCord.second == null) {
+            this.toastService.actionNotAllowed('you can\'t duplicate this column');
+          }
+          else {
             this.table.duplicateColumn(cellCord.second);
           }
           break;

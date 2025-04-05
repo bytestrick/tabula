@@ -33,4 +33,18 @@ export class ToastService {
       background: 'danger',
     });
   }
+
+
+  /**
+   * Notification message for the user. Used when the user cannot perform certain actions.
+   * @param message Message shown to the user.
+   */
+  actionNotAllowed(message: string): void {
+    this.show({
+      title: 'Not Allowed',
+      body: message,
+      icon: 'ban',
+      background: 'danger',
+    });
+  }
 }
