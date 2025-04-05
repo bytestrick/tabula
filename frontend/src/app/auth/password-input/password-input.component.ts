@@ -1,8 +1,8 @@
 import {Component, ElementRef, model, OnInit, viewChild} from '@angular/core';
+import {FormsModule} from '@angular/forms';
+import {passwordRegExp} from '../../constants';
+import {enableTooltips} from '../../tooltips';
 import {PasswordVisibilityDirective} from '../password-visibility.directive';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {passwordRegExp} from '../../app.config';
-import {enableTooltips} from '../../../main';
 
 /**
  * A reusable component to be included in `<form>` tags that represents
@@ -11,7 +11,7 @@ import {enableTooltips} from '../../../main';
 @Component({
   selector: 'app-password-input',
   standalone: true,
-  imports: [PasswordVisibilityDirective, ReactiveFormsModule, FormsModule],
+  imports: [FormsModule, PasswordVisibilityDirective],
   templateUrl: './password-input.component.html',
 })
 export class PasswordInputComponent implements OnInit {
@@ -19,7 +19,7 @@ export class PasswordInputComponent implements OnInit {
   private passFeedback = viewChild.required<ElementRef<HTMLElement>>('passFeedback');
   private passRepFeedback = viewChild.required<ElementRef<HTMLElement>>('passRepFeedback');
   private passRepInput = viewChild.required<ElementRef<HTMLInputElement>>('passRepInput');
-  password = model.required<string>();
+  password = model('');
 
   ngOnInit() {
     enableTooltips();
