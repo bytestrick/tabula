@@ -21,7 +21,7 @@ export class SelectDirective implements OnChanges, AfterViewInit {
   }
 
 
-  ngOnChanges(ignoredChanges: SimpleChanges): void {
+  ngOnChanges(_changes: SimpleChanges): void {
     this.updateSelection();
   }
 
@@ -30,7 +30,7 @@ export class SelectDirective implements OnChanges, AfterViewInit {
     const element: HTMLElement = this.targetElement || this.elementRef.nativeElement;
 
     if (this.isSelected) {
-      this.renderer.setStyle(element, 'background', 'rgb(230, 238, 252)');
+      this.renderer.setStyle(element, 'background', 'var(--selection-bg)');
       this.renderer.setStyle(element, 'border', this.borderStyle);
 
       if (this.selectedNeighbors.right)
