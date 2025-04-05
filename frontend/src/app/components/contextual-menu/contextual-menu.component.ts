@@ -36,6 +36,9 @@ export class ContextualMenuComponent implements IPopUpContent, AfterViewInit {
   constructor(private renderer: Renderer2) {}
 
 
+  onHidden(_action: string): void {}
+
+
   ngAfterViewInit(): void {
     this.renderer.setAttribute(this.defaultActionTarget.nativeElement,'checked', '');
   }

@@ -66,4 +66,17 @@ export class NumericInputComponent extends BaseInputComponent {
     this.value = this.input.nativeElement.value;
     this.input.nativeElement.focus();
   }
+
+
+  protected override onHiddenWithLeftClick(): void {
+    if (!isNaN(Number(this.value)))
+      this.confirmInput(this.value);
+    else
+      this.confirmInput(this.startingValue);
+  }
+
+
+  protected override onHiddenWithRightClick(): void {
+    this.abortInput();
+  }
 }

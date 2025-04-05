@@ -4,4 +4,5 @@ export interface IPopUpContent {
   popUpRef?: PopUp;
 
   beforeContentShowUp(): void;
+  onHidden(action: string): void;
 }
