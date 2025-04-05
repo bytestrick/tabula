@@ -137,8 +137,7 @@ export class Table {
   }
 
 
-
-  getCol(colIndex: number, limit: number = this.getRowsNumber()): Cell[] {
+  getColumn(colIndex: number, limit: number = this.getRowsNumber()): Cell[] {
     if (limit <= 0 || colIndex < 0 || colIndex >= this.getHeadersCellsAmount())
       return [];
 

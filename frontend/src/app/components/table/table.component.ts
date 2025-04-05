@@ -229,7 +229,7 @@ export class TableComponent implements OnInit, OnDestroy {
         });
 
         this.table.doForEachColumnSelected((e: number): void => {
-          for (let c of this.table.getCol(e))
+          for (let c of this.table.getColumn(e))
             c.value = value;
         });
       }
