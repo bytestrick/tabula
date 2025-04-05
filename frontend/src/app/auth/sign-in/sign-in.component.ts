@@ -45,6 +45,7 @@ export class SignInComponent {
 
   private isFormValid(event: Event): boolean {
     const form = event.target as HTMLFormElement;
+    this.emailFeedback().nativeElement.textContent = 'Email required';
     form.classList.add('was-validated');
     event.preventDefault();
     event.stopPropagation();
@@ -128,7 +129,9 @@ export class SignInComponent {
         }
       })
     } else {
+      this.emailFeedback().nativeElement.textContent = 'To reset your password, please enter your email';
       emailInput.parentElement!.classList.add('was-validated'); // only validate the email input
+      document.querySelector('form')!.classList.remove('was-validated');
     }
   }
 }

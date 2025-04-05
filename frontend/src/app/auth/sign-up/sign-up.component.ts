@@ -26,7 +26,7 @@ interface SignUpRequest {
 }
 
 @Component({
-  selector: 'app-sign-un',
+  selector: 'app-sign-up',
   standalone: true,
   imports: [FormsModule, RouterLink, NgForOf, PasswordInputComponent],
   templateUrl: './sign-up.component.html',
@@ -36,7 +36,6 @@ export class SignUpComponent {
   private auth = inject(AuthService);
   private router = inject(Router);
   private toast = inject(ToastService);
-  private passwordInput = viewChild.required(PasswordInputComponent);
   private emailInput = viewChild.required<ElementRef<HTMLInputElement>>('emailInput');
   private emailFeedback = viewChild.required<ElementRef<HTMLElement>>('emailFeedback');
   private countryInput = viewChild.required<ElementRef<HTMLSelectElement>>('countryInput');
@@ -71,7 +70,7 @@ export class SignUpComponent {
   protected onCountrySelect(event: Event) {
     this.form.country = this.countries[this.countryIndex];
     const select = event.target as HTMLSelectElement;
-    if (select.value !== '0') {
+    if (parseInt(select.value) > -1) {
       select.setCustomValidity('');
     }
   }
@@ -94,10 +93,9 @@ export class SignUpComponent {
     event.stopPropagation();
 
     const country = this.countryInput().nativeElement;
-    if (country.value === '0') {
-      country.setCustomValidity('Country is required')
+    if (country.value === '-1') {
+      country.setCustomValidity('Country required');
     }
-    this.form.password = this.passwordInput().password;
 
     return form.checkValidity();
   }

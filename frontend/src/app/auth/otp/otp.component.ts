@@ -24,13 +24,13 @@ export class OtpComponent {
   private http = inject(HttpClient);
   private router = inject(Router);
   private toast = inject(ToastService);
+  private otpFeedback = viewChild<ElementRef<HTMLElement>>('otpFeedback');
+  private otpInput = viewChild<ElementRef<HTMLInputElement>>('otpInput');
   protected reason?: Reason;
   protected email?: string | null;
   protected otp = '';
+  protected newPassword = '';
   protected showOtpInput = true;
-  private passwordInput = viewChild(PasswordInputComponent);
-  private otpFeedback = viewChild<ElementRef<HTMLElement>>('otpFeedback');
-  private otpInput = viewChild<ElementRef<HTMLInputElement>>('otpInput');
 
   ngOnInit() {
     const stringData = localStorage.getItem('otpData');
@@ -108,7 +108,7 @@ export class OtpComponent {
   private resetPassword() {
     this.http.post('/auth/reset-password', {
       email: this.email,
-      newPassword: this.passwordInput()!.password,
+      newPassword: this.newPassword,
       otp: this.otp
     }).subscribe({
       next: () => {
