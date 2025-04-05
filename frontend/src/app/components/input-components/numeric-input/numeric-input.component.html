@@ -1,6 +1,7 @@
-<div class="container">
-  <input #input type="text" (keydown)="onKeyPressed($event)" (input)="onInsertion($event)">
-  <div class="controls">
+<div class="container d-flex justify-content-between align-items-center p-0">
+  <input #input class="form-control" type="text" placeholder="123" (keydown)="onKeyPressed($event)" (input)="onInsertion($event)">
+
+  <div class="controls d-flex flex-column align-items-center justify-content-center me-2">
     <button class="btn btn-primary increase-button" (click)="onIncrease()" (mousedown)="$event.preventDefault()">
       <i class="bi bi-caret-up-fill"></i>
     </button>

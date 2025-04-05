@@ -1,5 +1,5 @@
-<div>
-  <input #input type="text" (keydown)="onKeyPressed($event)" (input)="onInsertion($event)">
+<div class="d-flex align-items-center justify-content-evenly">
+  <input #input class="form-control me-2" type="text" placeholder="Text" (keydown)="onKeyPressed($event)" (input)="onInsertion($event)">
   <i
     class="bi bi-info-circle opacity-50"
     data-bs-toggle="tooltip"

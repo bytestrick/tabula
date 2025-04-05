@@ -1,5 +1,5 @@
 <div class="table-responsive space-left-right">
-  <table class="table app-table-bordered" (mouseleave)="onMouseLeaveTable()" style="width: 100%">
+  <table class="table app-table-bordered" (mouseleave)="onMouseLeaveTable()">
     <colgroup #colgroup appUpdateColumnsWidth [colgroup]="colgroup">
       <col class="first-column">
       <col
@@ -7,7 +7,7 @@
         [attr.data-index]="columnIndex"
         class="column"
       >
-      <col style="var(--cell-table-min-width)">
+      <col class="last-column">
     </colgroup>
     <thead>
       <!-- riga per i table-organizer -->
@@ -67,7 +67,8 @@
             appHighlightBorders [appHighlightBordersOf]="cellWrapper.bordersToHighLight.nativeElement" [appHighlightCanDisable]="canDisableCellHighlight()"
             [headerCell]="headerCell"
             (dblclick)="onDoubleClickedCell($event, HEADER_ROW_INDEX, colIndex)"
-          ></app-cell-wrapper>
+          >
+          </app-cell-wrapper>
           <div class="resize-handle">
             <div class="resize-handle-active-area"></div>
           </div>
@@ -132,7 +133,8 @@
             }"
             [cell]="cell"
             (dblclick)="onDoubleClickedCell($event, rowIndex, colIndex)"
-          ></app-cell-wrapper>
+          >
+          </app-cell-wrapper>
         </td>
 
         <!--
