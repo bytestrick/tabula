@@ -4,7 +4,7 @@
     <button class="btn btn-primary my-button d-flex justify-content-center align-items-center"><i class="bi bi-search p-0"></i></button>
   </div>
 
-  <div class="list-group">
+  <div class="list-group overflow-auto" style="max-height: max(100vh - 420px, 120px);">
     <button class="list-group-item list-group-item-action p-1"
       *ngFor="let dataType of dataTypesRegistry.getDataTypes()"
       (click)="onCreateDataType(dataType)"
