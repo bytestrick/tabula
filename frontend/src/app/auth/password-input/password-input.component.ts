@@ -1,4 +1,4 @@
-import {Component, ElementRef, viewChild} from '@angular/core';
+import {Component, ElementRef, model, viewChild} from '@angular/core';
 import {PasswordVisibilityDirective} from '../password-visibility.directive';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {passwordRegExp} from '../../app.config';
@@ -9,7 +9,7 @@ import {enableTooltips} from '../../../main';
  * two password input fields with appropriate validation.
  */
 @Component({
-  selector: 'app-double-pass-input',
+  selector: 'app-password-input',
   standalone: true,
   imports: [PasswordVisibilityDirective, ReactiveFormsModule, FormsModule],
   templateUrl: './password-input.component.html',
@@ -19,7 +19,7 @@ export class PasswordInputComponent {
   private passFeedback = viewChild.required<ElementRef<HTMLElement>>('passFeedback');
   private passRepFeedback = viewChild.required<ElementRef<HTMLElement>>('passRepFeedback');
   private passRepInput = viewChild.required<ElementRef<HTMLInputElement>>('passRepInput');
-  password = '';
+  password = model.required<string>();
 
   ngOnInit() {
     enableTooltips();
@@ -35,7 +35,7 @@ export class PasswordInputComponent {
       passFeedback.textContent = 'Password is required';
     } else if (passInput.validity.tooShort) {
       passFeedback.textContent = `Must be at least ${passInput.minLength} characters long`;
-    } else if (!passwordRegExp.test(this.password)) {
+    } else if (!passwordRegExp.test(this.password())) {
       passFeedback.textContent = 'Password must respect the criteria below';
       passInput.setCustomValidity('invalid');
     } else {
@@ -43,7 +43,7 @@ export class PasswordInputComponent {
     }
 
     if (passInput.validity.valid) {
-      if (this.password === passRepInput.value) {
+      if (this.password() === passRepInput.value) {
         passInput.setCustomValidity('');
         passRepInput.setCustomValidity('');
       } else {

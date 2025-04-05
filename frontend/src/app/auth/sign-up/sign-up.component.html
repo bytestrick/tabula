@@ -24,9 +24,9 @@
   <div class="row mb-3">
     <label for="country-input" class="form-label p-0">Country</label>
     <div class="input-group p-0 has-validation position-relative">
-      <select #countryInput (change)="onCountrySelect($event)" class="form-select" [(ngModel)]="countryIndex"
-              name="country" required>
-        <option value="0" disabled>Select your country</option>
+      <select #countryInput id="country-input" (change)="onCountrySelect($event)" class="form-select"
+              [(ngModel)]="countryIndex" name="country" required>
+        <option value="-1" disabled>Select your country</option>
         <option [value]="i" *ngFor="let country of countries; index as i">
           {{ country.name.length > 26 ? country.name.substring(0, 26) + '…' : country.name }}&nbsp;
           {{ country.flag }}
@@ -45,7 +45,7 @@
     </div>
   </div>
 
-  <app-double-pass-input/>
+  <app-password-input [(password)]="form.password"/>
 
   <div class="row mb-5">
     <div class="form-check">
