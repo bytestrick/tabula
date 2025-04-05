@@ -12,6 +12,9 @@ export interface ToastOptions {
    *
    * Goes in the header, left of the title. */
   icon?: string;
+  /** Text color, it's one of {@link https://getbootstrap.com/docs/5.3/utilities/colors/#colors|these Bootstrap classes}
+   * without the `text-` prefix */
+  color?: string;
   /** Background color of the toast. It's one of the Bootstrap background color
    * {@link https://getbootstrap.com/docs/5.3/utilities/background/#background-color|classes}
    * without the `bg-` prefix*/
@@ -72,10 +75,13 @@ export class ToastComponent implements OnInit, OnDestroy {
         iconColor = options.background.endsWith('-subtle') ? options.background.slice(0, -7) : options.background;
       }
     }
+    if (options.color) {
+      el.classList.add(`text-${options.color}`);
+    }
     if (options.title) {
       // Toast with header and body
       el.innerHTML = `
-        <div class="toast-header">
+        <div class="toast-header ${options.color ? `text-${options.color}` : ''}">
           ${options.icon ? `<i class="bi bi-${options.icon} ${iconColor ? `text-${iconColor}-emphasis` : ''} me-2"></i>` : ''}
           <strong class="me-auto">${options.title}</strong>
           <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
