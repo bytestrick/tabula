@@ -17,6 +17,7 @@ export class DataTypesChooserComponent extends BaseInputComponent {
 
   @ViewChild('searchBar', { static: true }) searchBar!: ElementRef;
 
+
   constructor(protected dataTypesRegistry: DataTypeRegistryService) {
     super();
   }
@@ -33,4 +34,10 @@ export class DataTypesChooserComponent extends BaseInputComponent {
   onCreateDataType(dataType: IDataType): void {
     this.confirmInput(dataType);
   }
+
+
+  protected override onHiddenWithLeftClick(): void {}
+
+
+  protected override onHiddenWithRightClick(): void {}
 }

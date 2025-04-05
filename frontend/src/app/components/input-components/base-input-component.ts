@@ -42,4 +42,22 @@ export abstract class BaseInputComponent implements IPopUpContent {
     this.grabFocus();
     this.beforeShowUp();
   }
+
+  
+  protected abstract onHiddenWithLeftClick(): void;
+  protected abstract onHiddenWithRightClick(): void;
+
+
+  onHidden(action: string): void {
+    switch (action) {
+      case this.popUpRef?.CLOSED_WITH_RIGHT_CLICK: {
+        this.onHiddenWithRightClick();
+        break;
+      }
+      case this.popUpRef?.CLOSED_WITH_LEFT_CLICK: {
+        this.onHiddenWithLeftClick()
+        break;
+      }
+    }
+  }
 }

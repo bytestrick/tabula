@@ -38,4 +38,14 @@ export class TextualInputComponent extends BaseInputComponent {
   override grabFocus(): void {
     this.input.nativeElement.focus();
   }
+
+
+  protected override onHiddenWithLeftClick(): void {
+    this.confirmInput(this.text);
+  }
+
+
+  protected override onHiddenWithRightClick(): void {
+    this.abortInput();
+  }
 }

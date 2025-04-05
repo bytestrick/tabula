@@ -35,6 +35,9 @@ export class PopUp implements OnInit, OnDestroy, AfterViewInit {
   private popUpPosition: Pair<number, number> = new Pair(0, 0);
   private readonly OFFSET_TO_SCREEN_SIDES: number = 6;
 
+  readonly CLOSED_WITH_LEFT_CLICK: string = 'leftClick';
+  readonly CLOSED_WITH_RIGHT_CLICK: string = 'rightClick';
+
 
   constructor(private renderer: Renderer2, private changeDetector: ChangeDetectorRef) {}
 
@@ -149,7 +152,8 @@ export class PopUp implements OnInit, OnDestroy, AfterViewInit {
   }
 
 
-  onHidePopUp(): void {
+  onHidePopUp(action: string): void {
+    this.content?.instance.onHidden(action);
     this.hide();
   }
 }
