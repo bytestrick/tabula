@@ -1,4 +1,4 @@
-import {Directive, ElementRef, HostListener} from '@angular/core';
+import {Directive, ElementRef, HostListener, inject} from '@angular/core';
 import {Tooltip} from 'bootstrap';
 
 /**
@@ -10,11 +10,7 @@ import {Tooltip} from 'bootstrap';
   standalone: true
 })
 export class PasswordVisibilityDirective {
-  private button: HTMLButtonElement;
-
-  constructor(button: ElementRef) {
-    this.button = button.nativeElement;
-  }
+  private button: HTMLButtonElement = inject(ElementRef).nativeElement;
 
   @HostListener('click') onClick() {
     const input = this.button.previousElementSibling as HTMLInputElement;

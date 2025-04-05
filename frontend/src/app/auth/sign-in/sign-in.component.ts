@@ -3,10 +3,10 @@ import {FormsModule} from '@angular/forms';
 import {AuthService} from '../auth.service';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {PasswordVisibilityDirective} from '../password-visibility.directive';
-import {enableTooltips} from '../../../main';
+import {enableTooltips} from '../../tooltips';
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {ToastService} from '../../toast/toast.service';
-import {passwordRegExp} from '../../app.config';
+import {passwordRegExp} from '../../constants';
 import {Reason} from '../otp/otp.component';
 
 export interface SignInRequest {

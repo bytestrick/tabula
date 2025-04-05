@@ -18,6 +18,5 @@ import {Router, RouterLink} from '@angular/router';
   `
 })
 export class PageNotFoundComponent {
-  private router = inject(Router);
-  protected currentPage = this.router.url;
+  protected currentPage = inject(Router).url;
 }

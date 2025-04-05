@@ -3,7 +3,7 @@ import {FormsModule} from '@angular/forms';
 import {Router, RouterLink} from '@angular/router';
 import {NgForOf} from '@angular/common';
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
-import {enableTooltips} from '../../../main';
+import {enableTooltips} from '../../tooltips';
 import {AuthService} from '../auth.service';
 import {ToastService} from '../../toast/toast.service';
 import {Reason} from '../otp/otp.component';

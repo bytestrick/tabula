@@ -1,5 +1,5 @@
 import {HttpInterceptorFn} from '@angular/common/http';
-import {backendBaseUrl} from './app.config';
+import {backendBaseUrl} from './constants';
 
 /**
  * Interceptor that prepends the backend API URL to the request URL
