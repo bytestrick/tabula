@@ -26,7 +26,7 @@ export class NumericInputComponent extends BaseInputComponent {
       if (!isNaN(Number(this.value)))
         this.confirmInput(this.value);
       else
-        this.confirmInput('');
+        this.confirmInput(this.startingValue);
     }
     else if (event.key === 'Delete') {
       this.abortInput();
