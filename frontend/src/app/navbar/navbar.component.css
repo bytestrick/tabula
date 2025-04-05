@@ -1,7 +1,3 @@
-.btn-hover:hover {
-  background-color: var(--bs-border-color-translucent);
-}
-
 #clear-search-field-button {
   position: absolute;
   height: 28px;

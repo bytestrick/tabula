@@ -23,9 +23,14 @@ public class HomeController {
     }
 
 
+    @GetMapping("table-card/next")
+    public ResponseEntity<List<TableCard>> getTableCardsPaginated(@RequestParam UUID id, @RequestParam int quantity) {
+        return ResponseEntity.ok().body(homeDao.findByCreationDateAfter(id, quantity));
+    }
+
     @GetMapping("table-card")
-    public ResponseEntity<List<TableCard>> getTableCardsPaginated(@RequestParam int page, @RequestParam int size) {
-        return ResponseEntity.ok(homeDao.findTableCardPaginated(page, size));
+    public ResponseEntity<List<TableCard>> getTableCardsPaginated(@RequestParam int quantity) {
+        return ResponseEntity.ok().body(homeDao.findFirst(quantity));
     }
 
     @PostMapping("table-card")
