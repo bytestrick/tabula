@@ -1,4 +1,4 @@
-import {Component, ElementRef, inject, viewChild} from '@angular/core';
+import {Component, ElementRef, inject, OnInit, viewChild} from '@angular/core';
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {Router} from '@angular/router';
 import {ToastService} from '../../toast/toast.service';
@@ -20,7 +20,7 @@ export enum Reason {
   imports: [ReactiveFormsModule, PasswordInputComponent, FormsModule],
   templateUrl: './otp.component.html',
 })
-export class OtpComponent {
+export class OtpComponent implements OnInit {
   private http = inject(HttpClient);
   private router = inject(Router);
   private toast = inject(ToastService);

@@ -1,4 +1,4 @@
-import {Component, ElementRef, inject, viewChild} from '@angular/core';
+import {Component, ElementRef, inject, OnInit, viewChild} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {AuthService} from '../auth.service';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
@@ -21,7 +21,7 @@ export interface SignInRequest {
   imports: [FormsModule, RouterLink, PasswordVisibilityDirective],
   templateUrl: './sign-in.component.html',
 })
-export class SignInComponent {
+export class SignInComponent implements OnInit {
   private auth = inject(AuthService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
