@@ -57,7 +57,7 @@ table {
 }
 
 .first-column {
-  --width: 80px;
+  --width: 94px;
 
   min-width: var(--width);
   width: var(--width);

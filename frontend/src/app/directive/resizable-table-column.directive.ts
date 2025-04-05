@@ -14,6 +14,7 @@ export class ResizableTableColumnDirective implements OnInit, AfterViewInit {
   private startWidth: number = 0;
   private colElement: HTMLElement | null = null;
   private body: HTMLElement | null = null;
+  private lastCol: HTMLElement | null = null;
 
 
 
@@ -23,6 +24,7 @@ export class ResizableTableColumnDirective implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.body = document.body;
+    this.lastCol = this.colgroup.children[this.colgroup.children.length] as HTMLElement;
   }
 
 
@@ -65,6 +67,9 @@ export class ResizableTableColumnDirective implements OnInit, AfterViewInit {
       newWidth = minWidth;
 
     this.renderer.setStyle(this.colElement, 'width', `${newWidth}px`);
+
+    if (this.lastCol !== null && this.lastCol.offsetWidth < parseInt(window.getComputedStyle(this.lastCol).minWidth, 0))
+      this.renderer.setStyle(this.lastCol, 'width', "var(--cell-table-min-width)");
   }
 
 

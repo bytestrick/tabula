@@ -60,8 +60,8 @@ export class UpdateColumnsWidthDirective implements AfterViewInit, OnDestroy {
     const cols: HTMLCollection = this.colgroup.children;
     const totalWidth: number = table.offsetWidth;
 
-    if (cols.length >= 1) {
-      for (let i: number = 1; i < cols.length; ++i) {
+    if (cols.length >= 3) {
+      for (let i: number = 1; i < cols.length -1; ++i) {
         const colElement = cols[i] as HTMLElement;
 
         if (colElement.hasAttribute('data-resized')) {
@@ -77,6 +77,11 @@ export class UpdateColumnsWidthDirective implements AfterViewInit, OnDestroy {
 
         this.renderer.setStyle(colElement, 'width', `${colWidth}px`);
       }
+
+      const lastCol: HTMLElement = cols[cols.length - 1] as HTMLElement;
+
+      if (lastCol.offsetWidth < parseInt(window.getComputedStyle(lastCol).minWidth, 0))
+        this.renderer.setStyle(cols[cols.length - 1], 'width', "var(--cell-table-min-width)");
     }
   }
 }
