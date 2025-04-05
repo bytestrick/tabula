@@ -7,13 +7,13 @@ import {
 } from '@angular/core';
 import { CreateTableCardComponent } from './create-table-card/create-table-card.component';
 import {FormsModule} from '@angular/forms';
-import {ModalCreateTableCardComponent} from './modal/modal-create-table-card/modal-create-table-card.component';
-import {ModalEditTableCardComponent} from './modal/modal-edit-table-card/modal-edit-table-card.component';
 import {HomeMediatorService} from './home-mediator.service';
 import {HomeService} from './home.service';
 import {TableCardComponent} from './table-card/table-card.component';
 import {TableCard} from './table-card/table-card.interface';
 import {NgIf} from '@angular/common';
+import {FormCreateTableCardComponent} from './modal-form/form-create-table-card/form-create-table-card.component';
+import {FormEditTableCardComponent} from './modal-form/form-edit-table-card/form-edit-table-card.component';
 
 @Component({
   selector: 'app-table-cards-container',
@@ -21,9 +21,9 @@ import {NgIf} from '@angular/common';
   imports: [
     CreateTableCardComponent,
     FormsModule,
-    ModalCreateTableCardComponent,
-    ModalEditTableCardComponent,
-    NgIf
+    NgIf,
+    FormCreateTableCardComponent,
+    FormEditTableCardComponent
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'

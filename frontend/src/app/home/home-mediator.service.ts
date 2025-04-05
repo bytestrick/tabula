@@ -1,7 +1,5 @@
 import {Injectable, ViewContainerRef} from '@angular/core';
 import {TableCardComponent} from './table-card/table-card.component';
-import {ModalEditTableCardComponent} from './modal/modal-edit-table-card/modal-edit-table-card.component';
-import {ModalCreateTableCardComponent} from './modal/modal-create-table-card/modal-create-table-card.component';
 import {HomeComponent} from './home.component';
 import {TableCard} from './table-card/table-card.interface';
 
@@ -9,25 +7,23 @@ import {TableCard} from './table-card/table-card.interface';
   providedIn: 'root'
 })
 export class HomeMediatorService {
-  private modalEditTableCard!: ModalEditTableCardComponent;
   private tableContainerRef!: ViewContainerRef;
-  private modalCreateTableCard!: ModalCreateTableCardComponent;
   private home !: HomeComponent;
 
 
   public constructor() {}
 
 
-  public setModalEditTableCard(modalEditTableCard: ModalEditTableCardComponent): void {
-    this.modalEditTableCard = modalEditTableCard;
+  public setModalEditTableCard(modalEditTableCard: any): void {
+    // this.modalEditTableCard = modalEditTableCard;
   }
 
   public setTableCardToEdit(tableCard: TableCardComponent): void {
-    this.modalEditTableCard.setTableCardToEdit(tableCard);
+    // this.modalEditTableCard.setTableCardToEdit(tableCard);
   }
 
   public showModalEditTableCard(): void {
-    this.modalEditTableCard.show();
+    // this.modalEditTableCard.show();
   }
 
   // ---
@@ -42,12 +38,12 @@ export class HomeMediatorService {
 
   // ---
 
-  public setModalCreateTableCard(modalCreateTableCard: ModalCreateTableCardComponent): void {
-    this.modalCreateTableCard = modalCreateTableCard;
+  public setModalCreateTableCard(modalCreateTableCard:  any): void {
+    // this.modalCreateTableCard = modalCreateTableCard;
   }
 
   public showModalCreateTableCard(): void {
-    this.modalCreateTableCard.show();
+    // this.modalCreateTableCard.show();
   }
 
   // ---
