@@ -1,4 +1,4 @@
-<nav class="shadow-sm navbar navbar-expand border m-2 rounded">
+<nav class="shadow-sm navbar navbar-expand border m-2 roundedc">
   <div class="container-fluid">
     <button class="btn btn-hover fw-bold fs-4">Tabula</button>
 
@@ -7,7 +7,7 @@
           (focusout)="onFocusOut()"
           (ngSubmit)="onSearchSubmit(searchForm)">
       <div class="input-group">
-        <input #searchField id="search-field" [(ngModel)]="searchContent" name="searchField" class="form-control rounded-start-5 ps-4 pe-5" type="search" placeholder="Search">
+        <input #searchField id="search-field" [(ngModel)]="searchContent" name="searchField" class="form-control rounded-start-5 ps-4 pe-5" type="search" placeholder="Search" (keyup)="onKeyUp()">
 
         <!-- Bottone di ricerca -->
         <button class="btn btn-light border rounded-end-5" type="submit">

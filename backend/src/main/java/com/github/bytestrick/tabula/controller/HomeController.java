@@ -2,6 +2,7 @@ package com.github.bytestrick.tabula.controller;
 
 import com.github.bytestrick.tabula.model.TableCard;
 import com.github.bytestrick.tabula.repository.HomeDao;
+import com.github.bytestrick.tabula.service.FuzzySearchTableCard;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,16 +14,18 @@ import java.util.UUID;
 public class HomeController {
 
     private final HomeDao homeDao;
+    private final FuzzySearchTableCard fuzzySearchTableCard;
 
 
-    public HomeController(HomeDao homeDao) {
+    public HomeController(HomeDao homeDao, FuzzySearchTableCard fuzzySearchTableCard) {
         this.homeDao = homeDao;
+        this.fuzzySearchTableCard = fuzzySearchTableCard;
     }
 
 
     @GetMapping("table-card")
-    public List<TableCard> getTableCardsPaginated(@RequestParam int page, @RequestParam int size) {
-        return homeDao.findTableCardPaginated(page, size);
+    public ResponseEntity<List<TableCard>> getTableCardsPaginated(@RequestParam int page, @RequestParam int size) {
+        return ResponseEntity.ok(homeDao.findTableCardPaginated(page, size));
     }
 
     @PostMapping("table-card")
@@ -40,5 +43,10 @@ public class HomeController {
     public ResponseEntity<String> deleteTableCard(@RequestParam UUID id) {
         homeDao.deleteTableCardById(id);
         return ResponseEntity.ok().body("TableCard deleted successfully");
+    }
+
+    @GetMapping("search")
+    public ResponseEntity<List<TableCard>> fuzzySearch(@RequestParam String pattern) {
+        return ResponseEntity.ok(fuzzySearchTableCard.fuzzySearch(pattern));
     }
 }
