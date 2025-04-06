@@ -6,11 +6,11 @@ import {AuthService} from './auth.service';
  * Interceptor to add the Authorization header to all requests.
  */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const auth = inject(AuthService).authentication;
-  if (auth && auth.token) {
+  const token = inject(AuthService).authentication?.token;
+  if (token) {
     req = req.clone({
       setHeaders: {
-        Authorization: `Bearer ${auth.token}`
+        Authorization: `Bearer ${token}`
       }
     });
   }

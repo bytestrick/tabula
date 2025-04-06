@@ -18,7 +18,7 @@ export class AppComponent implements OnInit {
    * Sync the app color scheme with the OS color scheme
    */
   private static updateColorScheme() {
-    const darkColorSchemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkColorSchemeQuery = matchMedia('(prefers-color-scheme: dark)');
     const onChange = (isDark: boolean) => {
       document.documentElement.setAttribute('data-bs-theme', isDark ? 'dark' : 'light');
     }
