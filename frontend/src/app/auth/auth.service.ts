@@ -10,7 +10,7 @@ interface AuthenticationResponse {
   token: string;
 }
 
-interface Authentication {
+export interface Authentication {
   email: string;
   token: string;
 }
@@ -26,11 +26,15 @@ export class AuthService {
   private toast = inject(ToastService);
   private router = inject(Router);
 
-  authentication: Authentication | null;
+  private auth: Authentication | null;
+
+  get authentication(): Authentication | null {
+    return this.auth;
+  }
 
   constructor() {
     const authenticationRaw = localStorage.getItem('authentication');
-    this.authentication = authenticationRaw ? JSON.parse(authenticationRaw) : null;
+    this.auth = authenticationRaw ? JSON.parse(authenticationRaw) : null;
   }
 
   get isAuthenticated(): boolean {
@@ -44,7 +48,7 @@ export class AuthService {
 
     return this.http.post<AuthenticationResponse>('/auth/sign-in', form).pipe(
       tap(response => {
-        this.authentication = {email: form.email, token: response.token}
+        this.auth = {email: form.email, token: response.token}
         localStorage.setItem('authentication', JSON.stringify(this.authentication));
       })
     );
@@ -53,33 +57,14 @@ export class AuthService {
   signOut() {
     if (this.isAuthenticated) {
       this.http.post('/auth/sign-out', {}).subscribe({
-        next: () => {
-          this.clearAuthentication();
-          this.toast.show({body: 'Sign-out successful', background: 'success'});
-        },
-        error: (error: HttpErrorResponse) => {
-          if (error.error?.message.startsWith('No token found')) {
-            // this is improbable
-            this.toast.show({
-              title: 'Invalid sign-out request',
-              body: 'Your authentication state was invalid. We signed you out anyway.',
-              background: 'warning',
-              icon: 'person-x'
-            });
-            this.clearAuthentication();
-          } else {
-            this.toast.serverError(error.error?.message);
-          }
-        }
+        next: () => this.toast.show({body: 'Sign-out successful', background: 'success'}),
+        error: (error: HttpErrorResponse) => this.toast.serverError(error.error?.message)
       });
+      localStorage.removeItem('authentication');
+      this.auth = null;
+      this.router.navigate(['/sign-in']).then();
     } else {
-      throw new Error(`Can't sign-out without being signed-in`);
+      throw new Error(`Can't sign-out without being signed-in first`);
     }
-  }
-
-  private clearAuthentication() {
-    localStorage.removeItem('authentication');
-    this.authentication = null;
-    this.router.navigate(['/sign-in']).then();
   }
 }

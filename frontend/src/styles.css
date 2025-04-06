@@ -23,7 +23,7 @@ app-sign-in form, app-sign-up form, app-otp form {
 }
 
 /* Validation tooltips are position in the top-right instead of the bottom-left */
-.invalid-tooltip, .valid-tooltip {
+.invalid-tooltip {
   right: 0;
   top: -100% !important;
 }

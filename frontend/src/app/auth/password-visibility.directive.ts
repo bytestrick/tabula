@@ -18,15 +18,15 @@ export class PasswordVisibilityDirective {
     if (input.type === 'password') {
       input.type = 'text';
       this.button.classList.add('active');
-      Tooltip.getInstance(this.button)?.setContent({'.tooltip-inner': 'Hide password'});
       icon.classList.add('bi-eye-slash');
       icon.classList.remove('bi-eye');
+      Tooltip.getInstance(this.button)?.setContent({'.tooltip-inner': 'Hide password'});
     } else {
       input.type = 'password';
       this.button.classList.remove('active');
-      Tooltip.getInstance(this.button)?.setContent({'.tooltip-inner': 'Show password'});
       icon.classList.add('bi-eye');
       icon.classList.remove('bi-eye-slash');
+      Tooltip.getInstance(this.button)?.setContent({'.tooltip-inner': 'Show password'});
     }
   }
 }
