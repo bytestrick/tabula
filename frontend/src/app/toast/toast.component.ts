@@ -97,12 +97,15 @@ export class ToastComponent implements OnInit, OnDestroy {
     }
     this.container().nativeElement.appendChild(el);
 
-    options.delay = options.delay || 5000;
-    const toast = Toast.getOrCreateInstance(el, {autohide: options.delay !== 0, delay: options.delay});
-    if (options.delay > 0) {
-      // endless growth is unsustainable
-      setTimeout(() => this.container().nativeElement.removeChild(el), options.delay * 2);
+
+    let delay = 5000;
+    if (options.delay !== undefined) {
+      delay = options.delay;
+      if (options.delay > 0) { // endless growth is unsustainable
+        setTimeout(() => this.container().nativeElement.removeChild(el), delay + 300);
+      }
     }
-    toast.show();
+
+    Toast.getOrCreateInstance(el, {autohide: delay !== 0, delay}).show();
   }
 }

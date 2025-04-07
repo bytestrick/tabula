@@ -15,7 +15,7 @@ import {HttpErrorResponse} from '@angular/common/http';
   providedIn: 'root'
 })
 export class ToastService {
-  subject = new Subject<ToastOptions>();
+  readonly subject = new Subject<ToastOptions>();
 
   show(data: ToastOptions) {
     this.subject.next(data);
