@@ -2,32 +2,29 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {PageNotFoundComponent} from './page-not-found.component';
 import {ActivatedRoute, Router} from '@angular/router';
-
-const mockRouter = {
-  url: ''
-};
-
-const mockActivatedRoute = {};
+import {By} from '@angular/platform-browser';
 
 describe('PageNotFoundComponent', () => {
   let component: PageNotFoundComponent;
   let fixture: ComponentFixture<PageNotFoundComponent>;
-  let router: jasmine.SpyObj<Router>;
-  let activatedRoute: jasmine.SpyObj<ActivatedRoute>;
+  const url = '/the/sun/does/not/have/a/definite/boundary';
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       providers: [
-        {provide: Router, useValue: mockRouter},
-        {provide: ActivatedRoute, useValue: mockActivatedRoute}
+        {provide: Router, useValue: {url}},
+        {provide: ActivatedRoute, useValue: {}},
       ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(PageNotFoundComponent);
     component = fixture.componentInstance;
-    router = TestBed.inject(Router) as jasmine.SpyObj<Router>;
-    activatedRoute = TestBed.inject(ActivatedRoute) as jasmine.SpyObj<ActivatedRoute>;
+    fixture.detectChanges();
   });
 
   it('should create', () => expect(component).toBeTruthy());
+
+  it('should show the current url', () => {
+    expect(fixture.debugElement.query(By.css('h5 span')).nativeElement.textContent).toBe(url);
+  });
 });
