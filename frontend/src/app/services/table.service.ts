@@ -1,10 +1,16 @@
-import {IDataType} from '../data-types/i-data-type';
-import {TextualDataType} from '../data-types/concrete-data-type/textual-data-type';
+import {Injectable} from '@angular/core';
+import {Cell} from '../model/table/cell';
+import {HeaderCell} from '../model/table/header-cell';
+import {IDataType} from '../model/data-types/i-data-type';
+import {TextualDataType} from '../model/data-types/concrete-data-type/textual-data-type';
 import {moveItemInArray} from '@angular/cdk/drag-drop';
-import {HeaderCell} from './header-cell';
-import {Cell} from './cell';
+import {Pair} from '../model/pair';
 
-export class Table {
+
+@Injectable({
+  providedIn: 'root'
+})
+export class TableService {
 
   private table: Cell[][] = [];
   private headerCells: HeaderCell[] = [];
@@ -14,13 +20,16 @@ export class Table {
 
   private readonly HEADER_CELL_DEFAULT_NAME: string = 'New Column';
 
+  readonly HEADER_ROW_INDEX: number = -1;
+  readonly INVALID_CELL_INDEX: number = -2; // deve essere un numero negativo
+
 
   addNewHeader(dataType: IDataType): void {
     this.headerCells.push(new HeaderCell(new TextualDataType(), this.HEADER_CELL_DEFAULT_NAME, dataType));
 
     for (let i: number = 0; i < this.getRowsNumber(); ++i) {
       while (this.table[i].length < this.getHeadersCellsAmount()) {
-        const currentDataType: IDataType = this.headerCells[this.table[i].length].columnDataType;
+        const currentDataType: IDataType = this.getColumnDataType(this.table[i].length);
         this.table[i].push(new Cell(currentDataType.getNewDataType(), null));
       }
     }
@@ -62,12 +71,12 @@ export class Table {
   }
 
 
-  insertNewDataTypeAt(colIndex: number, dataType: IDataType): void {
-    if (colIndex >= 0 && colIndex < this.getHeadersCellsAmount()) {
-      this.headerCells.splice(colIndex, 0, new HeaderCell(new TextualDataType(), this.HEADER_CELL_DEFAULT_NAME, dataType));
+  insertNewDataTypeAt(columnIndex: number, dataType: IDataType): void {
+    if (columnIndex >= 0 && columnIndex < this.getHeadersCellsAmount()) {
+      this.headerCells.splice(columnIndex, 0, new HeaderCell(new TextualDataType(), this.HEADER_CELL_DEFAULT_NAME, dataType));
 
       for (let i: number = 0; i < this.getRowsNumber(); ++i) {
-        this.table[i].splice(colIndex, 0, new Cell(this.headerCells[colIndex].columnDataType.getNewDataType(), null));
+        this.table[i].splice(columnIndex, 0, new Cell(this.getColumnDataType(columnIndex).getNewDataType(), null));
       }
     }
   }
@@ -137,16 +146,16 @@ export class Table {
   }
 
 
-  getColumn(colIndex: number, limit: number = this.getRowsNumber()): Cell[] {
-    if (limit <= 0 || colIndex < 0 || colIndex >= this.getHeadersCellsAmount())
+  getColumn(columnIndex: number, limit: number = this.getRowsNumber()): Cell[] {
+    if (limit <= 0 || columnIndex < 0 || columnIndex >= this.getHeadersCellsAmount())
       return [];
 
-    const col: Cell[] = [];
+    const column: Cell[] = [];
 
     for (let i: number = 0; i < Math.min(this.getRowsNumber(), limit); ++i)
-      col.push(this.table[i][colIndex]);
+      column.push(this.table[i][columnIndex]);
 
-    return col;
+    return column;
   }
 
 
@@ -158,8 +167,8 @@ export class Table {
   }
 
 
-  getColDataType(colIndex: number): IDataType {
-    return this.headerCells[colIndex].columnDataType;
+  getColumnDataType(columnIndex: number): IDataType {
+    return this.headerCells[columnIndex].columnDataType;
   }
 
 
@@ -213,12 +222,12 @@ export class Table {
   }
 
 
-  getCell(rowIndex: number, columnIndex: number): Cell {
+  private getCell(rowIndex: number, columnIndex: number): Cell {
     return this.table[rowIndex][columnIndex];
   }
 
 
-  getHeaderCell(columnIndex: number): HeaderCell {
+  private getHeaderCell(columnIndex: number): HeaderCell {
     return this.headerCells[columnIndex];
   }
 
@@ -261,8 +270,8 @@ export class Table {
 
   deleteSelectedColumn(): void {
     const colsToDelete = Array.from(this.columnsSelected).sort((a, b) => b - a);
-    for (const colIndex of colsToDelete) {
-      this.deleteColumn(colIndex);
+    for (const columnIndex of colsToDelete) {
+      this.deleteColumn(columnIndex);
     }
 
     this.columnsSelected.clear();
@@ -276,7 +285,7 @@ export class Table {
     const clonedRow: Cell[] = [];
 
     for (let j: number = 0; j < this.getHeadersCellsAmount(); ++j)
-      clonedRow.push(new Cell(this.getColDataType(j).getNewDataType(), this.table[rowIndex][j].value));
+      clonedRow.push(new Cell(this.getColumnDataType(j).getNewDataType(), this.table[rowIndex][j].value));
 
     this.table.splice(rowIndex, 0, clonedRow);
   }
@@ -297,6 +306,65 @@ export class Table {
     );
 
     for (let i: number = 0; i < this.getRowsNumber(); ++i)
-      this.table[i].splice(columnIndex, 0, new Cell(this.getColDataType(columnIndex).getNewDataType(), this.table[i][columnIndex].value));
+      this.table[i].splice(columnIndex, 0, new Cell(this.getColumnDataType(columnIndex).getNewDataType(), this.table[i][columnIndex].value));
+  }
+
+
+  changeColumnDataType(columnIndex: number, newDataType: IDataType): void {
+    if (columnIndex < 0 || columnIndex >= this.getHeadersCellsAmount())
+      return;
+
+    const currentDataType: IDataType = this.getColumnDataType(columnIndex);
+
+    if (currentDataType instanceof newDataType.constructor)
+      return;
+
+    this.headerCells[columnIndex] = new HeaderCell(
+      new TextualDataType(), this.HEADER_CELL_DEFAULT_NAME, newDataType.getNewDataType()
+    );
+
+    for (let i: number = 0; i < this.getRowsNumber(); ++i) {
+      this.table[i][columnIndex] = new Cell(newDataType.getNewDataType(), null);
+    }
+  }
+
+
+  getCellFromCoords(i: number, j: number): Cell | null {
+    if (j < 0 || j >= this.getHeadersCellsAmount())
+      return null;
+
+    if (i < 0 || i >= this.getRowsNumber())
+      return null;
+
+    return i === this.HEADER_ROW_INDEX ?
+      this.getHeaderCell(j) :
+      this.getCell(i, j);
+  }
+
+
+  setCellValue(cellCord: Pair<number, number>, value: any): void {
+    if (value !== null) {
+      const cell: Cell | null = this.getCellFromCoords(cellCord.first, cellCord.second);
+
+      if (cell === null)
+        return;
+
+      if (!this.isRowSelected(cellCord.first) && !this.isColumnSelected(cellCord.second)) {
+        cell.value = value;
+      }
+      else {
+        this.doForEachRowSelected((e: number): void => {
+          for (let r of this.getRow(e)) {
+            if (cell.cellDataType.constructor === r.cellDataType.constructor)
+              r.value = value;
+          }
+        });
+
+        this.doForEachColumnSelected((e: number): void => {
+          for (let c of this.getColumn(e))
+            c.value = value;
+        });
+      }
+    }
   }
 }

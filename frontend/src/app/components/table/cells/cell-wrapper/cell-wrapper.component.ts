@@ -2,7 +2,8 @@ import {
   AfterViewInit,
   Component, ComponentRef,
   ElementRef,
-  Input,
+  Input, OnChanges,
+  SimpleChanges,
   ViewChild,
   ViewContainerRef
 } from '@angular/core';
@@ -10,6 +11,7 @@ import {DataTypeCellComponent} from '../data-type-cell/data-type-cell.component'
 import {HeaderCell} from '../../../../model/table/header-cell';
 import {Cell} from '../../../../model/table/cell';
 import {BaseCellComponent} from '../base-cell-component';
+import {Pair} from '../../../../model/pair';
 
 @Component({
   selector: 'app-cell-wrapper',
@@ -27,10 +29,15 @@ import {BaseCellComponent} from '../base-cell-component';
     }
   `]
 })
-export class CellWrapperComponent implements AfterViewInit {
+export class CellWrapperComponent implements AfterViewInit, OnChanges {
 
   @Input() cell: Cell | null = null;
   @Input() headerCell: HeaderCell | null = null;
+  @Input() onChangeDataTypeCallback!: (event: MouseEvent, columnIndex: number) => void;
+  @Input(
+    {transform: (value: { i: number; j: number }): Pair<number, number> | null => new Pair(value.i, value.j)}
+  ) cord: Pair<number, number> | null = null;
+
   @ViewChild('container', { read: ViewContainerRef, static: true }) container!: ViewContainerRef;
   @ViewChild('borders', { static: true }) bordersToHighLight!: ElementRef;
 
@@ -38,14 +45,30 @@ export class CellWrapperComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     if (this.cell !== null) {
       const cellRef: ComponentRef<BaseCellComponent> = this.container.createComponent(this.cell.cellDataType.getCellComponent());
-      this.cell.cellRef = cellRef;
+
+      cellRef.setInput('cord', this.cord);
       cellRef.setInput('value', this.cell.value);
+
+      this.cell.cellRef = cellRef;
     }
 
     if (this.headerCell !== null) {
-      this.headerCell.cellRef = this.container.createComponent(DataTypeCellComponent);
-      this.headerCell.cellRef.setInput('iconName', this.headerCell.columnDataType.getIconName());
-      this.headerCell.cellRef.setInput('value', this.headerCell.value);
+      const headerCellRef: ComponentRef<DataTypeCellComponent> = this.container.createComponent(DataTypeCellComponent);
+
+      headerCellRef.setInput('iconName', this.headerCell.columnDataType.getIconName());
+      headerCellRef.setInput('value', this.headerCell.value);
+      headerCellRef.setInput('onChangeDataTypeCallback', this.onChangeDataTypeCallback);
+      headerCellRef.setInput('cord', this.cord);
+
+      this.headerCell.cellRef = headerCellRef;
+    }
+  }
+
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['cord']) {
+      this.headerCell?.cellRef?.setInput('cord', changes['cord'].currentValue);
+      this.cell?.cellRef?.setInput('cord', changes['cord'].currentValue);
     }
   }
 }

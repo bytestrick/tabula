@@ -10,7 +10,14 @@ import {BaseCellComponent} from '../base-cell-component';
 })
 export class DataTypeCellComponent extends BaseCellComponent {
 
-  override value: string | null = null;
-
   @Input() iconName: string = '';
+  @Input() protected onChangeDataTypeCallback!: (event: MouseEvent, columnIndex: number) => void;
+
+
+  onChangeDataType(event: MouseEvent): void {
+    if (this.cord === null)
+      return;
+
+    this.onChangeDataTypeCallback(event, this.cord.second);
+  }
 }

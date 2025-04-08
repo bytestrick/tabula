@@ -3,7 +3,7 @@
     <colgroup #colgroup appUpdateColumnsWidth [colgroup]="colgroup">
       <col class="first-column">
       <col
-        *ngFor="let _ of this.table.getHeadersCells(); let columnIndex = index"
+        *ngFor="let _ of this.tableService.getHeadersCells(); let columnIndex = index"
         [attr.data-index]="columnIndex"
         class="column"
       >
@@ -17,12 +17,12 @@
         (cdkDropListDropped)="onColumnDropped($event)"
       >
         <!-- serve per aggiungere la cella della colonna iniziale, quella per il table-organizer delle righe -->
-        <th (mouseenter)="onMouseEnteredCell(INVALID_CELL_INDEX, INVALID_CELL_INDEX)"></th>
+        <th (mouseenter)="onMouseEnteredCell(tableService.INVALID_CELL_INDEX, tableService.INVALID_CELL_INDEX)"></th>
 
         <th
-          *ngFor="let _ of this.table.getHeadersCells(); let colIndex = index"
+          *ngFor="let _ of this.tableService.getHeadersCells(); let colIndex = index"
           class="center-td-content-v-h"
-          (mouseenter)="onMouseEnteredCell(INVALID_CELL_INDEX, colIndex)"
+          (mouseenter)="onMouseEnteredCell(tableService.INVALID_CELL_INDEX, colIndex)"
         >
           <app-table-organizer
             cdkDrag
@@ -41,7 +41,7 @@
 
                 <ul class="list-group w-100">
                   <li
-                    *ngFor="let cell of table.getColumn(colIndex, previewLimit)"
+                    *ngFor="let cell of tableService.getColumn(colIndex, previewLimit)"
                     class="list-group-item d-inline-flex align-items-center"
                     style="min-height: var(--cell-table-min-height)"
                   >
@@ -56,17 +56,17 @@
         </th>
 
         <!-- serve per aggiungere la cella della colonna finale, quella dove c'è il bottone per aggiungere le colonne -->
-        <th (mouseenter)="onMouseEnteredCell(INVALID_CELL_INDEX, INVALID_CELL_INDEX)"></th>
+        <th (mouseenter)="onMouseEnteredCell(tableService.INVALID_CELL_INDEX, tableService.INVALID_CELL_INDEX)"></th>
       </tr>
 
       <!-- riga per i data-type -->
       <tr>
         <!-- serve per aggiungere la cella della colonna iniziale, quella per il table-organizer delle righe -->
-        <th (mouseenter)="onMouseEnteredCell(INVALID_CELL_INDEX, INVALID_CELL_INDEX)"></th>
+        <th (mouseenter)="onMouseEnteredCell(tableService.INVALID_CELL_INDEX, tableService.INVALID_CELL_INDEX)"></th>
         <th
-          *ngFor="let headerCell of this.table.getHeadersCells(); let colIndex = index"
+          *ngFor="let headerCell of this.tableService.getHeadersCells(); let colIndex = index"
           class="center-td-content-v-h"
-          (mouseenter)="onMouseEnteredCell(INVALID_CELL_INDEX, colIndex)"
+          (mouseenter)="onMouseEnteredCell(tableService.INVALID_CELL_INDEX, colIndex)"
           style="padding: 0; position: relative;"
           appResizableTableColumn [colIndex]="colIndex" [colgroup]="colgroup"
         >
@@ -74,7 +74,9 @@
             #cellWrapper
             appHighlightBorders [appHighlightBordersOf]="cellWrapper.bordersToHighLight.nativeElement" [appHighlightCanDisable]="canDisableCellHighlight()"
             [headerCell]="headerCell"
-            (dblclick)="onDoubleClickedCell($event, HEADER_ROW_INDEX, colIndex)"
+            [cord]="{ i: tableService.INVALID_CELL_INDEX, j: colIndex }"
+            [onChangeDataTypeCallback]="changeDataType.bind(this)"
+            (dblclick)="onDoubleClickedCell($event, tableService.HEADER_ROW_INDEX, colIndex)"
           >
           </app-cell-wrapper>
           <div class="resize-handle">
@@ -82,7 +84,7 @@
           </div>
         </th>
         <!-- serve per aggiungere la cella della colonna finale, quella dove c'è il bottone per aggiungere le colonne -->
-        <th class="remove-border center-container" (mouseenter)="onMouseEnteredCell(INVALID_CELL_INDEX, INVALID_CELL_INDEX)">
+        <th class="remove-border center-container" (mouseenter)="onMouseEnteredCell(tableService.INVALID_CELL_INDEX, tableService.INVALID_CELL_INDEX)">
           <button class="btn btn-primary center" type="button" (click)="onNewHeaderAdded($event)" title="Append new column">
             <i class="bi bi-plus-lg"></i>
           </button>
@@ -95,10 +97,10 @@
     >
       <!-- righe per gli elementi della tabella -->
       <tr
-        *ngFor="let row of table.getRows(); let rowIndex = index"
+        *ngFor="let row of tableService.getRows(); let rowIndex = index"
       >
         <!-- celle per contenere i table-organizer delle righe -->
-        <td class="remove-border center-td-content-v-h" (mouseenter)="onMouseEnteredCell(rowIndex, INVALID_CELL_INDEX)">
+        <td class="remove-border center-td-content-v-h" (mouseenter)="onMouseEnteredCell(rowIndex, tableService.INVALID_CELL_INDEX)">
           <app-table-organizer
             [showOrganizer]="hoveredRowIndex === rowIndex && !isAnElementDragged"
             [rowIndicators]="true"
@@ -116,7 +118,7 @@
 
                 <ul class="list-group list-group-horizontal">
                   <li
-                    *ngFor="let cell of table.getRow(rowIndex, previewLimit)"
+                    *ngFor="let cell of tableService.getRow(rowIndex, previewLimit)"
                     class="list-group-item d-inline-flex align-items-center"
                     style="min-width: var(--cell-table-min-width); max-width: var(--cell-table-min-width); min-height: var(--cell-table-min-height)"
                   >
@@ -143,11 +145,12 @@
             appSelect [appIsSelected]="isRowSelected(rowIndex) || isColumnSelected(colIndex)" [appTargetOfSelection]="areaToSelect"
             [selectedNeighbors]="{
               top: isRowSelected(rowIndex - 1) || (rowIndex - 1 >= 0 && isColumnSelected(colIndex)),
-              bottom: isRowSelected(rowIndex + 1) || (rowIndex + 1 < table.getRowsNumber() && isColumnSelected(colIndex)),
+              bottom: isRowSelected(rowIndex + 1) || (rowIndex + 1 < tableService.getRowsNumber() && isColumnSelected(colIndex)),
               left: isColumnSelected(colIndex - 1) || (colIndex - 1 >= 0 && isRowSelected(rowIndex)),
-              right: isColumnSelected(colIndex + 1) || (colIndex + 1 < table.getHeadersCellsAmount() && isRowSelected(rowIndex))
+              right: isColumnSelected(colIndex + 1) || (colIndex + 1 < tableService.getHeadersCellsAmount() && isRowSelected(rowIndex))
             }"
             [cell]="cell"
+            [cord]="{ i: rowIndex, j: colIndex }"
             (dblclick)="onDoubleClickedCell($event, rowIndex, colIndex)"
           >
           </app-cell-wrapper>
@@ -156,15 +159,15 @@
         <!--
           serve per aggiungere la cella della colonna finale, quella dove c'è il bottone per aggiungere le colonne
         -->
-        <td (mouseenter)="onMouseEnteredCell(INVALID_CELL_INDEX, INVALID_CELL_INDEX)"></td>
+        <td (mouseenter)="onMouseEnteredCell(tableService.INVALID_CELL_INDEX, tableService.INVALID_CELL_INDEX)"></td>
       </tr>
     </tbody>
     <tbody>
       <tr> <!-- riga dove sta il bottone di aggiunta righe -->
         <!-- serve per aggiungere la la cella della colonna iniziale, quella per il table-organizer delle righe -->
-        <td (mouseenter)="onMouseEnteredCell(INVALID_CELL_INDEX, INVALID_CELL_INDEX)"></td>
+        <td (mouseenter)="onMouseEnteredCell(tableService.INVALID_CELL_INDEX, tableService.INVALID_CELL_INDEX)"></td>
 
-        <td style="border-right-color: transparent; border-left-color: transparent;" class="center-td-content-v" (mouseenter)="onMouseEnteredCell(INVALID_CELL_INDEX, INVALID_CELL_INDEX)">
+        <td style="border-right-color: transparent; border-left-color: transparent;" class="center-td-content-v" (mouseenter)="onMouseEnteredCell(tableService.INVALID_CELL_INDEX, tableService.INVALID_CELL_INDEX)">
           <button class="btn btn-primary" type="button" (click)="onNewRowAdded()" title="Append new row">
             <i class="bi bi-plus-lg"></i>
           </button>
@@ -174,7 +177,7 @@
           aggiunge le restanti celle. Non sfora perché ci sono due colonne in più. Una per il bottone di aggiunta
           colonne e una per i table-organizer delle righe
         -->
-        <td style="border-right-color: transparent; border-left-color: transparent;" *ngFor="let cell of table.getHeadersCells()" (mouseenter)="onMouseEnteredCell(INVALID_CELL_INDEX, INVALID_CELL_INDEX)"></td>
+        <td style="border-right-color: transparent; border-left-color: transparent;" *ngFor="let cell of tableService.getHeadersCells()" (mouseenter)="onMouseEnteredCell(tableService.INVALID_CELL_INDEX, tableService.INVALID_CELL_INDEX)"></td>
       </tr>
     </tbody>
   </table>
