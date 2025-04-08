@@ -143,7 +143,10 @@ export class PopUp implements OnInit, OnDestroy, AfterViewInit {
 
 
   hasContent(content: ComponentRef<IPopUpContent> | null): boolean {
-    return this.content?.instance instanceof (content?.instance.constructor ?? Object);
+    if (this.content === null || content === null)
+      return false;
+
+    return this.content.instance instanceof (content.instance.constructor);
   }
 
 

@@ -1,4 +1,4 @@
-import {Component, ElementRef, ViewChild} from '@angular/core';
+import {Component, ElementRef, inject, ViewChild} from '@angular/core';
 import {BaseInputComponent} from '../base-input-component';
 import {DataTypeRegistryService} from '../../../services/data-type-registry.service';
 import {NgForOf} from '@angular/common';
@@ -15,12 +15,9 @@ import {IDataType} from '../../../model/data-types/i-data-type';
 })
 export class DataTypesChooserComponent extends BaseInputComponent {
 
-  @ViewChild('searchBar', { static: true }) searchBar!: ElementRef;
+  @ViewChild('searchBar') searchBar!: ElementRef;
 
-
-  constructor(protected dataTypesRegistry: DataTypeRegistryService) {
-    super();
-  }
+  protected dataTypesRegistry: DataTypeRegistryService = inject(DataTypeRegistryService);
 
 
   protected override beforeShowUp(): void {}
