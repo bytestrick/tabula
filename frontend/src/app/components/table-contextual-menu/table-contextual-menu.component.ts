@@ -53,6 +53,11 @@ export class TableContextualMenuComponent implements IPopUpContent, AfterViewIni
       case this.TARGET_ROW: {
         const rowI: number = this.cellCord.first;
 
+        if (this.tableService.isRowSelected(rowI)) {
+          this.tableService.deleteSelectedRow();
+          return;
+        }
+
         if (rowI == this.tableService.INVALID_CELL_INDEX) {
           this.toastService.actionNotAllowed('you can\'t delete this row');
         }
@@ -66,6 +71,11 @@ export class TableContextualMenuComponent implements IPopUpContent, AfterViewIni
       }
       case this.TARGET_COLUMN: {
         const columnI: number = this.cellCord.second;
+
+        if (this.tableService.isColumnSelected(columnI)) {
+          this.tableService.deleteSelectedColumn();
+          return;
+        }
 
         if (columnI == this.tableService.INVALID_CELL_INDEX) {
           this.toastService.actionNotAllowed('you can\'t delete this column');
