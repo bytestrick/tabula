@@ -175,12 +175,12 @@ export class TableComponent implements OnInit, OnDestroy {
     if (this.hoveredColIndex === null)
       return;
 
-    if (!this.tableService.hasColumnSelected()) {
+    if (!this.tableService.hasColumnsSelected()) {
       if (event.previousIndex !== this.hoveredColIndex)
         this.tableService.moveColumn(event.previousIndex, this.hoveredColIndex);
     }
     else {
-      this.tableService.moveSelectedColumns(this.hoveredColIndex);
+      this.tableService.moveSelectedColumns(event.previousIndex, this.hoveredColIndex);
     }
   }
 
@@ -194,7 +194,7 @@ export class TableComponent implements OnInit, OnDestroy {
         this.tableService.moveRow(event.previousIndex, this.hoveredRowIndex);
     }
     else {
-      this.tableService.moveSelectedRows(this.hoveredRowIndex);
+      this.tableService.moveSelectedRows(event.previousIndex, this.hoveredRowIndex);
     }
   }
 
