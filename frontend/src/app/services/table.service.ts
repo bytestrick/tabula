@@ -15,8 +15,8 @@ export class TableService {
   private table: Cell[][] = [];
   private headerCells: HeaderCell[] = [];
 
-  private rowsSelected: Set<number> = new Set<number>;
-  private columnsSelected: Set<number> = new Set<number>;
+  private selectedRows: Set<number> = new Set<number>;
+  private selectedColumns: Set<number> = new Set<number>;
 
   private readonly HEADER_CELL_DEFAULT_NAME: string = 'New Column';
 
@@ -66,6 +66,19 @@ export class TableService {
 
       for (let i: number = 0; i < this.getHeadersCellsAmount(); ++i)
         this.table[rowIndex].push(new Cell(this.headerCells[i].columnDataType.getNewDataType(), null));
+
+      // è necessario perché quando si inserisce una riga le righe al di sotto scendono di 1
+      const indexesToUpdate: number[] = [];
+      this.selectedRows.forEach(index => {
+        if (index >= rowIndex) {
+          indexesToUpdate.push(index);
+        }
+      });
+
+      indexesToUpdate.forEach(index => {
+        this.selectedRows.delete(index);
+        this.selectedRows.add(index + 1);
+      });
     }
   }
 
@@ -77,6 +90,19 @@ export class TableService {
       for (let i: number = 0; i < this.getRowsNumber(); ++i) {
         this.table[i].splice(columnIndex, 0, new Cell(this.getColumnDataType(columnIndex).getNewDataType(), null));
       }
+
+      // è necessario perché quando si inserisce una colonna le colonne a destra si spostano a destra di 1
+      const indexesToUpdate: number[] = [];
+      this.selectedColumns.forEach(index => {
+        if (index >= columnIndex) {
+          indexesToUpdate.push(index);
+        }
+      });
+
+      indexesToUpdate.forEach(index => {
+        this.selectedColumns.delete(index);
+        this.selectedColumns.add(index + 1);
+      });
     }
   }
 
@@ -172,52 +198,52 @@ export class TableService {
 
 
   selectRow(rowIndex: number): void {
-    this.rowsSelected.add(rowIndex);
+    this.selectedRows.add(rowIndex);
   }
 
 
   deselectRow(rowIndex: number): void {
-    this.rowsSelected.delete(rowIndex);
+    this.selectedRows.delete(rowIndex);
   }
 
 
   selectColumn(columnIndex: number): void {
-    this.columnsSelected.add(columnIndex);
+    this.selectedColumns.add(columnIndex);
   }
 
 
   deselectColumn(columnIndex: number): void {
-    this.columnsSelected.delete(columnIndex);
+    this.selectedColumns.delete(columnIndex);
   }
 
 
   isColumnSelected(columnIndex: number): boolean {
-    return this.columnsSelected.has(columnIndex);
+    return this.selectedColumns.has(columnIndex);
   }
 
 
   isRowSelected(rowIndex: number): boolean {
-    return this.rowsSelected.has(rowIndex);
+    return this.selectedRows.has(rowIndex);
   }
 
 
   hasRowsSelected(): boolean {
-    return this.rowsSelected.size !== 0;
+    return this.selectedRows.size !== 0;
   }
 
 
   hasColumnSelected(): boolean {
-    return this.columnsSelected.size !== 0;
+    return this.selectedColumns.size !== 0;
   }
 
 
   doForEachRowSelected(fn: (rowIndex: number) => void): void {
-    this.rowsSelected.forEach(fn);
+    this.selectedRows.forEach(fn);
   }
 
 
   doForEachColumnSelected(fn: (columnIndex: number) => void): void {
-    this.columnsSelected.forEach(fn);
+    this.selectedColumns.forEach(fn);
   }
 
 
@@ -241,22 +267,22 @@ export class TableService {
       this.deselectRow(rowIndex);
 
     // è necessario perché quando si cancella una riga le righe al di sotto salgano di 1
-    const indicesToUpdate: number[] = [];
-    this.rowsSelected.forEach(index => {
+    const indexesToUpdate: number[] = [];
+    this.selectedRows.forEach(index => {
       if (index > rowIndex) {
-        indicesToUpdate.push(index);
+        indexesToUpdate.push(index);
       }
     });
 
-    indicesToUpdate.forEach(index => {
-      this.rowsSelected.delete(index);
-      this.rowsSelected.add(index - 1);
+    indexesToUpdate.forEach(index => {
+      this.selectedRows.delete(index);
+      this.selectedRows.add(index - 1);
     });
   }
 
 
   deleteSelectedRow(): void {
-    const rowsToDelete = Array.from(this.rowsSelected).sort((a, b) => b - a);
+    const rowsToDelete = Array.from(this.selectedRows).sort((a, b) => b - a);
     for (const rowIndex of rowsToDelete) {
       this.deleteRow(rowIndex);
     }
@@ -277,28 +303,29 @@ export class TableService {
       this.deselectColumn(columnIndex);
 
     // è necessario perché quando si cancella una colonna le colonne a destra si spostano a sinistra di 1
-    const indicesToUpdate: number[] = [];
-    this.columnsSelected.forEach(index => {
+    const indexesToUpdate: number[] = [];
+    this.selectedColumns.forEach(index => {
       if (index > columnIndex) {
-        indicesToUpdate.push(index);
+        indexesToUpdate.push(index);
       }
     });
 
-    indicesToUpdate.forEach(index => {
-      this.columnsSelected.delete(index);
-      this.columnsSelected.add(index - 1);
+    indexesToUpdate.forEach(index => {
+      this.selectedColumns.delete(index);
+      this.selectedColumns.add(index - 1);
     });
   }
 
 
   deleteSelectedColumn(): void {
-    const colsToDelete = Array.from(this.columnsSelected).sort((a, b) => b - a);
+    const colsToDelete = Array.from(this.selectedColumns).sort((a, b) => b - a);
     for (const columnIndex of colsToDelete) {
       this.deleteColumn(columnIndex);
     }
   }
 
 
+  // duplica la riga e la inserisce a sotto di rowIndex
   duplicateRow(rowIndex: number): void {
     if (rowIndex < 0 || rowIndex >= this.getRowsNumber())
       return;
@@ -308,16 +335,30 @@ export class TableService {
     for (let j: number = 0; j < this.getHeadersCellsAmount(); ++j)
       clonedRow.push(new Cell(this.getColumnDataType(j).getNewDataType(), this.table[rowIndex][j].value));
 
-    this.table.splice(rowIndex, 0, clonedRow);
+    this.table.splice(rowIndex + 1, 0, clonedRow);
+
+    // è necessario perché quando si duplica una riga le righe al di sotto scendono di 1
+    const indexesToUpdate: number[] = [];
+    this.selectedRows.forEach(index => {
+      if (index > rowIndex) {
+        indexesToUpdate.push(index);
+      }
+    });
+
+    indexesToUpdate.forEach(index => {
+      this.selectedRows.delete(index);
+      this.selectedRows.add(index + 1);
+    });
   }
 
 
+  // duplica la colonna e la inserisce a destra di columnIndex
   duplicateColumn(columnIndex: number): void {
     if (columnIndex < 0 || columnIndex >= this.getHeadersCellsAmount())
       return;
 
     this.headerCells.splice(
-      columnIndex,
+      columnIndex + 1,
       0,
       new HeaderCell(
         this.getHeaderCell(columnIndex).cellDataType.getNewDataType(),
@@ -327,7 +368,20 @@ export class TableService {
     );
 
     for (let i: number = 0; i < this.getRowsNumber(); ++i)
-      this.table[i].splice(columnIndex, 0, new Cell(this.getColumnDataType(columnIndex).getNewDataType(), this.table[i][columnIndex].value));
+      this.table[i].splice(columnIndex + 1, 0, new Cell(this.getColumnDataType(columnIndex).getNewDataType(), this.table[i][columnIndex].value));
+
+    // è necessario perché quando si duplica una colonna le colonne a destra si spostano a destra di 1
+    const indexesToUpdate: number[] = [];
+    this.selectedColumns.forEach(index => {
+      if (index > columnIndex) {
+        indexesToUpdate.push(index);
+      }
+    });
+
+    indexesToUpdate.forEach(index => {
+      this.selectedColumns.delete(index);
+      this.selectedColumns.add(index + 1);
+    });
   }
 
 
