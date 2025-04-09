@@ -239,6 +239,19 @@ export class TableService {
 
     if (this.isRowSelected(rowIndex))
       this.deselectRow(rowIndex);
+
+    // è necessario perché quando si cancella una riga le righe al di sotto salgano di 1
+    const indicesToUpdate: number[] = [];
+    this.rowsSelected.forEach(index => {
+      if (index > rowIndex) {
+        indicesToUpdate.push(index);
+      }
+    });
+
+    indicesToUpdate.forEach(index => {
+      this.rowsSelected.delete(index);
+      this.rowsSelected.add(index - 1);
+    });
   }
 
 
@@ -247,8 +260,6 @@ export class TableService {
     for (const rowIndex of rowsToDelete) {
       this.deleteRow(rowIndex);
     }
-
-    this.rowsSelected.clear();
   }
 
 
@@ -264,6 +275,19 @@ export class TableService {
 
     if (this.isColumnSelected(columnIndex))
       this.deselectColumn(columnIndex);
+
+    // è necessario perché quando si cancella una colonna le colonne a destra si spostano a sinistra di 1
+    const indicesToUpdate: number[] = [];
+    this.columnsSelected.forEach(index => {
+      if (index > columnIndex) {
+        indicesToUpdate.push(index);
+      }
+    });
+
+    indicesToUpdate.forEach(index => {
+      this.columnsSelected.delete(index);
+      this.columnsSelected.add(index - 1);
+    });
   }
 
 
@@ -272,8 +296,6 @@ export class TableService {
     for (const columnIndex of colsToDelete) {
       this.deleteColumn(columnIndex);
     }
-
-    this.columnsSelected.clear();
   }
 
 
