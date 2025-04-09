@@ -4,7 +4,7 @@ import {HeaderCell} from '../model/table/header-cell';
 import {IDataType} from '../model/data-types/i-data-type';
 import {TextualDataType} from '../model/data-types/concrete-data-type/textual-data-type';
 import {moveItemInArray} from '@angular/cdk/drag-drop';
-import {Pair} from '../model/pair';
+import {CellCord} from '../model/table/cell-cord';
 
 
 @Injectable({
@@ -20,7 +20,6 @@ export class TableService {
 
   private readonly HEADER_CELL_DEFAULT_NAME: string = 'New Column';
 
-  readonly HEADER_ROW_INDEX: number = -1;
   readonly INVALID_CELL_INDEX: number = -2; // deve essere un numero negativo
 
 
@@ -329,27 +328,27 @@ export class TableService {
   }
 
 
-  getCellFromCoords(i: number, j: number): Cell | null {
-    if (j < 0 || j >= this.getHeadersCellsAmount())
+  getCellFromCoords(cord: CellCord): Cell | null {
+    if (cord.j < 0 || cord.j >= this.getHeadersCellsAmount())
       return null;
 
-    if (i < 0 || i >= this.getRowsNumber())
+    if (!cord.isHeaderCell && cord.i < 0 || cord.i >= this.getRowsNumber())
       return null;
 
-    return i === this.HEADER_ROW_INDEX ?
-      this.getHeaderCell(j) :
-      this.getCell(i, j);
+    return cord.isHeaderCell ?
+      this.getHeaderCell(cord.j) :
+      this.getCell(cord.i, cord.j);
   }
 
 
-  setCellValue(cellCord: Pair<number, number>, value: any): void {
+  setCellValue(cord: CellCord, value: any): void {
     if (value !== null) {
-      const cell: Cell | null = this.getCellFromCoords(cellCord.first, cellCord.second);
+      const cell: Cell | null = this.getCellFromCoords(cord);
 
       if (cell === null)
         return;
 
-      if (!this.isRowSelected(cellCord.first) && !this.isColumnSelected(cellCord.second)) {
+      if (!this.isRowSelected(cord.i) && !this.isColumnSelected(cord.j)) {
         cell.value = value;
       }
       else {

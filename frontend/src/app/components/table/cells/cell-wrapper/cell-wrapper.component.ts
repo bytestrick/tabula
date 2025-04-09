@@ -12,6 +12,7 @@ import {HeaderCell} from '../../../../model/table/header-cell';
 import {Cell} from '../../../../model/table/cell';
 import {BaseCellComponent} from '../base-cell-component';
 import {Pair} from '../../../../model/pair';
+import {CellCord} from '../../../../model/table/cell-cord';
 
 @Component({
   selector: 'app-cell-wrapper',
@@ -34,9 +35,7 @@ export class CellWrapperComponent implements AfterViewInit, OnChanges {
   @Input() cell: Cell | null = null;
   @Input() headerCell: HeaderCell | null = null;
   @Input() onChangeDataTypeCallback!: (event: MouseEvent, columnIndex: number) => void;
-  @Input(
-    {transform: (value: { i: number; j: number }): Pair<number, number> | null => new Pair(value.i, value.j)}
-  ) cord: Pair<number, number> | null = null;
+  @Input() cord!: CellCord;
 
   @ViewChild('container', { read: ViewContainerRef, static: true }) container!: ViewContainerRef;
   @ViewChild('borders', { static: true }) bordersToHighLight!: ElementRef;

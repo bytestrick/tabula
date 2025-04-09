@@ -74,9 +74,9 @@
             #cellWrapper
             appHighlightBorders [appHighlightBordersOf]="cellWrapper.bordersToHighLight.nativeElement" [appHighlightCanDisable]="canDisableCellHighlight()"
             [headerCell]="headerCell"
-            [cord]="{ i: tableService.INVALID_CELL_INDEX, j: colIndex }"
+            [cord]="createCellCord(-1, colIndex, true)"
             [onChangeDataTypeCallback]="changeDataType.bind(this)"
-            (dblclick)="onDoubleClickedCell($event, tableService.HEADER_ROW_INDEX, colIndex)"
+            (dblclick)="onDoubleClickedCell($event, createCellCord(-1, colIndex, true))"
           >
           </app-cell-wrapper>
           <div class="resize-handle">
@@ -150,8 +150,8 @@
               right: isColumnSelected(colIndex + 1) || (colIndex + 1 < tableService.getHeadersCellsAmount() && isRowSelected(rowIndex))
             }"
             [cell]="cell"
-            [cord]="{ i: rowIndex, j: colIndex }"
-            (dblclick)="onDoubleClickedCell($event, rowIndex, colIndex)"
+            [cord]="createCellCord(rowIndex, colIndex, false)"
+            (dblclick)="onDoubleClickedCell($event, createCellCord(rowIndex, colIndex, false))"
           >
           </app-cell-wrapper>
         </td>

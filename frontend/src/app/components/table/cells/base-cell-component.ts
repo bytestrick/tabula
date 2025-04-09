@@ -1,12 +1,12 @@
 import {Directive, Input} from '@angular/core';
-import {Pair} from '../../../model/pair';
+import {CellCord} from '../../../model/table/cell-cord';
 
 
 @Directive()
 export abstract class BaseCellComponent {
 
   @Input() protected value: string | null = null;
-  @Input() protected cord: Pair<number, number> | null = null;
+  @Input() protected cord!: CellCord;
 
 
   setValue(value: string | null): void {
