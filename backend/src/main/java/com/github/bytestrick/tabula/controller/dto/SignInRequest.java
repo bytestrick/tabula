@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public record SignInRequest(@NotBlank @Email String email,
-                            @NotBlank @Size(max = 512) @Pattern(regexp = Constants.PASSWORD_REGEXP) String password,
+                            @NotBlank @Size(min = 10, max = 512) @Pattern(regexp = Constants.PASSWORD_REGEXP)
+                            String password,
                             boolean rememberMe) {
 }

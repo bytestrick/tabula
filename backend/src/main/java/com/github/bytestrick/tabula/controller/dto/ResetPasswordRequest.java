@@ -8,6 +8,6 @@ import jakarta.validation.constraints.Size;
 import static com.github.bytestrick.tabula.config.Constants.PASSWORD_REGEXP;
 
 public record ResetPasswordRequest(@NotBlank @Email String email,
-                                   @NotBlank @Pattern(regexp = PASSWORD_REGEXP) String newPassword,
+                                   @NotBlank @Size(min = 10, max = 512) @Pattern(regexp = PASSWORD_REGEXP) String newPassword,
                                    @NotBlank @Size(min = 6, max = 6) String otp) {
 }
