@@ -118,6 +118,7 @@ public class AuthenticationController {
 
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest body) {
+        // TODO: maybe use PATCH method
         try {
             return userDao.findByEmail(body.email())
                     .map(user -> {
