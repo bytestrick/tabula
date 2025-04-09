@@ -162,12 +162,63 @@ export class TableService {
   }
 
 
-  // TODO: Sposta in blocco le righe selezionate, inserendole a partire da toIndex.
-  moveSelectedRows(toIndex: number): void {
+  moveSelectedRows(fromIndex: number, toIndex: number): void {
+    if (!this.hasRowsSelected())
+      return;
+
+    let deltaI: number = toIndex - fromIndex;
+    let rowsToMove: number[] = [];
+
+    if (deltaI < 0) {
+      // ordina le righe selezionate in modo crescente
+      rowsToMove = Array.from(this.selectedRows).sort((a, b) => a - b);
+
+      while(rowsToMove[0] + deltaI < 0) // rowsToMove[0] + deltaI corrisponde all'indice in cui finirà la prima riga selezionata
+        ++deltaI;
+    }
+    else if (deltaI > 0) {
+      // ordina le righe selezionate in modo decrescente
+      rowsToMove = Array.from(this.selectedRows).sort((a, b) => b - a);
+
+      while(rowsToMove[0] + deltaI >= this.getRowsNumber()) // rowsToMove[0] + deltaI corrisponde all'indice in cui finirà l'ultima riga selezionata
+        --deltaI;
+    }
+
+    if (deltaI === 0)
+      return;
+
+    for (let i of rowsToMove)
+      this.moveRow(i, i + deltaI);
   }
 
-// TODO: Sposta in blocco le colonne selezionate, inserendole a partire da toIndex.
-  moveSelectedColumns(toIndex: number): void {
+
+  moveSelectedColumns(fromIndex: number, toIndex: number): void {
+    if (!this.hasColumnsSelected())
+      return;
+
+    let deltaI: number = toIndex - fromIndex;
+    let columnsToMove: number[] = [];
+
+    if (deltaI < 0) {
+      // Ordina le colonne selezionate in ordine crescente
+      columnsToMove = Array.from(this.selectedColumns).sort((a, b) => a - b);
+
+      while (columnsToMove[0] + deltaI < 0) // columnsToMove[0] + deltaI corrisponde all'indice in cui finirà la prima colonna selezionata
+        ++deltaI;
+    }
+    else if (deltaI > 0) {
+      // Ordina le colonne selezionate in ordine decrescente
+      columnsToMove = Array.from(this.selectedColumns).sort((a, b) => b - a);
+
+      while (columnsToMove[0] + deltaI >= this.getHeadersCellsAmount()) // columnsToMove[0] + deltaI corrisponde all'indice in cui finirà l'ultima colonna selezionata
+        --deltaI;
+    }
+
+    if (deltaI === 0)
+      return;
+
+    for (let i of columnsToMove)
+      this.moveColumn(i, i + deltaI);
   }
 
 
@@ -232,7 +283,7 @@ export class TableService {
   }
 
 
-  hasColumnSelected(): boolean {
+  hasColumnsSelected(): boolean {
     return this.selectedColumns.size !== 0;
   }
 
@@ -318,8 +369,8 @@ export class TableService {
 
 
   deleteSelectedColumn(): void {
-    const colsToDelete = Array.from(this.selectedColumns).sort((a, b) => b - a);
-    for (const columnIndex of colsToDelete) {
+    const columnsToDelete = Array.from(this.selectedColumns).sort((a, b) => b - a);
+    for (const columnIndex of columnsToDelete) {
       this.deleteColumn(columnIndex);
     }
   }
