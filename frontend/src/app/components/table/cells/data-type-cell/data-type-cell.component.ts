@@ -15,9 +15,6 @@ export class DataTypeCellComponent extends BaseCellComponent {
 
 
   onChangeDataType(event: MouseEvent): void {
-    if (this.cord === null)
-      return;
-
-    this.onChangeDataTypeCallback(event, this.cord.second);
+    this.onChangeDataTypeCallback(event, this.cord.j);
   }
 }

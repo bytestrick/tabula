@@ -25,6 +25,7 @@ import {PopUpManagerService} from '../../services/pop-up-manager.service';
 import {TableContextualMenuComponent} from '../table-contextual-menu/table-contextual-menu.component';
 import {PopUp} from '../pop-up-component/pop-up.component';
 import {TableService} from '../../services/table.service';
+import {CellCord} from '../../model/table/cell-cord';
 
 @Component({
   selector: 'app-table',
@@ -114,14 +115,14 @@ export class TableComponent implements OnInit, OnDestroy {
   }
 
 
-  onDoubleClickedCell(event: MouseEvent, rowIndex: number, columnIndex: number): void {
-    this.showInputMethod(new Pair(event.x, event.y), rowIndex, columnIndex);
+  onDoubleClickedCell(event: MouseEvent, cord: CellCord): void {
+    this.showInputMethod(new Pair(event.x, event.y), cord);
   }
 
 
 
-  showInputMethod(position: Pair<number, number>, rowIndex: number, columnIndex: number): void {
-    const cell: Cell | null = this.tableService.getCellFromCoords(rowIndex, columnIndex);
+  showInputMethod(position: Pair<number, number>, cord: CellCord): void {
+    const cell: Cell | null = this.tableService.getCellFromCoords(cord);
 
     if (cell == null)
       return;
@@ -131,7 +132,7 @@ export class TableComponent implements OnInit, OnDestroy {
       { environmentInjector: this.envInj }
     );
     inputComponent.setInput('startingValue', cell.value);
-    inputComponent.setInput('doAfterInputConfirmation', (value: any): void => this.tableService.setCellValue(new Pair(rowIndex, columnIndex), value));
+    inputComponent.setInput('doAfterInputConfirmation', (value: any): void => this.tableService.setCellValue(cord, value));
 
     this.popUpManagerService.getOrCreatePopUp(this.INPUT_METHOD_POP_UP, inputComponent)?.instance.show(position);
   }
@@ -247,6 +248,11 @@ export class TableComponent implements OnInit, OnDestroy {
       !this.popUpManagerService.isPopUpShown(this.INPUT_METHOD_POP_UP) &&
       !this.popUpManagerService.isPopUpShown(this.TABLE_CONTEXTUAL_MENU)
     );
+  }
+
+
+  protected createCellCord(rowIndex: number, colIndex: number, isHeaderCell: boolean): CellCord {
+    return new CellCord(rowIndex, colIndex, isHeaderCell);
   }
 
 
