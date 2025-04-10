@@ -1,37 +1,44 @@
 package com.github.bytestrick.tabula.service;
 
 import com.github.bytestrick.tabula.repository.InvalidJwtDao;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
+import com.nimbusds.jose.*;
+import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.crypto.MACVerifier;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAmount;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * Service that manages JSON Web Tokens
  */
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class JwtProvider {
     private final InvalidJwtDao invalidJwtDao;
-    @Value("${app.jwt.expiration-ms}")
-    private long jwtExpirationMs;
     @Value("${app.jwt.secret}")
     private String jwtSecret;
-    /**
-     * Secret key used to sign and verify JSON Web Tokens
-     */
-    private SecretKey secretKey;
+    private MACSigner signer;
+    private MACVerifier verifier;
 
     /**
      * Extract a JSON Web Token from an HTTP request
+     *
+     * @return the serialized token or {@code null} if it can't be extracted from the request
      */
     public static String fromRequest(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
@@ -44,57 +51,77 @@ public class JwtProvider {
     /**
      * Extract the expiration timestamp from a JSON Web Token
      */
-    public static Date getExpiration(String token) {
-        return Jwts.parser()
-                .build()
-                .parseSignedClaims(token)
-                .getPayload()
-                .getExpiration();
+    public static Date getExpiration(String token) throws ParseException {
+        return SignedJWT.parse(token).getJWTClaimsSet().getExpirationTime();
+    }
+
+    /**
+     * Create a new JSON Web Token
+     *
+     * @param claims     an associative array of claims to include in the token like
+     *                   <p>{@code { "sub": "user", "roles": ["ROLE_USER"] }}`
+     * @param notBefore  amount of time to delay the initial validity of the token
+     * @param expiration amount of time after the creation of the token when it stops being valid
+     * @return the new serialized token
+     */
+    public String create(
+            Map<String, Object> claims,
+            TemporalAmount notBefore,
+            TemporalAmount expiration
+    ) throws JOSEException {
+        JWTClaimsSet.Builder claimsBuilder = new JWTClaimsSet.Builder();
+        for (String entry : claims.keySet()) {
+            claimsBuilder.claim(entry, claims.get(entry));
+        }
+
+        Instant issuedAt = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+        JWTClaimsSet claimsSet = claimsBuilder.issueTime(Date.from(issuedAt))
+                .notBeforeTime(Date.from(issuedAt.plus(notBefore)))
+                .expirationTime(Date.from(issuedAt.plus(expiration))).build();
+
+        JWSObject jwsObject = new JWSObject(new JWSHeader(JWSAlgorithm.HS256), new Payload(claimsSet.toJSONObject()));
+        jwsObject.sign(signer);
+        return jwsObject.serialize();
     }
 
     @PostConstruct
-    public void init() {
-        secretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+    public void init() throws JOSEException {
+        byte[] bytes = jwtSecret.getBytes(StandardCharsets.UTF_8);
+        signer = new MACSigner(bytes);
+        verifier = new MACVerifier(bytes);
     }
 
     /**
-     * Generate a JSON Web Token for an authenticated user
+     * Verify a JSON Web Token
      *
-     * @return the new token
+     * @param token the token to verify
+     * @return an optional containing the username of the user associated with the token if it's valid
+     * @throws ParseException when the parsing of the token fails
+     * @throws JOSEException  when the cryptographic verification fails
      */
-    public String generateToken(String username) {
-        Date now = new Date();
-        return Jwts.builder()
-                .subject(username)
-                .issuedAt(now)
-                .expiration(new Date(now.getTime() + jwtExpirationMs))
-                .signWith(secretKey)
-                .compact();
-    }
-
-    /**
-     * Validate a JSON Web Token
-     *
-     * @return the username of the user associated with the token
-     */
-    public String validateToken(String token) {
-        try {
-            if (invalidJwtDao.exists(token)) {
-                return null;
+    public String verify(String token) throws JOSEException, ParseException {
+        if (!invalidJwtDao.exists(token)) {
+            SignedJWT signedJWT = SignedJWT.parse(token);
+            if (signedJWT.verify(verifier)) {
+                if (new Date().before(signedJWT.getJWTClaimsSet().getExpirationTime())
+                        && new Date().after(signedJWT.getJWTClaimsSet().getNotBeforeTime())) {
+                    String username = (String) signedJWT.getPayload().toJSONObject().get("username");
+                    System.out.println();
+                    return username;
+                }
             }
-            return Jwts.parser()
-                    .verifyWith(secretKey)
-                    .build()
-                    .parseSignedClaims(token).getPayload().getSubject();
-        } catch (Exception e) {
-            return null;
         }
+        throw new RuntimeException("invalid token");
     }
 
     /**
      * Blacklist a JSON Web Token
      */
-    public void invalidateToken(String token) {
-        invalidJwtDao.save(token);
+    public void invalidate(String token) {
+        try {
+            invalidJwtDao.save(token);
+        } catch (ParseException e) {
+            log.warn("Tried to store a malformed JWT", e);
+        }
     }
 }
