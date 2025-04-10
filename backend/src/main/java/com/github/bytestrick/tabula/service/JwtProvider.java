@@ -6,6 +6,7 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -30,8 +31,11 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class JwtProvider {
     private final InvalidJwtDao invalidJwtDao;
+
+    // TODO: implement dotenv-java to store secrets or spring-dotenv
     @Value("${app.jwt.secret}")
     private String jwtSecret;
+
     private MACSigner signer;
     private MACVerifier verifier;
 
@@ -66,6 +70,7 @@ public class JwtProvider {
      */
     public String create(
             Map<String, Object> claims,
+            @Nullable String subject,
             TemporalAmount notBefore,
             TemporalAmount expiration
     ) throws JOSEException {
@@ -73,7 +78,9 @@ public class JwtProvider {
         for (String entry : claims.keySet()) {
             claimsBuilder.claim(entry, claims.get(entry));
         }
-
+        if (StringUtils.hasText(subject)) {
+            claimsBuilder.subject(subject);
+        }
         Instant issuedAt = Instant.now().truncatedTo(ChronoUnit.SECONDS);
         JWTClaimsSet claimsSet = claimsBuilder.issueTime(Date.from(issuedAt))
                 .notBeforeTime(Date.from(issuedAt.plus(notBefore)))
@@ -95,19 +102,18 @@ public class JwtProvider {
      * Verify a JSON Web Token
      *
      * @param token the token to verify
-     * @return an optional containing the username of the user associated with the token if it's valid
+     * @return the subject of the token
      * @throws ParseException when the parsing of the token fails
      * @throws JOSEException  when the cryptographic verification fails
      */
     public String verify(String token) throws JOSEException, ParseException {
         if (!invalidJwtDao.exists(token)) {
-            SignedJWT signedJWT = SignedJWT.parse(token);
-            if (signedJWT.verify(verifier)) {
-                if (new Date().before(signedJWT.getJWTClaimsSet().getExpirationTime())
-                        && new Date().after(signedJWT.getJWTClaimsSet().getNotBeforeTime())) {
-                    String username = (String) signedJWT.getPayload().toJSONObject().get("username");
-                    System.out.println();
-                    return username;
+            SignedJWT jwt = SignedJWT.parse(token);
+            JWTClaimsSet claims = jwt.getJWTClaimsSet();
+            Date now = new Date();
+            if (jwt.verify(verifier)) {
+                if (now.before(claims.getExpirationTime()) && now.after(claims.getNotBeforeTime())) {
+                    return claims.getSubject();
                 }
             }
         }

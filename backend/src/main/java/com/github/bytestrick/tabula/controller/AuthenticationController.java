@@ -54,7 +54,7 @@ public class AuthenticationController {
             SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (BadCredentialsException e) {
             if (userDao.findByEmail(signInRequest.email()).isEmpty()) {
-                log.warn("User '{}' tried to log in but is not registered", signInRequest.email());
+                log.warn("User '{}' tried to sign-in but is not registered", signInRequest.email());
                 return ResponseEntity.badRequest().body(
                         new InformativeResponse("There is no user registered with this email")
                 );
@@ -64,12 +64,12 @@ public class AuthenticationController {
         }
         try {
             return ResponseEntity.ok(new SignInResponse(jwtProvider.create(
-                    Map.of("username", signInRequest.email()), Duration.ofMillis(0), Duration.ofHours(24)
+                    Map.of(), signInRequest.email(), Duration.ofMillis(0), Duration.ofHours(24)
             )));
         } catch (JOSEException e) {
             return ResponseEntity.internalServerError().body("Error while signing in");
         } finally {
-            log.info("User '{}' has logged in", signInRequest.email());
+            log.info("User '{}' has signed in", signInRequest.email());
         }
     }
 
