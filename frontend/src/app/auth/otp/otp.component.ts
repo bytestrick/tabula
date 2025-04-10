@@ -106,7 +106,7 @@ export class OtpComponent implements OnInit {
   }
 
   private resetPassword() {
-    this.http.post('/auth/reset-password', {
+    this.http.patch('/auth/reset-password', {
       email: this.email,
       newPassword: this.newPassword,
       otp: this.otp
