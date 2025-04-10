@@ -6,6 +6,7 @@ import com.github.bytestrick.tabula.model.User;
 import com.github.bytestrick.tabula.repository.UserDao;
 import com.github.bytestrick.tabula.service.JwtProvider;
 import com.github.bytestrick.tabula.service.OtpProvider;
+import com.nimbusds.jose.JOSEException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,12 +20,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -62,8 +62,15 @@ public class AuthenticationController {
             log.warn("Incorrect password for user '{}'", signInRequest.email());
             return ResponseEntity.badRequest().body(new InformativeResponse("Incorrect password"));
         }
-        log.info("User '{}' has logged in", signInRequest.email());
-        return ResponseEntity.ok(new SignInResponse(jwtProvider.generateToken(signInRequest.email())));
+        try {
+            return ResponseEntity.ok(new SignInResponse(jwtProvider.create(
+                    Map.of("username", signInRequest.email()), Duration.ofMillis(0), Duration.ofHours(24)
+            )));
+        } catch (JOSEException e) {
+            return ResponseEntity.internalServerError().body("Error while signing in");
+        } finally {
+            log.info("User '{}' has logged in", signInRequest.email());
+        }
     }
 
     @PostMapping("/sign-up")
@@ -92,14 +99,16 @@ public class AuthenticationController {
     @PostMapping("/verify-email-otp")
     public ResponseEntity<?> verifyEmail(@Valid @RequestBody VerifyOtpRequest body) {
         try {
-            return otpProvider.verifyOtp(body.email(), body.otp()).map(user -> {
-                user.setEnabled(true);
-                user.setOtp(null);
-                user.setOtpExpiration(null);
-                userDao.updateEmailVerification(user);
-                log.info("{} has verified their email", body.email());
-                return ResponseEntity.ok().build();
-            }).orElse(ResponseEntity.notFound().build());
+            return otpProvider.verifyOtp(body.email(), body.otp())
+                    .map(user -> {
+                        user.setEnabled(true);
+                        user.setOtp(null);
+                        user.setOtpExpiration(null);
+                        userDao.updateEmailVerification(user);
+                        log.info("{} has verified their email", body.email());
+                        return ResponseEntity.ok().build();
+                    })
+                    .orElse(ResponseEntity.notFound().build());
         } catch (InvalidOtpException e) {
             return ResponseEntity.badRequest().body(new InformativeResponse(e.getMessage()));
         }
@@ -109,16 +118,15 @@ public class AuthenticationController {
     public ResponseEntity<?> verifyResetPassword(@Valid @RequestBody VerifyOtpRequest body) {
         try {
             return otpProvider.verifyOtp(body.email(), body.otp())
-                    .map((User u) -> ResponseEntity.ok().build())
+                    .map(user -> ResponseEntity.ok().build())
                     .orElse(ResponseEntity.notFound().build());
         } catch (InvalidOtpException e) {
             return ResponseEntity.badRequest().body(new InformativeResponse(e.getMessage()));
         }
     }
 
-    @PostMapping("/reset-password")
+    @PatchMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest body) {
-        // TODO: maybe use PATCH method
         try {
             return userDao.findByEmail(body.email())
                     .map(user -> {
@@ -139,22 +147,23 @@ public class AuthenticationController {
 
     @PostMapping("/send-otp")
     public ResponseEntity<?> resendOtp(@Valid @RequestBody ResendOtpRequest body) {
-        return userDao.findByEmail(body.email()).map(user -> {
-            otpProvider.sendOtp(user, body.reason());
-            userDao.updateOtp(user);
-            return ResponseEntity.ok().build();
-        }).orElse(ResponseEntity.notFound().build());
+        return userDao.findByEmail(body.email())
+                .map(user -> {
+                    otpProvider.sendOtp(user, body.reason());
+                    userDao.updateOtp(user);
+                    return ResponseEntity.ok().build();
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping("/sign-out")
     public ResponseEntity<?> signOut(HttpServletRequest request) {
-        // TODO: all tokens for this user should be invalidated
-        String token = JwtProvider.fromRequest(request);
-        if (token != null) {
-            jwtProvider.invalidateToken(token);
+        try {
+            jwtProvider.invalidate(JwtProvider.fromRequest(request));
             SecurityContextHolder.clearContext();
             return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new InformativeResponse("No token found"));
         }
-        return ResponseEntity.badRequest().body(new InformativeResponse("No token found"));
     }
 }
