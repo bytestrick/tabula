@@ -1,6 +1,8 @@
 .app-table-bordered {
   border-collapse: separate;
   border-spacing: 0;
+  table-layout: fixed;
+  width: 100%
 }
 
 .app-table-bordered tr {
@@ -51,22 +53,17 @@
 }
 
 
-table {
-  table-layout: fixed;
-  width: 100%
-}
-
 .first-column {
   --width: 94px;
 
-  min-width: var(--width);
+  min-width: var(--width) !important;;
   width: var(--width);
-  max-width: var(--width);
+  max-width: var(--width) !important;;
 }
 
 
 .last-column {
-  min-width: var(--cell-table-min-width);
+  min-width: var(--cell-table-min-width) !important;
   width: auto;
 }
 

@@ -24,7 +24,11 @@ export class ResizableTableColumnDirective implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.body = document.body;
-    this.lastCol = this.colgroup.children[this.colgroup.children.length] as HTMLElement;
+
+    if (this.colgroup.children.length >= 2) {
+      const lastChild: Element = this.colgroup.children[this.colgroup.children.length - 1];
+      this.lastCol = lastChild instanceof HTMLElement ? lastChild : null;
+    }
   }
 
 
@@ -55,9 +59,9 @@ export class ResizableTableColumnDirective implements OnInit, AfterViewInit {
 
   @HostListener('document:mousemove', ['$event'])
   onMouseMove(event: MouseEvent): void {
-    if (!this.dragging || !this.colElement) {
+    if (!this.dragging || !this.colElement)
       return;
-    }
+
     const dx: number = event.clientX - this.startX;
     let newWidth: number = this.startWidth + dx;
 
@@ -68,8 +72,13 @@ export class ResizableTableColumnDirective implements OnInit, AfterViewInit {
 
     this.renderer.setStyle(this.colElement, 'width', `${newWidth}px`);
 
-    if (this.lastCol !== null && this.lastCol.offsetWidth < parseInt(window.getComputedStyle(this.lastCol).minWidth, 0))
-      this.renderer.setStyle(this.lastCol, 'width', "var(--cell-table-min-width)");
+    if (this.lastCol === null)
+      return;
+
+    if (this.lastCol.offsetWidth <= parseInt(window.getComputedStyle(this.lastCol).minWidth, 0))
+      this.renderer.setStyle(this.lastCol, 'width', 'var(--cell-table-min-width)');
+    else
+      this.renderer.setStyle(this.lastCol, 'width', 'auto');
   }
 
 
