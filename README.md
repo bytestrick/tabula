@@ -25,6 +25,27 @@ accepted otherwise it is rejected.
 `JwtProvider` uses a `SecretKey` to sign the JWT, this key is generated every time from a high entropy secret stored in
 `application.properties`.
 
+### Secrets and the `.env` file
+
+Before running the backend you must provide it some secrets. It requires a high entropy secret of at least 256 bits to
+generate the keys to sign and verify JWTs (see `JwtProvider`), you can generate this with
+
+```sh
+openssl rand --hex 32
+```
+
+Moreover, it requires email credentials to send emails to verify the user emails at sign-up and such. If you decide to
+provide a Gmail account you can [create an app password](https://myaccount.google.com/apppasswords) and provide it
+directly in double quotes.
+
+The `.env` file is placed in `backend/src/main/resources/` next to applications.properties. An example file:
+
+```dotenv
+JWT_SECRET=312a8d917893986c44f7f9dea03f0b045a40281f2cb1762082f50348d4e30b50
+EMAIL_ADDRESS=tabula.noreply@example.com
+EMAIL_PASSWORD="vejr zffv tcda mrqw"
+```
+
 ## Credits
 
 - <a href="https://www.flaticon.com/free-icons/business-and-finance" title="business and finance icons">Business and

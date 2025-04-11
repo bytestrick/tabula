@@ -32,7 +32,6 @@ import java.util.Map;
 public class JwtProvider {
     private final InvalidJwtDao invalidJwtDao;
 
-    // TODO: implement dotenv-java to store secrets or spring-dotenv
     @Value("${app.jwt.secret}")
     private String jwtSecret;
 
