@@ -77,11 +77,6 @@ export class UpdateColumnsWidthDirective implements AfterViewInit, OnDestroy {
 
         this.renderer.setStyle(colElement, 'width', `${colWidth}px`);
       }
-
-      const lastCol: HTMLElement = cols[cols.length - 1] as HTMLElement;
-
-      if (lastCol.offsetWidth < parseInt(window.getComputedStyle(lastCol).minWidth, 0))
-        this.renderer.setStyle(cols[cols.length - 1], 'width', "var(--cell-table-min-width)");
     }
   }
 }
