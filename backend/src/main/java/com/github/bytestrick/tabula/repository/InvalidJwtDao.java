@@ -20,7 +20,6 @@ public class InvalidJwtDao {
     }
 
     public boolean exists(String token) {
-        // TODO: maybe use a virtual proxy for this or query paging
         return jdbcClient.sql("SELECT * FROM invalid_jwt WHERE token = :token")
                 .param("token", token)
                 .query()

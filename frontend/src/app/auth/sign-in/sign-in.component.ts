@@ -49,21 +49,38 @@ export class SignInComponent implements OnInit {
     if (this.form.valid) {
       this.auth.signIn(this.form.value as SignInRequest).subscribe({
         next: () => {
-          // FIXME: if the user is not enabled redirect to OtpComponent
           this.toast.show({
             title: 'Sign in successful',
             body: 'Welcome back!',
             background: 'success',
             icon: 'check-circle-fill',
-            delay: 2000
+            delay: 4000
           });
           this.router.navigate([this.returnUrl]).then();
         },
         error: (error: HttpErrorResponse) => {
-          if ( error.error?.message?.startsWith('No user found')) {
+          if (error.error?.message?.startsWith('No user found')) {
             this.form.controls.email.setErrors({unknownUser: true});
           } else if (error.error?.message?.startsWith('Incorrect')) {
             this.form.controls.password.setErrors({incorrect: true});
+          } else if (error.error?.message?.startsWith('Not enabled')) {
+            this.http.post('/auth/send-otp', {
+              email: this.form.controls.email.value,
+              reason: Reason.VerifyEmail
+            }).subscribe({
+              next: () => {
+                this.toast.show({
+                  title: 'Unverified account',
+                  body: 'You signed-up but you didn\'t verify your email yet.'
+                    + 'You must verify your email to finish the sign-up process.',
+                  icon: 'person-fill-exclamation',
+                  background: 'warning',
+                  delay: 30_000
+                });
+                this.router.navigate(['/otp']).then();
+              },
+              error: (error: HttpErrorResponse) => this.toast.serverError(error.error?.message)
+            })
           } else {
             this.toast.serverError(error.error?.message);
           }

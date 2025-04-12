@@ -53,17 +53,11 @@ export class OtpComponent implements OnInit {
     this.http.post('/auth/send-otp', {email: this.email, reason: this.reason}).subscribe({
       next: () => this.toast.show({
         title: 'Code resent',
-        body: 'Another code was resent to your email',
-        icon: 'info-circle-fill',
+        body: 'Another code was sent to your email address',
+        icon: 'send-check-fill',
         background: 'info',
       }),
-      error: (error: HttpErrorResponse) => {
-        if (error.status === 404) {
-          this.handleNoOtpFoundForUser();
-        } else {
-          this.toast.serverError(error.error?.message);
-        }
-      }
+      error: (error: HttpErrorResponse) => this.toast.serverError(error.error?.message)
     })
   }
 
@@ -75,7 +69,15 @@ export class OtpComponent implements OnInit {
       if (this.otp.valid) {
         console.log({email: this.email, otp: this.otp.value});
         this.http.post('/auth/verify-email-otp', {email: this.email, otp: this.otp.value}).subscribe({
-          next: () => this.finalize('Sign up successful', 'You can sign in into your new account'),
+          next: () => {
+            this.toast.show({
+              title: 'Account verified',
+              body: 'Now you can sign into your account',
+              icon: 'person-fill-check',
+              background: 'success',
+            });
+            this.finalize();
+          },
           error: (error: HttpErrorResponse) => this.handleVerifyOtpError(error)
         });
       }
@@ -96,7 +98,15 @@ export class OtpComponent implements OnInit {
             newPassword: this.passwordComponent()?.form.controls.password.value,
             otp: this.otp
           }).subscribe({
-            next: () => this.finalize('Password reset successfully', 'You can now sign-in with your credentials'),
+            next: () => {
+              this.toast.show({
+                title: 'Password reset successfully',
+                body: 'You can now sign in with your updated credentials',
+                icon: 'person-fill-gear',
+                background: 'success',
+              });
+              this.finalize();
+            },
             error: (error: HttpErrorResponse) => this.toast.serverError(error.error?.message)
           });
         }
@@ -108,8 +118,7 @@ export class OtpComponent implements OnInit {
     }
   }
 
-  private finalize(title: string, body: string) {
-    this.toast.show({title, body, icon: 'check-circle-fill', background: 'success',});
+  private finalize() {
     this.router.navigate(['/sign-in']).then();
     localStorage.removeItem('otpData');
   }
@@ -119,12 +128,11 @@ export class OtpComponent implements OnInit {
       title: 'There are no outstanding codes for that email',
       body: 'Request another code and try again',
       icon: 'exclamation-triangle-fill',
-      background: 'warning-subtle'
+      background: 'warning'
     });
   }
 
   private handleVerifyOtpError(error: HttpErrorResponse) {
-    console.error(error.error);
     switch (error.error?.message) {
       case 'Expired':
         // FIXME: OTPs don't seem to expire

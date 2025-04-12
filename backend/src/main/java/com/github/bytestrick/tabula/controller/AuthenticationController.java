@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -49,27 +50,30 @@ public class AuthenticationController {
 
     @PostMapping("/sign-in")
     public ResponseEntity<?> signIn(@Valid @RequestBody SignInRequest signInRequest) {
+        Optional<User> user = userDao.findByEmail(signInRequest.email());
+        if (user.isEmpty()) {
+            log.warn("User '{}' tried to sign-in but is not registered", signInRequest.email());
+            return USER_NOT_FOUND;
+        }
+        if (!user.get().isEnabled()) {
+            return ResponseEntity.badRequest().body(new InformativeResponse("Not enabled"));
+        }
+
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(signInRequest.email(), signInRequest.password())
             );
             SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (BadCredentialsException e) {
-            if (userDao.findByEmail(signInRequest.email()).isEmpty()) {
-                log.warn("User '{}' tried to sign-in but is not registered", signInRequest.email());
-                return USER_NOT_FOUND;
-            }
             log.warn("Incorrect password for user '{}'", signInRequest.email());
             return ResponseEntity.badRequest().body(new InformativeResponse("Incorrect password"));
         }
         try {
-            return ResponseEntity.ok(new SignInResponse(jwtProvider.create(
-                    Map.of(), signInRequest.email(), Duration.ofMillis(0), Duration.ofHours(24)
-            )));
+            String jwt = jwtProvider.create(Map.of(), signInRequest.email(), Duration.ZERO, Duration.ofHours(24));
+            log.info("User '{}' has signed in", signInRequest.email());
+            return ResponseEntity.ok(new SignInResponse(jwt));
         } catch (JOSEException e) {
             return ResponseEntity.internalServerError().body("Error while signing in");
-        } finally {
-            log.info("User '{}' has signed in", signInRequest.email());
         }
     }
 
@@ -146,7 +150,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/send-otp")
-    public ResponseEntity<?> resendOtp(@Valid @RequestBody ResendOtpRequest body) {
+    public ResponseEntity<?> sendOtp(@Valid @RequestBody ResendOtpRequest body) {
         return userDao.findByEmail(body.email())
                 .map(user -> {
                     otpProvider.send(user, body.reason());
