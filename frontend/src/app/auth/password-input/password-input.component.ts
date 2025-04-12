@@ -16,7 +16,7 @@ import {PasswordVisibilityDirective} from '../password-visibility.directive';
  * two password input fields with appropriate validation.
  */
 @Component({
-  selector: 'app-password-input',
+  selector: 'tbl-password-input',
   standalone: true,
   imports: [PasswordVisibilityDirective, ReactiveFormsModule],
   templateUrl: './password-input.component.html',

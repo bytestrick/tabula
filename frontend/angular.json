@@ -5,7 +5,14 @@
   "projects": {
     "tabula": {
       "projectType": "application",
-      "schematics": {},
+      "schematics": {
+        "@schematics/angular:component": {
+          "prefix": "tbl"
+        },
+        "@schematics/angular:directive": {
+          "prefix": "tbl"
+        }
+      },
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",

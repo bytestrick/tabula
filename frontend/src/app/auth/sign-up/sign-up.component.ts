@@ -17,7 +17,7 @@ interface Country {
 }
 
 @Component({
-  selector: 'app-sign-up',
+  selector: 'tbl-sign-up',
   standalone: true,
   imports: [RouterLink, NgForOf, PasswordInputComponent, ReactiveFormsModule],
   templateUrl: './sign-up.component.html',

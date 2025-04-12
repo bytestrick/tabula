@@ -6,7 +6,7 @@ import {Tooltip} from 'bootstrap';
  * visibility on a form input
  */
 @Directive({
-  selector: '[appPasswordVisibility]',
+  selector: '[tblPasswordVisibility]',
   standalone: true
 })
 export class PasswordVisibilityDirective {

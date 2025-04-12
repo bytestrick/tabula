@@ -5,13 +5,13 @@ html, body {
 }
 
 /* If the body contains either the sign-in or the sign-up component, center it */
-body:has(app-sign-in, app-sign-up, app-page-not-found, app-otp) {
+body:has(tbl-sign-in, tbl-sign-up, tbl-page-not-found, tbl-otp) {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-app-sign-in form, app-sign-up form, app-otp form {
+tbl-sign-in form, tbl-sign-up form, tbl-otp form {
   max-width: 500px !important;
   padding: 2em;
   max-height: 80vh;
