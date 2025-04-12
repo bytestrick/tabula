@@ -29,7 +29,7 @@ public class OtpProvider {
      * @param user   the generated OTP is set on it
      * @param reason the reason for the OTP
      */
-    public void sendOtp(User user, String reason) {
+    public void send(User user, String reason) {
         String otp = String.valueOf(RANDOM.nextInt(100000, 999999));
         int expirationMinutes = 30;
         user.setOtp(otp);
@@ -44,7 +44,7 @@ public class OtpProvider {
         log.info("OTP sent to {}", user.getEmail());
     }
 
-    public Optional<User> verifyOtp(String email, String otp) throws InvalidOtpException {
+    public Optional<User> verify(String email, String otp) throws InvalidOtpException {
         return userDao.findByEmail(email).map(user -> {
             if (user.getOtpExpiration() == null || user.getOtp() == null) {
                 throw new InvalidOtpException("Not found");

@@ -1,38 +1,64 @@
-<form (submit)="onSubmit($event)" class="needs-validation" novalidate>
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="needs-validation" novalidate>
   <h1 class="mb-5 d-flex justify-content-center"><i class="me-3 bi bi-table" style="color: orangered"></i>Tabula</h1>
 
   <h5 class="row mb-5 p-0 justify-content-center">Sign into your account</h5>
 
   <div class="row mb-3">
-    <label for="email-input" class="form-label p-0">Email address</label>
+    <label for="email" class="form-label p-0">Email address</label>
     <div class="input-group p-0 has-validation">
-      <input #emailInput id="email-input" class="form-control" type="email" [(ngModel)]="form.email" name="email"
-             placeholder="john.doe@example.com" required autocomplete="username" (input)="onEmailInput()">
-      <div #emailFeedback class="invalid-tooltip">Valid email required</div>
+      <input formControlName="email" [class.is-valid]="form.controls.email.touched && form.controls.email.valid"
+             [class.is-invalid]="form.controls.email.touched && form.controls.email.invalid" id="email"
+             class="form-control" type="email" placeholder="john.doe@example.com" autocomplete="username">
+      <div class="invalid-tooltip">
+        @if (form.controls.email.touched && form.controls.email.invalid) {
+          @if (form.controls.email.errors?.['required']) {
+            Email required
+          } @else if (form.controls.email.errors?.['email']) {
+            Invalid email
+          } @else if (form.controls.email.errors?.['unknownUser']) {
+            There is no user registered with this email
+          }
+        }
+      </div>
     </div>
   </div>
 
   <div class="row mb-3">
-    <label for="pass-input" class="form-label p-0">Password</label>
+    <label for="pass" class="form-label p-0">Password</label>
     <div class="input-group p-0 has-validation">
-      <input #passwordInput id="pass-input" class="form-control" [(ngModel)]="form.password" name="password"
-             type="password" required autocomplete="current-password" minlength="10" maxlength="512"
-             (input)="onPasswordInput()">
-      <button appPasswordVisibility id="pass-visible" type="button" class="btn btn-outline-secondary"
+      <input id="pass" class="form-control" type="password" autocomplete="current-password"
+             formControlName="password"
+             [class.is-valid]="form.controls.password.touched && form.controls.password.valid"
+             [class.is-invalid]="form.controls.password.touched && form.controls.password.invalid">
+      <button appPasswordVisibility type="button" class="btn btn-outline-secondary"
               data-bs-toggle="tooltip" data-bs-title="Show password">
-        <i class="bi bi-eye" id="pass-icon"></i>
+        <i class="bi bi-eye"></i>
       </button>
-      <div #passwordFeedback class="invalid-tooltip">Password required</div>
+      <div class="invalid-tooltip">
+        @if (form.controls.password.touched && form.controls.password.invalid) {
+          @if (form.controls.password.errors?.['required']) {
+            Password required
+          } @else if (form.controls.password.errors?.['minlength']) {
+            Password must be at least 10 characters long
+          } @else if (form.controls.password.errors?.['maxlength']) {
+            Password can't be longer than 512 characters
+          } @else if (form.controls.password.errors?.['pattern']) {
+            Provided password doesn't match the validity criteria
+          } @else if (form.controls.password.errors?.['incorrect']) {
+            Incorrect password
+          }
+        }
+      </div>
     </div>
   </div>
 
   <div class="row mb-5">
     <div class="col form-check">
-      <input id="remember-me" class="form-check-input" type="checkbox" [(ngModel)]="form.rememberMe"
-             name="rememberLogin" checked>
+      <input id="remember-me" class="form-check-input" type="checkbox" formControlName="rememberMe">
       <label for="remember-me" class="form-check-label">Keep me signed in</label>
     </div>
-    <button (click)="onForgotPassword()" type="button" class="col btn btn-link d-flex justify-content-end p-0">Forgot
+    <button (click)="onForgotPassword()" type="button" class="col btn btn-link d-flex justify-content-end p-0">
+      Forgot
       Password?
     </button>
   </div>
@@ -43,4 +69,3 @@
 
   <a class="row pb-5" routerLink="/sign-up">Don't have an account?</a>
 </form>
-

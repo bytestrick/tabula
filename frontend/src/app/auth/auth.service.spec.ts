@@ -1,10 +1,9 @@
 import {TestBed} from '@angular/core/testing';
-import {Authentication, AuthService} from './auth.service';
+import {Authentication, AuthService, SignInRequest} from './auth.service';
 import {HttpErrorResponse, provideHttpClient, withInterceptors} from '@angular/common/http';
 import {Router} from '@angular/router';
 import {ToastService} from '../toast/toast.service';
 import {HttpTestingController, provideHttpClientTesting} from '@angular/common/http/testing';
-import {SignInRequest} from './sign-in/sign-in.component';
 import {apiInterceptor} from '../http/api.interceptor';
 import {backendBaseUrl} from '../constants';
 
@@ -50,7 +49,7 @@ describe('AuthService', () => {
     expect(localStorage.getItem).toHaveBeenCalledOnceWith('authentication');
     expect(service.isAuthenticated).toBeTrue();
     expect(service.authentication).toEqual(authStatus);
-  })
+  });
 
   it('should sign-in a user given their credentials, if those are correct', () => {
     service = TestBed.inject(AuthService);
@@ -74,7 +73,7 @@ describe('AuthService', () => {
     httpTestingController.expectOne(`${backendBaseUrl}/auth/sign-in`).flush('b6c0b80a-3a97-48d5-962c-85ea6efe18d9');
 
     expect(() => service.signIn(form)).toThrowError('Already signed-in');
-  })
+  });
 
   it('should not sign-in a user when their credentials are incorrect', () => {
     service = TestBed.inject(AuthService);
@@ -113,7 +112,7 @@ describe('AuthService', () => {
     expect(router.navigate).toHaveBeenCalledOnceWith(['/sign-in']);
     expect(service.authentication).toBeNull();
     expect(service.isAuthenticated).toBeFalse();
-  })
+  });
 
   it('should sign-out the user anyway when the server returns an error', () => {
     service = TestBed.inject(AuthService);
@@ -131,7 +130,7 @@ describe('AuthService', () => {
     expect(router.navigate).toHaveBeenCalledOnceWith(['/sign-in']);
     expect(service.authentication).toBeNull();
     expect(service.isAuthenticated).toBeFalse();
-  })
+  });
 
   it('should throw an error when asked to sign-out a user that is not authenticated first', () => {
     service = TestBed.inject(AuthService);
