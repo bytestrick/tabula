@@ -11,11 +11,11 @@ describe('authGuard', () => {
 
   beforeEach(() => {
     const mockRouter = jasmine.createSpyObj('Router', ['navigate']);
-    mockRouter.navigate.and.returnValue(Promise.resolve())
+    mockRouter.navigate.and.returnValue(Promise.resolve());
 
     const mockAuthService = jasmine.createSpyObj('AuthService', ['signIn']);
     authSateSpy = jasmine.createSpy('isAuthenticated');
-    Object.defineProperty(mockAuthService, 'isAuthenticated', {get: authSateSpy})
+    Object.defineProperty(mockAuthService, 'isAuthenticated', {get: authSateSpy});
 
     TestBed.configureTestingModule({
       providers: [

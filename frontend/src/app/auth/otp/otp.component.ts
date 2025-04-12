@@ -20,7 +20,7 @@ enum View {
 }
 
 @Component({
-  selector: 'app-otp',
+  selector: 'tbl-otp',
   standalone: true,
   imports: [ReactiveFormsModule, PasswordInputComponent],
   templateUrl: './otp.component.html',

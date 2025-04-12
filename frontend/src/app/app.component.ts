@@ -3,7 +3,7 @@ import {RouterOutlet} from '@angular/router';
 import {ToastComponent} from './toast/toast.component';
 
 @Component({
-  selector: 'app-root',
+  selector: 'tbl-root',
   standalone: true,
   imports: [RouterOutlet, ToastComponent],
   templateUrl: './app.component.html',
@@ -21,7 +21,7 @@ export class AppComponent implements OnInit {
     const darkColorSchemeQuery = matchMedia('(prefers-color-scheme: dark)');
     const onChange = (isDark: boolean) => {
       document.documentElement.setAttribute('data-bs-theme', isDark ? 'dark' : 'light');
-    }
+    };
     darkColorSchemeQuery.addEventListener('change', e => onChange(e.matches));
     onChange(darkColorSchemeQuery.matches); // at first load
   }

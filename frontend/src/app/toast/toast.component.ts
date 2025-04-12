@@ -40,7 +40,7 @@ export interface ToastOptions {
  * @see {@link https://getbootstrap.com/docs/5.3/components/toasts/|Bootstraps' toasts}
  */
 @Component({
-  selector: 'app-toasts',
+  selector: 'tbl-toasts',
   standalone: true,
   template: `
     <div #container class="toast-container top-0 end-0 p-3 position-fixed"></div>

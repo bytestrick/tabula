@@ -10,7 +10,7 @@ import {passwordRegExp} from '../../constants';
 import {Reason} from '../otp/otp.component';
 
 @Component({
-  selector: 'app-sign-in',
+  selector: 'tbl-sign-in',
   standalone: true,
   imports: [RouterLink, PasswordVisibilityDirective, ReactiveFormsModule],
   templateUrl: './sign-in.component.html',
