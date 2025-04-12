@@ -12,7 +12,7 @@ CREATE TABLE users
     country_dial_code INT          NOT NULL,
     enabled           BOOLEAN DEFAULT FALSE,
     otp               VARCHAR(6) NULL,
-    otp_expiration    DATE NULL
+    otp_expiration    TIMESTAMP NULL
 );
 
 CREATE TABLE invalid_jwts

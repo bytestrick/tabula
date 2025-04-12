@@ -64,11 +64,10 @@ export class SignInComponent implements OnInit {
           } else if (error.error?.message?.startsWith('Incorrect')) {
             this.form.controls.password.setErrors({incorrect: true});
           } else if (error.error?.message?.startsWith('Not enabled')) {
-            this.http.post('/auth/send-otp', {
-              email: this.form.controls.email.value,
-              reason: Reason.VerifyEmail
-            }).subscribe({
+            const otpRequest = {email: this.form.controls.email.value, reason: Reason.VerifyEmail};
+            this.http.post('/auth/send-otp', otpRequest).subscribe({
               next: () => {
+                localStorage.setItem('otpData', JSON.stringify(otpRequest));
                 this.toast.show({
                   title: 'Unverified account',
                   body: 'You signed-up but you didn\'t verify your email yet.'
