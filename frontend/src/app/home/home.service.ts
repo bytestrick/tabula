@@ -13,18 +13,28 @@ export class HomeService {
   constructor(private http: HttpClient) {}
 
 
-  public loadTableCard(page: number, size: number): Observable<TableCard[]> {
-    const headers = new HttpHeaders({
-      'Authorization': 'Bearer ' + ''
-    });
+  public loadNextTableCards(id: string, quantity: number): Observable<TableCard[]> {
+    // const headers = new HttpHeaders({
+    //   'Authorization': 'Bearer ' + ''
+    // });
 
     const params: HttpParams = new HttpParams()
-      .set('page', page)
-      .set('size', size);
+      .set('quantity', quantity)
+      .set('id', id);
+
+    return this.http.get<TableCard[]>(
+      '/table-card/next',
+      {params, responseType: 'json'}
+    );
+  }
+
+  public loadTableCards(quantity: number): Observable<TableCard[]> {
+    const params: HttpParams = new HttpParams()
+      .set('quantity', quantity);
 
     return this.http.get<TableCard[]>(
       '/table-card',
-      { params, responseType: 'json' }
+      {params, responseType: 'json'}
     );
   }
 

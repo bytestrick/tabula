@@ -1,7 +1,7 @@
 import { Modal } from 'bootstrap';
 import { ElementRef } from '@angular/core';
 
-export abstract class ModalForm {
+export abstract class ModalFormComponent {
 
   protected modal!: Modal;
   protected form!: HTMLFormElement;

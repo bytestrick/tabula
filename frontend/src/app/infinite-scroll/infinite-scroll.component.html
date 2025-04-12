@@ -1,0 +1,17 @@
+<ng-container #content>
+  <ng-content></ng-content>
+</ng-container>
+
+<div intersectionListener [component]="this"></div>
+
+<div *ngIf="isLoading"
+     class="d-flex justify-content-center mb-3"
+     style="width: 100%">
+    <div class="spinner-border"
+         role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+
+
+

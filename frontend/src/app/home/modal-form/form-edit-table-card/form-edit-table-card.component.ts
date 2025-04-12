@@ -1,5 +1,5 @@
 import {AfterViewInit, Component, ElementRef, ViewChild} from '@angular/core';
-import {ModalForm} from '../modal-form';
+import {ModalFormComponent} from '../modal-form.component';
 import {FormsModule} from '@angular/forms';
 import {TableCardComponent} from "../../table-card/table-card.component";
 import {HomeService} from "../../home.service";
@@ -14,11 +14,11 @@ import {TableCard} from "../../table-card/table-card.interface";
   templateUrl: './form-edit-table-card.component.html',
   styleUrl: './form-edit-table-card.component.css'
 })
-export class FormEditTableCardComponent extends ModalForm implements AfterViewInit {
+export class FormEditTableCardComponent extends ModalFormComponent implements AfterViewInit {
 
   @ViewChild('form') private formRef!: ElementRef;
   @ViewChild('modal') private modalRef!: ElementRef;
-  private tableCardComponentToEdit: TableCardComponent | undefined;
+  private tableCardCmpToEdit: TableCardComponent | undefined;
   titleField: string = '';
   descriptionField: string = '';
 
@@ -33,7 +33,7 @@ export class FormEditTableCardComponent extends ModalForm implements AfterViewIn
   }
 
   setTableCardComponentToEdit(tableCardComponent: TableCardComponent): void {
-    this.tableCardComponentToEdit = tableCardComponent;
+    this.tableCardCmpToEdit = tableCardComponent;
     this.titleField = tableCardComponent.getTitle();
     this.descriptionField = tableCardComponent.getDescription();
   }
@@ -41,16 +41,18 @@ export class FormEditTableCardComponent extends ModalForm implements AfterViewIn
   protected doOnModalHide(): void {
     this.titleField = '';
     this.descriptionField = '';
-    this.tableCardComponentToEdit = undefined;
+    this.tableCardCmpToEdit = undefined;
   }
 
   protected doOnSubmit(): void {
-    let tableCard: TableCard = {
-      id: this.tableCardComponentToEdit?.getId(),
-      title: this.titleField,
-      description: this.descriptionField
-    }
-    const toEdit: TableCardComponent | undefined = this.tableCardComponentToEdit;
+    const tableCard: TableCard | undefined = this.tableCardCmpToEdit?.toTableCard();
+    if (!tableCard) return;
+
+    tableCard.title = this.titleField;
+    tableCard.description = this.descriptionField;
+    tableCard.lastEditDate = new Date();
+    const toEdit: TableCardComponent | undefined = this.tableCardCmpToEdit;
+
     this.homeService.editTableCard(tableCard).subscribe({
       next: (data: string): void => {
         console.log(data);

@@ -53,7 +53,6 @@ export class NavbarComponent {
     this.navbarService.fuzzySearch(text).subscribe({
       next: (tableCards: TableCard[]): void => {
         console.debug(tableCards);
-        // this.homeMediatorService.addTableCards(tableCards);
       },
       error: (err: any): any => console.debug(err)
     });
