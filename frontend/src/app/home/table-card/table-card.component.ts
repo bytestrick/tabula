@@ -1,4 +1,12 @@
-import {Component, ComponentRef, EventEmitter, OnDestroy, Output, ViewContainerRef} from '@angular/core';
+import {
+  Component,
+  ComponentRef,
+  createComponent, EnvironmentInjector,
+  EventEmitter,
+  OnDestroy,
+  Output,
+  ViewContainerRef
+} from '@angular/core';
 import {HomeService} from '../home.service';
 import {TableCard} from './table-card.interface';
 import {Subscription} from 'rxjs';
@@ -14,10 +22,14 @@ import {Subscription} from 'rxjs';
 export class TableCardComponent implements OnDestroy {
 
   @Output('editTableCard') editTableCard: EventEmitter<TableCardComponent> = new EventEmitter;
-  private ref!: ComponentRef<TableCardComponent>;
+  private componentRef!: ComponentRef<TableCardComponent>;
+
   private id?: string;
   protected title: string = "Title";
   protected description: string = "Description";
+  protected creationDate?: Date;
+  protected lastEditDate?: Date;
+
   private isInit: boolean = false;
   private subscription!: Subscription;
 
@@ -25,21 +37,35 @@ export class TableCardComponent implements OnDestroy {
   constructor(private homeService: HomeService) {}
 
 
-  init(tableCard: TableCard): void {
-    if (this.isInit) return;
+  init(tableCard: TableCard): TableCardComponent {
+    if (this.isInit) return this;
     this.isInit = true;
 
     this.id = tableCard.id;
     this.title = tableCard.title;
     this.description = tableCard.description;
+    this.creationDate = tableCard.creationDate;
+    this.lastEditDate = tableCard.lastEditDate;
+
+    return this;
   }
 
-  static create(containerRef: ViewContainerRef): TableCardComponent {
-    let newTableCard: ComponentRef<TableCardComponent> = containerRef.createComponent(TableCardComponent);
-    newTableCard.instance.ref = newTableCard;
-    containerRef.insert(newTableCard.hostView, 0);
+  static create(injector: EnvironmentInjector): ComponentRef<TableCardComponent> {
+    const newTableCardRef: ComponentRef<TableCardComponent> = createComponent(TableCardComponent, {
+      environmentInjector: injector
+    });
+    newTableCardRef.instance.componentRef = newTableCardRef;
+    return newTableCardRef;
+  }
 
-    return newTableCard.instance;
+  toTableCard(): TableCard {
+    return {
+      id: this.getId(),
+      title: this.getTitle(),
+      description: this.getDescription(),
+      creationDate: this.getCreationDate(),
+      lastEditDate: this.getLastEditDate()
+    }
   }
 
   getId(): string | undefined {
@@ -54,20 +80,32 @@ export class TableCardComponent implements OnDestroy {
     return this.description;
   }
 
+  getCreationDate(): Date | undefined {
+    return this.creationDate;
+  }
+
+  getLastEditDate(): Date | undefined {
+    return this.lastEditDate;
+  }
+
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
 
+  insert(parent: ViewContainerRef, index?: number): void {
+    parent.insert(this.componentRef.hostView, index);
+  }
+
   onDelete(): void {
-    if (this.id) {
-      this.subscription = this.homeService.deleteTableCard(this.id).subscribe({
-        next: (data: string): void => {
-          console.log(data)
-          this.ref.destroy();
-        },
-        error: (err: any): void => console.log(err)
-      });
-    }
+    if (!this.id) return;
+
+    this.subscription = this.homeService.deleteTableCard(this.id).subscribe({
+      next: (data: string): void => {
+        console.log(data)
+        this.componentRef.destroy();
+      },
+      error: (err: any): void => console.log(err)
+    });
   }
 
   onEdit(): void {

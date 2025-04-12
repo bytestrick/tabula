@@ -1,5 +1,5 @@
 import {AfterViewInit, Component, ElementRef, EventEmitter, Output, ViewChild} from '@angular/core';
-import {ModalForm} from '../modal-form';
+import {ModalFormComponent} from '../modal-form.component';
 import {FormsModule} from '@angular/forms';
 import {HomeService} from "../../home.service";
 import {TableCard} from "../../table-card/table-card.interface";
@@ -13,7 +13,7 @@ import {TableCard} from "../../table-card/table-card.interface";
   templateUrl: './form-create-table-card.component.html',
   styleUrl: './form-create-table-card.component.css'
 })
-export class FormCreateTableCardComponent extends ModalForm implements AfterViewInit {
+export class FormCreateTableCardComponent extends ModalFormComponent implements AfterViewInit {
 
   @ViewChild('form') private formRef!: ElementRef;
   @ViewChild('modal') private modalRef!: ElementRef;
@@ -32,9 +32,10 @@ export class FormCreateTableCardComponent extends ModalForm implements AfterView
   }
 
   protected doOnSubmit(): void {
-    let tableCard: TableCard = {
+    const tableCard: TableCard = {
       title: this.titleField,
-      description: this.descriptionField
+      description: this.descriptionField,
+      creationDate: new Date()
     }
     this.homeService.createTableCard(tableCard).subscribe({
       next: (data: TableCard): void => {
