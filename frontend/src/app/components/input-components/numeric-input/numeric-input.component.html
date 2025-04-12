@@ -1,4 +1,4 @@
-<div class="container d-flex justify-content-between align-items-center p-0">
+<div class="d-flex justify-content-between align-items-center p-0">
   <input #input class="form-control" type="text" placeholder="123" (keydown)="onKeyPressed($event)" (input)="onInsertion($event)">
 
   <div class="controls d-flex flex-column align-items-center justify-content-center me-2">
@@ -10,10 +10,5 @@
     </button>
   </div>
 
-  <i
-    class="bi bi-info-circle opacity-50"
-    data-bs-toggle="tooltip"
-    data-bs-html="true"
-    title="Press Enter to confirm Press Canc to abort"
-  ></i>
+  <app-info></app-info>
 </div>

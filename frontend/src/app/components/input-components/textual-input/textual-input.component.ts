@@ -1,10 +1,13 @@
 import {Component, ElementRef, ViewChild} from '@angular/core';
 import {BaseInputComponent} from '../base-input-component';
+import {InfoComponent} from '../info-component/info.component';
 
 @Component({
   selector: 'app-text-input',
   standalone: true,
-  imports: [],
+  imports: [
+    InfoComponent
+  ],
   templateUrl: './textual-input.component.html',
 })
 export class TextualInputComponent extends BaseInputComponent {
@@ -15,8 +18,10 @@ export class TextualInputComponent extends BaseInputComponent {
 
 
   protected override beforeShowUp(): void {
-    this.input.nativeElement.value = this.startingValue;
-    this.text = this.startingValue;
+    this.grabFocus();
+
+    this.input.nativeElement.value = this.startingValue || '';
+    this.text = this.startingValue || '';
   }
 
 
@@ -35,7 +40,7 @@ export class TextualInputComponent extends BaseInputComponent {
   }
 
 
-  override grabFocus(): void {
+  protected grabFocus(): void {
     this.input.nativeElement.focus();
   }
 

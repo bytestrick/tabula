@@ -11,7 +11,6 @@ import {DataTypeCellComponent} from '../data-type-cell/data-type-cell.component'
 import {HeaderCell} from '../../../../model/table/header-cell';
 import {Cell} from '../../../../model/table/cell';
 import {BaseCellComponent} from '../base-cell-component';
-import {Pair} from '../../../../model/pair';
 import {CellCord} from '../../../../model/table/cell-cord';
 
 @Component({

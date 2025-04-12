@@ -1,10 +1,13 @@
 import {Component, ElementRef, ViewChild} from '@angular/core';
 import {BaseInputComponent} from '../base-input-component';
+import {InfoComponent} from '../info-component/info.component';
 
 @Component({
   selector: 'app-numeric-input',
   standalone: true,
-  imports: [],
+  imports: [
+    InfoComponent
+  ],
   templateUrl: './numeric-input.component.html',
   styleUrl: './numeric-input.component.css'
 })
@@ -16,17 +19,24 @@ export class NumericInputComponent extends BaseInputComponent {
 
 
   protected override beforeShowUp(): void {
-    this.input.nativeElement.value = this.startingValue;
-    this.value = this.startingValue;
+    this.grabFocus();
+
+    this.input.nativeElement.value = this.startingValue || '';
+    this.value = this.startingValue || '';
+  }
+
+
+  private setInput(value: string): void {
+    if (!isNaN(Number(value)))
+      this.confirmInput(value);
+    else
+      this.confirmInput(this.startingValue || '');
   }
 
 
   onKeyPressed(event: KeyboardEvent): void {
     if (event.key === 'Enter') {
-      if (!isNaN(Number(this.value)))
-        this.confirmInput(this.value);
-      else
-        this.confirmInput(this.startingValue);
+      this.setInput(this.value);
     }
     else if (event.key === 'Delete') {
       this.abortInput();
@@ -39,7 +49,7 @@ export class NumericInputComponent extends BaseInputComponent {
   }
 
 
-  override grabFocus(): void {
+  protected grabFocus(): void {
     this.input.nativeElement.focus();
   }
 
@@ -69,10 +79,7 @@ export class NumericInputComponent extends BaseInputComponent {
 
 
   protected override onHiddenWithLeftClick(): void {
-    if (!isNaN(Number(this.value)))
-      this.confirmInput(this.value);
-    else
-      this.confirmInput(this.startingValue);
+    this.setInput(this.value);
   }
 
 
