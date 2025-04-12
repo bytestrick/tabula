@@ -1,0 +1,15 @@
+<div class="input-group d-flex justify-content-between align-items-center p-0">
+  <div class="dropdown">
+    <button class="rounded-end-0 btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+      {{ currentSymbol }}
+    </button>
+    <ul class="dropdown-menu" style="min-width: 56px">
+      <li *ngFor="let s of symbol">
+        <button class="dropdown-item text-center" type="button" (click)="onChangeSymbol(s)">{{ s }}</button>
+      </li>
+    </ul>
+  </div>
+
+  <input #input type="text" class="form-control me-2" style="width: 160px" aria-label="Amount" (keydown)="onKeyPressed($event)" (input)="onInsertion($event)">
+  <app-info></app-info>
+</div>

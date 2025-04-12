@@ -20,10 +20,12 @@ export class DataTypesChooserComponent extends BaseInputComponent {
   protected dataTypesRegistry: DataTypeRegistryService = inject(DataTypeRegistryService);
 
 
-  protected override beforeShowUp(): void {}
+  protected override beforeShowUp(): void {
+    this.grabFocus();
+  }
 
 
-  override grabFocus(): void {
+  protected grabFocus(): void {
     this.searchBar.nativeElement.focus();
   }
 

@@ -15,7 +15,6 @@ export abstract class BaseInputComponent implements IPopUpContent {
 
 
   protected abstract beforeShowUp(): void;
-  abstract grabFocus(): void;
 
 
   protected confirmInput(value: any): void {
@@ -32,7 +31,6 @@ export abstract class BaseInputComponent implements IPopUpContent {
 
 
   beforeContentShowUp(): void {
-    this.grabFocus();
     this.beforeShowUp();
   }
 
