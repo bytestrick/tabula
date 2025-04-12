@@ -61,23 +61,27 @@ export class SignUpComponent implements OnInit, AfterViewInit {
   protected onSubmit() {
     this.form.markAllAsTouched();
     if (this.form.valid) {
-      const data = {
+      this.http.post('/auth/sign-up', {
         ...this.form.value,
         password: this.form.controls.password.controls.password.value,
         country: this.countries[this.form.controls.country.value!],
-      };
-
-      console.log(data);
-      this.http.post('/auth/sign-up', data).subscribe({
+      }).subscribe({
         next: () => {
           localStorage.setItem('otpData', JSON.stringify({
             email: this.form.controls.email.value,
             reason: Reason.VerifyEmail
           }));
           this.router.navigate(['/otp']).then();
+          this.toast.show({
+            title: 'Sign up successful',
+            body: 'Now you must verify your email to finish the sign-up process',
+            icon: 'person-fill-add',
+            background: 'info',
+            delay: 15_000
+          });
         },
         error: (error: HttpErrorResponse) => {
-          if (error.status === 400 && error.error?.messsage?.startsWith('Email already registered')) {
+          if (error.error?.messsage?.startsWith('Email already registered')) {
             this.form.controls.email.setErrors({alreadyRegistered: true});
           } else {
             this.toast.serverError(error.error?.message);
