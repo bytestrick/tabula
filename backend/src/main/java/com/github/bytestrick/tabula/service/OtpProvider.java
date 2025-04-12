@@ -46,15 +46,15 @@ public class OtpProvider {
 
     public Optional<User> verify(String email, String otp) throws InvalidOtpException {
         return userDao.findByEmail(email).map(user -> {
-            if (user.getOtpExpiration() == null || user.getOtp() == null) {
+            LocalDateTime expiration = user.getOtpExpiration(), now = LocalDateTime.now();
+            String actualOtp = user.getOtp();
+            if (expiration == null || actualOtp == null) {
                 throw new InvalidOtpException("Not found");
             }
-
-            if (user.getOtpExpiration().isAfter(LocalDateTime.now())) {
+            if (now.isAfter(expiration)) {
                 throw new InvalidOtpException("Expired");
             }
-
-            if (user.getOtp().equals(otp)) {
+            if (otp.equals(actualOtp)) {
                 return user;
             }
             throw new InvalidOtpException("Incorrect");
@@ -71,14 +71,5 @@ public class OtpProvider {
         RESET_PASSWORD("reset your password");
 
         private final String reason;
-
-        public Reason fromString(String reason) {
-            for (Reason r : Reason.values()) {
-                if (r.getReason().equals(reason)) {
-                    return r;
-                }
-            }
-            throw new IllegalArgumentException("Invalid reason: " + reason);
-        }
     }
 }

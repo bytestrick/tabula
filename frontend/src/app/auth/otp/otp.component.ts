@@ -67,7 +67,6 @@ export class OtpComponent implements OnInit {
     if (this.reason === Reason.VerifyEmail) {
       this.otp.markAsTouched();
       if (this.otp.valid) {
-        console.log({email: this.email, otp: this.otp.value});
         this.http.post('/auth/verify-email-otp', {email: this.email, otp: this.otp.value}).subscribe({
           next: () => {
             this.toast.show({
@@ -85,7 +84,7 @@ export class OtpComponent implements OnInit {
       if (this.view === View.InputCode) {
         this.otp.markAsTouched();
         if (this.otp.valid) {
-          this.http.post('/auth/verify-reset-password-otp', {email: this.email, otp: this.otp}).subscribe({
+          this.http.post('/auth/verify-reset-password-otp', {email: this.email, otp: this.otp.value}).subscribe({
             next: () => this.view = View.InputResetPassword, // next step
             error: (error: HttpErrorResponse) => this.handleVerifyOtpError(error)
           });
@@ -96,7 +95,7 @@ export class OtpComponent implements OnInit {
           this.http.patch('/auth/reset-password', {
             email: this.email,
             newPassword: this.passwordComponent()?.form.controls.password.value,
-            otp: this.otp
+            otp: this.otp.value
           }).subscribe({
             next: () => {
               this.toast.show({
@@ -135,13 +134,13 @@ export class OtpComponent implements OnInit {
   private handleVerifyOtpError(error: HttpErrorResponse) {
     switch (error.error?.message) {
       case 'Expired':
-        // FIXME: OTPs don't seem to expire
         this.toast.show({
           title: 'Code expired',
-          body: 'Request another code and try again.',
+          body: 'Request another code and try again',
           icon: 'hourglass-bottom',
           background: 'danger'
         });
+        this.otp.setErrors({expired: true});
         break;
       case 'Not found':
         this.handleNoOtpFoundForUser();
