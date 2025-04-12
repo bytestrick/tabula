@@ -2,9 +2,14 @@ import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {inject, Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
 import {tap} from 'rxjs/operators';
-import {SignInRequest} from './sign-in/sign-in.component';
 import {ToastService} from '../toast/toast.service';
 import {Router} from '@angular/router';
+
+export interface SignInRequest {
+  email: string,
+  password: string,
+  rememberMe: boolean
+}
 
 interface AuthenticationResponse {
   token: string;
@@ -48,7 +53,7 @@ export class AuthService {
 
     return this.http.post<AuthenticationResponse>('/auth/sign-in', form).pipe(
       tap(response => {
-        this.auth = {email: form.email, token: response.token}
+        this.auth = {email: form.email, token: response.token};
         localStorage.setItem('authentication', JSON.stringify(this.authentication));
       })
     );

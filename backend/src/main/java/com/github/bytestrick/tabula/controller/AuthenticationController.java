@@ -39,6 +39,8 @@ import java.util.UUID;
 )
 @RequiredArgsConstructor
 public class AuthenticationController {
+    private static final ResponseEntity<Object> USER_NOT_FOUND =
+            ResponseEntity.badRequest().body(new InformativeResponse("No user found with this email"));
     private final UserDao userDao;
     private final JwtProvider jwtProvider;
     private final AuthenticationManager authenticationManager;
@@ -55,9 +57,7 @@ public class AuthenticationController {
         } catch (BadCredentialsException e) {
             if (userDao.findByEmail(signInRequest.email()).isEmpty()) {
                 log.warn("User '{}' tried to sign-in but is not registered", signInRequest.email());
-                return ResponseEntity.badRequest().body(
-                        new InformativeResponse("There is no user registered with this email")
-                );
+                return USER_NOT_FOUND;
             }
             log.warn("Incorrect password for user '{}'", signInRequest.email());
             return ResponseEntity.badRequest().body(new InformativeResponse("Incorrect password"));
@@ -89,7 +89,7 @@ public class AuthenticationController {
                 .roles(List.of(new SimpleGrantedAuthority("USER")))
                 .build();
 
-        otpProvider.sendOtp(user, OtpProvider.Reason.VERIFY_EMAIL.getReason());
+        otpProvider.send(user, OtpProvider.Reason.VERIFY_EMAIL.getReason());
         userDao.save(user);
 
         log.info("User '{}' has signed up", user.getEmail());
@@ -99,7 +99,7 @@ public class AuthenticationController {
     @PostMapping("/verify-email-otp")
     public ResponseEntity<?> verifyEmail(@Valid @RequestBody VerifyOtpRequest body) {
         try {
-            return otpProvider.verifyOtp(body.email(), body.otp())
+            return otpProvider.verify(body.email(), body.otp())
                     .map(user -> {
                         user.setEnabled(true);
                         user.setOtp(null);
@@ -108,7 +108,7 @@ public class AuthenticationController {
                         log.info("{} has verified their email", body.email());
                         return ResponseEntity.ok().build();
                     })
-                    .orElse(ResponseEntity.notFound().build());
+                    .orElse(USER_NOT_FOUND);
         } catch (InvalidOtpException e) {
             return ResponseEntity.badRequest().body(new InformativeResponse(e.getMessage()));
         }
@@ -117,9 +117,9 @@ public class AuthenticationController {
     @PostMapping("/verify-reset-password-otp")
     public ResponseEntity<?> verifyResetPassword(@Valid @RequestBody VerifyOtpRequest body) {
         try {
-            return otpProvider.verifyOtp(body.email(), body.otp())
+            return otpProvider.verify(body.email(), body.otp())
                     .map(user -> ResponseEntity.ok().build())
-                    .orElse(ResponseEntity.notFound().build());
+                    .orElse(USER_NOT_FOUND);
         } catch (InvalidOtpException e) {
             return ResponseEntity.badRequest().body(new InformativeResponse(e.getMessage()));
         }
@@ -131,7 +131,7 @@ public class AuthenticationController {
             return userDao.findByEmail(body.email())
                     .map(user -> {
                         // check the OTP again so that a single request can't hijack the password
-                        otpProvider.verifyOtp(body.email(), body.otp());
+                        otpProvider.verify(body.email(), body.otp());
 
                         user.setOtp(null);
                         user.setOtpExpiration(null);
@@ -139,7 +139,7 @@ public class AuthenticationController {
                         log.info("password reset for {}", body.email());
                         return ResponseEntity.ok().build();
                     })
-                    .orElse(ResponseEntity.notFound().build());
+                    .orElse(USER_NOT_FOUND);
         } catch (InvalidOtpException e) {
             return ResponseEntity.badRequest().body(new InformativeResponse(e.getMessage()));
         }
@@ -149,11 +149,11 @@ public class AuthenticationController {
     public ResponseEntity<?> resendOtp(@Valid @RequestBody ResendOtpRequest body) {
         return userDao.findByEmail(body.email())
                 .map(user -> {
-                    otpProvider.sendOtp(user, body.reason());
+                    otpProvider.send(user, body.reason());
                     userDao.updateOtp(user);
                     return ResponseEntity.ok().build();
                 })
-                .orElse(ResponseEntity.notFound().build());
+                .orElse(USER_NOT_FOUND);
     }
 
     @PostMapping("/sign-out")
