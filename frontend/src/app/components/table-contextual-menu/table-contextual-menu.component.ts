@@ -11,7 +11,7 @@ import {ToastService} from '../../toast/toast.service';
 import {TableService} from '../../services/table.service';
 
 @Component({
-  selector: 'app-contextual-menu',
+  selector: 'tbl-contextual-menu',
   standalone: true,
   templateUrl: './table-contextual-menu.component.html',
   styleUrl: './table-contextual-menu.component.css'

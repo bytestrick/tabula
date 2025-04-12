@@ -1,7 +1,7 @@
 import {AfterViewInit, Directive, HostListener, Input, OnInit, Renderer2} from '@angular/core';
 
 @Directive({
-  selector: '[appResizableTableColumn]',
+  selector: '[tblResizableTableColumn]',
   standalone: true
 })
 export class ResizableTableColumnDirective implements OnInit, AfterViewInit {

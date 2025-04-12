@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 import {BaseCellComponent} from '../base-cell-component';
 
 @Component({
-  selector: 'app-data-type-cell',
+  selector: 'tbl-data-type-cell',
   standalone: true,
   imports: [],
   templateUrl: './data-type-cell.component.html',

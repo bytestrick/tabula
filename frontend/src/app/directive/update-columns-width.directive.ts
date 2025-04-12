@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 
 @Directive({
-  selector: '[appUpdateColumnsWidth]',
+  selector: '[tblUpdateColumnsWidth]',
   standalone: true
 })
 export class UpdateColumnsWidthDirective implements AfterViewInit, OnDestroy {

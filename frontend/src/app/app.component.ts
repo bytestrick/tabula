@@ -20,7 +20,7 @@ export class AppComponent implements OnInit {
 
   @ViewChild('popUpContainer', { read: ViewContainerRef, static: true }) popUpContainer!: ViewContainerRef;
 
-  
+
   ngOnInit() {
     AppComponent.updateColorScheme();
     this.popUpManager.setPopUpContainer(this.popUpContainer);
