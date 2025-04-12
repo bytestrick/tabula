@@ -10,7 +10,7 @@ import {NgStyle} from '@angular/common';
 import {CdkDragHandle} from '@angular/cdk/drag-drop';
 
 @Component({
-  selector: 'app-table-organizer',
+  selector: 'tbl-table-organizer',
   standalone: true,
   imports: [
     NgStyle,

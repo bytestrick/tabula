@@ -3,7 +3,7 @@ import {BaseInputComponent} from '../base-input-component';
 import {InfoComponent} from '../info-component/info.component';
 
 @Component({
-  selector: 'app-text-input',
+  selector: 'tbl-text-input',
   standalone: true,
   imports: [
     InfoComponent

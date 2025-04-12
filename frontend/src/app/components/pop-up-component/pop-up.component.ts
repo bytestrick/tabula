@@ -11,7 +11,7 @@ import {Pair} from '../../model/pair';
 import {IPopUpContent} from '../../model/i-pop-up-content';
 
 @Component({
-  selector: 'app-pop-up',
+  selector: 'tbl-pop-up',
   standalone: true,
   imports: [],
   templateUrl: './pop-up.component.html',

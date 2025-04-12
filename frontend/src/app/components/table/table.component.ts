@@ -28,7 +28,7 @@ import {TableService} from '../../services/table.service';
 import {CellCord} from '../../model/table/cell-cord';
 
 @Component({
-  selector: 'app-table',
+  selector: 'tbl-table',
   standalone: true,
   imports: [
     NgForOf,

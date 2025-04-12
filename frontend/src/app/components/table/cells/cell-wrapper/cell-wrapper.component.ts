@@ -14,7 +14,7 @@ import {BaseCellComponent} from '../base-cell-component';
 import {CellCord} from '../../../../model/table/cell-cord';
 
 @Component({
-  selector: 'app-cell-wrapper',
+  selector: 'tbl-cell-wrapper',
   standalone: true,
   imports: [],
   template: `

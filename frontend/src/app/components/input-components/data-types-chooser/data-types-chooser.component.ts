@@ -5,7 +5,7 @@ import {NgForOf} from '@angular/common';
 import {IDataType} from '../../../model/data-types/i-data-type';
 
 @Component({
-  selector: 'app-data-types-chooser',
+  selector: 'tbl-data-types-chooser',
   standalone: true,
   imports: [
     NgForOf

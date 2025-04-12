@@ -4,7 +4,7 @@ import {NgForOf} from '@angular/common';
 import {InfoComponent} from '../info-component/info.component';
 
 @Component({
-  selector: 'app-input-components',
+  selector: 'tbl-monetary-input',
   standalone: true,
   imports: [
     NgForOf,
@@ -35,7 +35,12 @@ export class MonetaryInputComponent extends BaseInputComponent {
 
 
   private setInput(value: string): void {
-    if (!isNaN(Number(value)) && value !== '') {
+    if (value === '') {
+      this.confirmInput('');
+      return;
+    }
+
+    if (!isNaN(Number(value))) {
       let s: string[] = value.split('.');
 
       if (s.length == 1)

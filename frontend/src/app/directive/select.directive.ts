@@ -1,14 +1,14 @@
 import {AfterViewInit, Directive, ElementRef, Input, OnChanges, Renderer2, SimpleChanges} from '@angular/core';
 
 @Directive({
-  selector: '[appSelect]',
+  selector: '[tblSelection]',
   standalone: true
 })
 export class SelectDirective implements OnChanges, AfterViewInit {
 
-  @Input('appIsSelected') isSelected: boolean = false;
+  @Input('tblIsSelected') isSelected: boolean = false;
   @Input() selectedNeighbors: { top: boolean, bottom: boolean, left: boolean, right: boolean } = { top: false, bottom: false, left: false, right: false };
-  @Input('appTargetOfSelection') targetElement?: HTMLElement;
+  @Input('tblTargetOfSelection') targetElement?: HTMLElement;
 
 
   private borderStyle: string = '1px solid var(--bs-primary)';

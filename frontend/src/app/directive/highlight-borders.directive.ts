@@ -10,13 +10,13 @@ import {
 } from '@angular/core';
 
 @Directive({
-  selector: '[appHighlightBorders]',
+  selector: '[tblHighlightBorders]',
   standalone: true
 })
 export class HighlightBordersDirective implements OnChanges, AfterViewInit {
 
-  @Input('appHighlightBordersOf') targetElement?: HTMLElement;
-  @Input('appHighlightCanDisable') canDisable: boolean = true;
+  @Input('tblHighlightBordersOf') targetElement?: HTMLElement;
+  @Input('tblHighlightCanDisable') canDisable: boolean = true;
 
   private borderStyle: string = '2px dashed';
   private borderColor: string = 'var(--bs-primary)';
