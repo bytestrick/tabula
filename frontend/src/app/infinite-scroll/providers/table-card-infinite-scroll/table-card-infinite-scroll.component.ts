@@ -1,7 +1,7 @@
 import {
   Component,
   ComponentRef,
-  EnvironmentInjector,
+  EnvironmentInjector, Input,
   ViewChild,
   ViewContainerRef
 } from '@angular/core';
@@ -12,6 +12,7 @@ import {NgIf} from '@angular/common';
 import {HomeService} from '../../../home/home.service';
 import {TableCard} from '../../../home/table-card/table-card.interface';
 import {Observable} from 'rxjs';
+import {HomeComponent} from '../../../home/home.component';
 
 @Component({
   selector: 'app-table-card-infinite-scroll',
@@ -26,6 +27,7 @@ import {Observable} from 'rxjs';
 export class TableCardInfiniteScrollComponent extends InfiniteScrollComponent<ComponentRef<TableCardComponent>> {
 
   @ViewChild('content', { read: ViewContainerRef }) protected override viewContainerRef!: ViewContainerRef;
+  @Input() homeComponent!: HomeComponent;
   private nElementToFetch: number = 10;
 
 
@@ -62,6 +64,11 @@ export class TableCardInfiniteScrollComponent extends InfiniteScrollComponent<Co
     return data.map((tableCard: TableCard): ComponentRef<TableCardComponent> => {
       const tableCardCmpRef: ComponentRef<TableCardComponent> = TableCardComponent.create(this.injector);
       tableCardCmpRef.instance.init(tableCard);
+
+      tableCardCmpRef.instance.editTableCard.subscribe((tableCardCmp: TableCardComponent): void => {
+        this.homeComponent.editTableCard(tableCardCmp);
+      })
+
       return tableCardCmpRef;
     });
   }

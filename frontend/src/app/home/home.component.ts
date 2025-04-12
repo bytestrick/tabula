@@ -33,8 +33,6 @@ export class HomeComponent {
   @ViewChild('formCreateTableCard') private formCreateTableCard!: FormCreateTableCardComponent;
   @ViewChild('formEditTableCard') private formEditTableCard!: FormEditTableCardComponent;
   @ViewChild('tableCardContainer', { read: ViewContainerRef }) private tableCardContainerView!: ViewContainerRef;
-  // @ViewChild('infiniteScroll') private infiniteScrollCmp!: InfiniteScrollComponent<TableCardComponent>;
-
 
   constructor(private homeService: HomeService,
               private injector: EnvironmentInjector) {}
