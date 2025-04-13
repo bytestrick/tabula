@@ -40,6 +40,8 @@ public class HomeController {
 
     @PutMapping("table-card")
     public ResponseEntity<String> updateTableCard(@RequestBody TableCard tableCard) {
+        System.out.println("Table: " + tableCard);
+
         homeDao.updateTableCard(tableCard);
         return ResponseEntity.ok().body("TableCard updated successfully");
     }

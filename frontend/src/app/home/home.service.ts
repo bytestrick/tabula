@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
-import {Observable} from 'rxjs';
+import {map, Observable} from 'rxjs';
 import {TableCard} from './table-card/table-card.interface';
 import {TableCardComponent} from './table-card/table-card.component';
 
@@ -13,7 +13,7 @@ export class HomeService {
   constructor(private http: HttpClient) {}
 
 
-  public loadNextTableCards(id: string, quantity: number): Observable<TableCard[]> {
+  public fetchNextTableCards(id: string, quantity: number): Observable<TableCard[]> {
     // const headers = new HttpHeaders({
     //   'Authorization': 'Bearer ' + ''
     // });
@@ -28,7 +28,7 @@ export class HomeService {
     );
   }
 
-  public loadTableCards(quantity: number): Observable<TableCard[]> {
+  public fetchTableCards(quantity: number): Observable<TableCard[]> {
     const params: HttpParams = new HttpParams()
       .set('quantity', quantity);
 

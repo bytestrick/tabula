@@ -10,12 +10,17 @@ import {
 import {HomeService} from '../home.service';
 import {TableCard} from './table-card.interface';
 import {Subscription} from 'rxjs';
+import {DatePipe, NgIf} from '@angular/common';
+import {PrettyDatePipe} from '../pretty-date.pipe';
 
 
 @Component({
   selector: 'app-table-card',
   standalone: true,
-  imports: [],
+  imports: [
+    DatePipe,
+    PrettyDatePipe
+  ],
   templateUrl: './table-card.component.html',
   styleUrl: './table-card.component.css'
 })
@@ -44,9 +49,8 @@ export class TableCardComponent implements OnDestroy {
     this.id = tableCard.id;
     this.title = tableCard.title;
     this.description = tableCard.description;
-    this.creationDate = tableCard.creationDate;
-    this.lastEditDate = tableCard.lastEditDate;
-
+    this.creationDate = tableCard.creationDate ? new Date(tableCard.creationDate + 'Z') : undefined;
+    this.lastEditDate = tableCard.lastEditDate ? new Date(tableCard.lastEditDate + 'Z') : this.creationDate;
     return this;
   }
 
@@ -115,5 +119,6 @@ export class TableCardComponent implements OnDestroy {
   edit(tableCard: TableCard): void {
     this.title = tableCard.title;
     this.description = tableCard.description;
+    this.lastEditDate = tableCard.lastEditDate;
   }
 }
