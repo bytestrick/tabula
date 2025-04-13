@@ -6,7 +6,7 @@ import {AuthService} from './auth.service';
 
 describe('authGuard', () => {
   let guard: CanActivateFn;
-  let authSateSpy: jasmine.Spy;
+  let authStateSpy: jasmine.Spy;
   let router: jasmine.SpyObj<Router>;
 
   beforeEach(() => {
@@ -14,8 +14,8 @@ describe('authGuard', () => {
     mockRouter.navigate.and.returnValue(Promise.resolve());
 
     const mockAuthService = jasmine.createSpyObj('AuthService', ['signIn']);
-    authSateSpy = jasmine.createSpy('isAuthenticated');
-    Object.defineProperty(mockAuthService, 'isAuthenticated', {get: authSateSpy});
+    authStateSpy = jasmine.createSpy('isAuthenticated');
+    Object.defineProperty(mockAuthService, 'isAuthenticated', {get: authStateSpy});
 
     TestBed.configureTestingModule({
       providers: [
@@ -30,7 +30,7 @@ describe('authGuard', () => {
   it('should be created', () => expect(guard).toBeTruthy());
 
   it('should let an authenticated user through', () => {
-    authSateSpy.and.returnValue(true);
+    authStateSpy.and.returnValue(true);
     const route = {} as ActivatedRouteSnapshot;
     const state = {url: '/'} as RouterStateSnapshot;
     expect(guard(route, state)).toBeTrue();
@@ -38,7 +38,7 @@ describe('authGuard', () => {
   });
 
   it('should redirect unauthenticated users to the sign-in page and remember the returnUrl', () => {
-    authSateSpy.and.returnValue(false);
+    authStateSpy.and.returnValue(false);
     const route = {} as ActivatedRouteSnapshot;
     const state = {url: '/'} as RouterStateSnapshot;
     expect(guard(route, state)).toBeFalse();

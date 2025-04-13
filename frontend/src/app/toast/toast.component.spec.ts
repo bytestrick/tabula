@@ -31,7 +31,7 @@ describe('ToastsComponent', () => {
 
     toast.subject.subscribe((data: ToastOptions) => {
       expect(data).toEqual(jasmine.objectContaining({body: uuid}));
-    })
+    });
 
     toast.show({body: uuid})
   });

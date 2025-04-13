@@ -7,7 +7,7 @@ import {enableTooltips} from '../tooltips';
 @Component({
   template: `
     <input type="password">
-    <button appPasswordVisibility data-bs-toggle="tooltip" data-bs-title="Show password">
+    <button tblPasswordVisibility data-bs-toggle="tooltip" data-bs-title="Show password">
       <i class="bi bi-eye"></i>
     </button>
   `,
@@ -39,7 +39,7 @@ describe('PasswordVisibilityDirective', () => {
   });
 
   it('should create an instance', () => {
-    expect(directive).toBeTruthy()
+    expect(directive).toBeTruthy();
     expect(inputElement.nativeElement.type).toBe('password');
   });
 
@@ -61,7 +61,7 @@ describe('PasswordVisibilityDirective', () => {
   it('should show the password after a click', async () => {
     enableTooltips();
 
-    buttonElement.nativeElement.click()
+    buttonElement.nativeElement.click();
     expect(inputElement.nativeElement.type).toBe('text');
     expect(buttonElement.nativeElement.classList).toContain('active');
     expect(iconElement.nativeElement.classList).toContain('bi-eye-slash');
@@ -75,15 +75,15 @@ describe('PasswordVisibilityDirective', () => {
   });
 
   it('should alternate between shown/hidden password', () => {
-    buttonElement.nativeElement.click()
+    buttonElement.nativeElement.click();
     expect(inputElement.nativeElement.type).toBe('text');
-    buttonElement.nativeElement.click()
+    buttonElement.nativeElement.click();
     expect(inputElement.nativeElement.type).toBe('password');
-    buttonElement.nativeElement.click()
+    buttonElement.nativeElement.click();
     expect(inputElement.nativeElement.type).toBe('text');
-    buttonElement.nativeElement.click()
+    buttonElement.nativeElement.click();
     expect(inputElement.nativeElement.type).toBe('password');
-    buttonElement.nativeElement.click()
+    buttonElement.nativeElement.click();
     expect(inputElement.nativeElement.type).toBe('text');
   });
 });
