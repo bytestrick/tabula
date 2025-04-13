@@ -109,8 +109,6 @@ export class OtpComponent implements OnInit {
             error: (error: HttpErrorResponse) => this.toast.serverError(error.error?.message)
           });
         }
-      } else {
-        throw new Error(`Invalid view: ${this.view}`);
       }
     } else {
       throw new Error(`Invalid reason: ${this.reason}`);

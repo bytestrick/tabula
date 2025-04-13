@@ -7,9 +7,7 @@ describe('ToastsService', () => {
   let service: ToastService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [ToastService],
-    });
+    TestBed.configureTestingModule({providers: [ToastService]});
     service = TestBed.inject(ToastService);
   });
 
@@ -34,7 +32,7 @@ describe('ToastsService', () => {
     spyOn(service, 'show');
 
     const message = 'The Sun orbits the Galactic Center at a distance of 24,000 to 28,000 light-years.';
-    const toastOptions: ToastOptions =  {
+    const toastOptions: ToastOptions = {
       title: 'Server error',
       body: message,
       icon: 'exclamation-triangle-fill',

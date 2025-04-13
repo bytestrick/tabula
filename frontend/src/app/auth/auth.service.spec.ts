@@ -1,11 +1,9 @@
 import {TestBed} from '@angular/core/testing';
 import {Authentication, AuthService, SignInRequest} from './auth.service';
-import {HttpErrorResponse, provideHttpClient, withInterceptors} from '@angular/common/http';
+import {HttpErrorResponse, provideHttpClient} from '@angular/common/http';
 import {Router} from '@angular/router';
 import {ToastService} from '../toast/toast.service';
 import {HttpTestingController, provideHttpClientTesting} from '@angular/common/http/testing';
-import {apiInterceptor} from '../http/api.interceptor';
-import {backendBaseUrl} from '../constants';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -21,7 +19,7 @@ describe('AuthService', () => {
     TestBed.configureTestingModule({
       providers: [
         AuthService,
-        provideHttpClient(withInterceptors([apiInterceptor])),
+        provideHttpClient(),
         provideHttpClientTesting(),
         {provide: Router, useValue: jasmine.createSpyObj('Router', ['navigate'])},
         {provide: ToastService, useValue: jasmine.createSpyObj('Router', ['show', 'serverError'])},
@@ -58,7 +56,7 @@ describe('AuthService', () => {
     const form: SignInRequest = {email: 'test@test.com', password: 'abracadabra', rememberMe: false};
     service.signIn(form).subscribe(response => expect(response).toEqual({token}));
 
-    httpTestingController.expectOne(`${backendBaseUrl}/auth/sign-in`).flush({token});
+    httpTestingController.expectOne(`/auth/sign-in`).flush({token});
     const auth = {email: form.email, token};
     expect(localStorage.setItem).toHaveBeenCalledOnceWith('authentication', JSON.stringify(auth));
     expect(service.isAuthenticated).toBeTrue();
@@ -70,7 +68,7 @@ describe('AuthService', () => {
     expect(service).toBeTruthy();
     const form = {email: 'test@test.com', password: 'abracadabra', rememberMe: false};
     service.signIn(form).subscribe();
-    httpTestingController.expectOne(`${backendBaseUrl}/auth/sign-in`).flush('b6c0b80a-3a97-48d5-962c-85ea6efe18d9');
+    httpTestingController.expectOne(`/auth/sign-in`).flush('b6c0b80a-3a97-48d5-962c-85ea6efe18d9');
 
     expect(() => service.signIn(form)).toThrowError('Already signed-in');
   });
@@ -88,7 +86,7 @@ describe('AuthService', () => {
       }
     });
 
-    const req = httpTestingController.expectOne(`${backendBaseUrl}/auth/sign-in`);
+    const req = httpTestingController.expectOne(`/auth/sign-in`);
     req.flush({message: 'could not sign-in'}, {status: 400, statusText: 'incorrect credentials'});
     expect(localStorage.setItem).not.toHaveBeenCalled();
     expect(service.isAuthenticated).toBeFalse();
@@ -101,11 +99,11 @@ describe('AuthService', () => {
     router.navigate.and.returnValue(Promise.resolve(true));
 
     service.signIn({email: 'test@test.com', password: 'abracadabra', rememberMe: false}).subscribe();
-    httpTestingController.expectOne(`${backendBaseUrl}/auth/sign-in`).flush('ea0af96e-4125-4e9a-8880-c0015e7953d5');
+    httpTestingController.expectOne(`/auth/sign-in`).flush('ea0af96e-4125-4e9a-8880-c0015e7953d5');
 
     service.signOut();
 
-    httpTestingController.expectOne(`${backendBaseUrl}/auth/sign-out`).flush({});
+    httpTestingController.expectOne(`/auth/sign-out`).flush({});
 
     expect(localStorage.removeItem).toHaveBeenCalledOnceWith('authentication');
     expect(toast.show).toHaveBeenCalledWith(jasmine.objectContaining({body: 'Sign-out successful'}));
@@ -120,11 +118,11 @@ describe('AuthService', () => {
     router.navigate.and.returnValue(Promise.resolve(true));
 
     service.signIn({email: 'test@test.com', password: 'abracadabra', rememberMe: false}).subscribe();
-    httpTestingController.expectOne(`${backendBaseUrl}/auth/sign-in`).flush('591d5890-9078-4105-bfa1-26086b8740ee');
+    httpTestingController.expectOne(`/auth/sign-in`).flush('591d5890-9078-4105-bfa1-26086b8740ee');
 
     service.signOut();
 
-    const req = httpTestingController.expectOne(`${backendBaseUrl}/auth/sign-out`);
+    const req = httpTestingController.expectOne(`/auth/sign-out`);
     req.flush({message: 'No token found'}, {status: 400, statusText: 'No token found'});
     expect(toast.serverError).toHaveBeenCalledOnceWith('No token found');
     expect(router.navigate).toHaveBeenCalledOnceWith(['/sign-in']);

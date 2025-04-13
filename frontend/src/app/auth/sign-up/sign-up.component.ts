@@ -81,7 +81,7 @@ export class SignUpComponent implements OnInit, AfterViewInit {
           });
         },
         error: (error: HttpErrorResponse) => {
-          if (error.error?.messsage?.startsWith('Email already registered')) {
+          if (error.error?.message?.startsWith('Email already registered')) {
             this.form.controls.email.setErrors({alreadyRegistered: true});
           } else {
             this.toast.serverError(error.error?.message);

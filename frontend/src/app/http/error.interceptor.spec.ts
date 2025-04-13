@@ -39,7 +39,7 @@ describe('errorInterceptor', () => {
     http.get('/something').subscribe({
       next: () => fail('this request fails'),
       error: () => fail('the error is not propagated'),
-    })
+    });
 
     const req = httpTestingController.expectOne('/something');
     req.error(new ProgressEvent('timeout'));
@@ -61,7 +61,7 @@ describe('errorInterceptor', () => {
         expect(error.status).toBe(418);
         expect(error.statusText).toBe(`I'm a teapot`);
       }
-    })
+    });
 
     const req = httpTestingController.expectOne('/something');
     req.flush({message: 'Not intercepted'}, {status: 418, statusText: `I'm a teapot`});

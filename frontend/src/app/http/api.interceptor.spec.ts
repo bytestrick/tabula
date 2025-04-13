@@ -32,7 +32,7 @@ describe('apiInterceptor', () => {
     const req = httpTestingController.expectOne(`${backendBaseUrl}/some/path`);
     req.flush({});
     expect(req.request.url).toBe(`${backendBaseUrl}/some/path`);
-  })
+  });
 
   it('should not intervene on requests that use an absolute path', () => {
     const url = 'https://api.example.com/v1/some/path';
