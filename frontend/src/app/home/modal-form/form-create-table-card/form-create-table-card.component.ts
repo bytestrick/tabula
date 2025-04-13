@@ -32,10 +32,12 @@ export class FormCreateTableCardComponent extends ModalFormComponent implements 
   }
 
   protected doOnSubmit(): void {
+    const now: Date = new Date();
     const tableCard: TableCard = {
       title: this.titleField,
       description: this.descriptionField,
-      creationDate: new Date()
+      creationDate: now,
+      lastEditDate: now
     }
     this.homeService.createTableCard(tableCard).subscribe({
       next: (data: TableCard): void => {

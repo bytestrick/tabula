@@ -51,11 +51,13 @@ export class FormEditTableCardComponent extends ModalFormComponent implements Af
     tableCard.title = this.titleField;
     tableCard.description = this.descriptionField;
     tableCard.lastEditDate = new Date();
+
+    console.log('date', tableCard.lastEditDate);
     const toEdit: TableCardComponent | undefined = this.tableCardCmpToEdit;
 
     this.homeService.editTableCard(tableCard).subscribe({
       next: (data: string): void => {
-        console.log(data);
+        console.log('response: ', data);
         toEdit?.edit(tableCard);
       },
       error: (err: any): void => console.error(err)
