@@ -1,6 +1,6 @@
 import {
   Component,
-  ComponentRef,
+  ComponentRef, ElementRef,
   EnvironmentInjector, Input,
   ViewChild,
   ViewContainerRef
@@ -26,13 +26,14 @@ import {HomeComponent} from '../../../home/home.component';
 })
 export class TableCardInfiniteScrollComponent extends InfiniteScrollComponent<ComponentRef<TableCardComponent>> {
 
-  @ViewChild('content', { read: ViewContainerRef }) protected override viewContainerRef!: ViewContainerRef;
-  @Input() homeComponent!: HomeComponent;
+  @ViewChild('content', { read: ViewContainerRef }) protected override contentViewRef!: ViewContainerRef;
+  @Input() parentComponent!: HomeComponent;
   private nElementToFetch: number = 10;
 
 
   constructor(private homeService: HomeService,
-              private injector: EnvironmentInjector) {
+              private injector: EnvironmentInjector,
+              protected selectorElementRef: ElementRef) {
     super();
   }
 
@@ -66,7 +67,7 @@ export class TableCardInfiniteScrollComponent extends InfiniteScrollComponent<Co
       tableCardCmpRef.instance.init(tableCard);
 
       tableCardCmpRef.instance.editTableCard.subscribe((tableCardCmp: TableCardComponent): void => {
-        this.homeComponent.editTableCard(tableCardCmp);
+        this.parentComponent.editTableCard(tableCardCmp);
       })
 
       return tableCardCmpRef;
