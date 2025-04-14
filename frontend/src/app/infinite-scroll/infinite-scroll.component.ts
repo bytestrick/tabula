@@ -1,15 +1,16 @@
 import {
-  ComponentRef,
+  ComponentRef, ElementRef,
   ViewContainerRef,
 } from '@angular/core';
 
 export abstract class InfiniteScrollComponent<T extends ComponentRef<any>> {
 
-  protected abstract viewContainerRef: ViewContainerRef;
-  protected maxElementOnPage: number = 50;
+  protected abstract contentViewRef: ViewContainerRef;
+  protected abstract selectorElementRef: ElementRef;
+  // TODO: fare in modo che in una pagina non sia possibile avere più di un tot di elementi
+  // protected maxElementOnPage: number = 50;
   private elements: T[] = [];
   protected isLoading: boolean = false;
-
   private isDataFetched: boolean = true;
 
 
@@ -26,13 +27,20 @@ export abstract class InfiniteScrollComponent<T extends ComponentRef<any>> {
   protected provideElements(elements: T[]): void {
     this.isDataFetched = true;
     this.isLoading = false;
+
+    if (elements.length === 0) return;
     this.appendElementsToDOM(elements);
+
+    // Carica finché la pagina non si riempie di elementi
+    if (!this.selectorElementRef) return;
+    if (this.selectorElementRef.nativeElement.scrollHeight <= window.innerHeight)
+      this.fetchElements();
   }
 
   private appendElementsToDOM(elements: T[]): void {
     elements.forEach((componentRef: T): void => {
       this.elements.push(componentRef);
-      this.viewContainerRef.insert(componentRef.hostView);
+      this.contentViewRef.insert(componentRef.hostView);
     });
   }
 
