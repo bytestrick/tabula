@@ -17,9 +17,8 @@ import {PasswordVisibilityDirective} from '../password-visibility.directive';
  */
 @Component({
   selector: 'tbl-password-input',
-  standalone: true,
   imports: [PasswordVisibilityDirective, ReactiveFormsModule],
-  templateUrl: './password-input.component.html',
+  templateUrl: './password-input.component.html'
 })
 export class PasswordInputComponent implements OnInit {
   private formBuilder = inject(FormBuilder);

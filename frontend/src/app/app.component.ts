@@ -4,7 +4,6 @@ import {ToastComponent} from './toast/toast.component';
 
 @Component({
   selector: 'tbl-root',
-  standalone: true,
   imports: [RouterOutlet, ToastComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'

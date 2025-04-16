@@ -3,7 +3,6 @@ import {Router, RouterLink} from '@angular/router';
 
 @Component({
   selector: 'tbl-page-not-found',
-  standalone: true,
   imports: [RouterLink],
   template: `
     <main class="container text-center">

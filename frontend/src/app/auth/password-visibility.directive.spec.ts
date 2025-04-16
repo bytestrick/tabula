@@ -11,7 +11,6 @@ import {enableTooltips} from '../tooltips';
       <i class="bi bi-eye"></i>
     </button>
   `,
-  standalone: true,
   imports: [PasswordVisibilityDirective]
 })
 class TestComponent {

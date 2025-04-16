@@ -11,9 +11,8 @@ import {Reason} from '../otp/otp.component';
 
 @Component({
   selector: 'tbl-sign-in',
-  standalone: true,
   imports: [RouterLink, PasswordVisibilityDirective, ReactiveFormsModule],
-  templateUrl: './sign-in.component.html',
+  templateUrl: './sign-in.component.html'
 })
 export class SignInComponent implements OnInit {
   private auth = inject(AuthService);

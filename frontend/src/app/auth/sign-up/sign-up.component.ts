@@ -18,9 +18,8 @@ interface Country {
 
 @Component({
   selector: 'tbl-sign-up',
-  standalone: true,
   imports: [RouterLink, NgForOf, PasswordInputComponent, ReactiveFormsModule],
-  templateUrl: './sign-up.component.html',
+  templateUrl: './sign-up.component.html'
 })
 export class SignUpComponent implements OnInit, AfterViewInit {
   private http = inject(HttpClient);
