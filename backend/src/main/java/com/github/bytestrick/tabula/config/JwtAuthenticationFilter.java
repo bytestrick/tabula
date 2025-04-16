@@ -1,5 +1,6 @@
 package com.github.bytestrick.tabula.config;
 
+import com.github.bytestrick.tabula.exception.InvalidJwtException;
 import com.github.bytestrick.tabula.service.JwtProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -29,17 +30,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
-        String username = JwtProvider.fromRequest(request);
-        if (username != null) {
+        String token = JwtProvider.fromRequest(request);
+        if (token != null) {
             try {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(jwtProvider.verify(username));
+                UserDetails userDetails = userDetailsService.loadUserByUsername(jwtProvider.verify(token));
                 UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities()
                 );
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(auth);
-            } catch (Exception e) {
-                log.error("Could not authenticate request", e);
+            } catch (InvalidJwtException e) {
+                log.warn("Could not authenticate request: {}", e.getMessage());
             }
         }
         filterChain.doFilter(request, response);

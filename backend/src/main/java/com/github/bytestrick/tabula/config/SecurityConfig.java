@@ -1,6 +1,8 @@
 package com.github.bytestrick.tabula.config;
 
 import com.github.bytestrick.tabula.service.DaoUserDetailsService;
+import com.github.bytestrick.tabula.service.JwtProvider;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -10,10 +12,12 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -22,7 +26,11 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+    private final UserDetailsService userDetailsService;
+    private final JwtProvider jwtProvider;
+
     /**
      * Configure the {@link CorsConfigurationSource} to allow requests from the Angular application.
      */
@@ -50,13 +58,21 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/test/no-auth/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(handler -> handler
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
                 )
+                .addFilterBefore(jwtAuthenticationFilter(jwtProvider, userDetailsService), UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
+
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter(JwtProvider jwtProvider, UserDetailsService userDetailsService) {
+        return new JwtAuthenticationFilter(jwtProvider, userDetailsService);
+    }
+
 
     /**
      * Configure the {@link AuthenticationManager} to use our {@link DaoUserDetailsService}
@@ -67,6 +83,7 @@ public class SecurityConfig {
                                                        PasswordEncoder passwordEncoder) {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider(passwordEncoder);
         authenticationProvider.setUserDetailsService(daoUserDetailsService);
+        authenticationProvider.setHideUserNotFoundExceptions(false);
         return new ProviderManager(authenticationProvider);
     }
 
