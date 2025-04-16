@@ -34,9 +34,9 @@ generate the keys to sign and verify JWTs (see `JwtProvider`), you can generate 
 openssl rand --hex 32
 ```
 
-Moreover, it requires email credentials to send emails to verify the user emails at sign-up and such. If you decide to
-provide a Gmail account you can [create an app password](https://myaccount.google.com/apppasswords) and provide it
-directly in double quotes.
+Moreover, it requires datasource credentials and email credentials to send emails to verify the user emails at sign-up
+and such. If you decide to provide a Gmail account you
+can [create an app password](https://myaccount.google.com/apppasswords) and provide it directly in double quotes.
 
 The `.env` file is placed in `backend/src/main/resources/` next to applications.properties. An example file:
 
@@ -44,6 +44,9 @@ The `.env` file is placed in `backend/src/main/resources/` next to applications.
 JWT_SECRET=312a8d917893986c44f7f9dea03f0b045a40281f2cb1762082f50348d4e30b50
 EMAIL_ADDRESS=tabula.noreply@example.com
 EMAIL_PASSWORD="vejr zffv tcda mrqw"
+DATASOURCE_URL=jdbc:postgresql://localhost:5432/tabula
+DATASOURCE_USERNAME=postgres
+DATASOURCE_PASSWORD=postgres
 ```
 
 ## Credits
