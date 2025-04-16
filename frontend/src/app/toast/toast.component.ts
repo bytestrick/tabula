@@ -41,7 +41,6 @@ export interface ToastOptions {
  */
 @Component({
   selector: 'tbl-toasts',
-  standalone: true,
   template: `
     <div #container class="toast-container top-0 end-0 p-3 position-fixed"></div>
   `

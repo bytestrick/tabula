@@ -21,9 +21,8 @@ enum View {
 
 @Component({
   selector: 'tbl-otp',
-  standalone: true,
   imports: [ReactiveFormsModule, PasswordInputComponent],
-  templateUrl: './otp.component.html',
+  templateUrl: './otp.component.html'
 })
 export class OtpComponent implements OnInit {
   private http = inject(HttpClient);
