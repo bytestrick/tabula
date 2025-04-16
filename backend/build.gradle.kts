@@ -34,15 +34,25 @@ dependencies {
     implementation("me.paulschwarz:spring-dotenv:4.0.0")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
-    compileOnly("org.projectlombok:lombok")
-    annotationProcessor("org.projectlombok:lombok")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.mockito:mockito-core:3.+")
+    compileOnly("org.projectlombok:lombok")
+    annotationProcessor("org.projectlombok:lombok")
+    testCompileOnly("org.projectlombok:lombok:1.18.30")
+    testAnnotationProcessor("org.projectlombok:lombok:1.18.30")
 }
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    jvmArgs("--enable-native-access=ALL-UNNAMED")
+    jvmArgs(
+        "-javaagent:${
+            configurations.testRuntimeClasspath.get()
+                .find { it.name.contains("mockito-inline") } ?: configurations.testRuntimeClasspath.get()
+                .find { it.name.contains("mockito-core") }
+        }"
+    )
 }

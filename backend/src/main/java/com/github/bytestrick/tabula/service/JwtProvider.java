@@ -1,5 +1,6 @@
 package com.github.bytestrick.tabula.service;
 
+import com.github.bytestrick.tabula.exception.InvalidJwtException;
 import com.github.bytestrick.tabula.repository.InvalidJwtDao;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
@@ -102,21 +103,33 @@ public class JwtProvider {
      *
      * @param token the token to verify
      * @return the subject of the token
-     * @throws ParseException when the parsing of the token fails
-     * @throws JOSEException  when the cryptographic verification fails
+     * @throws InvalidJwtException when verification fails for any reason
      */
-    public String verify(String token) throws JOSEException, ParseException {
-        if (!invalidJwtDao.exists(token)) {
+    public String verify(String token) throws InvalidJwtException {
+        if (invalidJwtDao.exists(token)) {
+            throw new InvalidJwtException("Token has been revoked");
+        }
+        try {
             SignedJWT jwt = SignedJWT.parse(token);
             JWTClaimsSet claims = jwt.getJWTClaimsSet();
             Date now = new Date();
-            if (jwt.verify(verifier)) {
-                if (now.before(claims.getExpirationTime()) && now.after(claims.getNotBeforeTime())) {
+            try {
+                if (jwt.verify(verifier)) {
+                    if (claims.getExpirationTime().before(now)) {
+                        throw new InvalidJwtException("Expired token");
+                    }
+                    if (claims.getNotBeforeTime().after(now)) {
+                        throw new InvalidJwtException("Token not enabled yet");
+                    }
                     return claims.getSubject();
                 }
+            } catch (JOSEException e) {
+                throw new InvalidJwtException("Token verification failed");
             }
+        } catch (ParseException e) {
+            throw new InvalidJwtException("Malformed token");
         }
-        throw new RuntimeException("invalid token");
+        throw new InvalidJwtException("Could not verify token");
     }
 
     /**

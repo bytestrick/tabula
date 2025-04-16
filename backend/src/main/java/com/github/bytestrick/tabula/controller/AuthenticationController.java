@@ -97,6 +97,7 @@ public class AuthenticationController {
         userDao.save(user);
 
         log.info("User '{}' has signed up", user.getEmail());
+        // TODO: maybe return CREATED
         return ResponseEntity.ok().build();
     }
 
@@ -150,7 +151,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/send-otp")
-    public ResponseEntity<?> sendOtp(@Valid @RequestBody ResendOtpRequest body) {
+    public ResponseEntity<?> sendOtp(@Valid @RequestBody SendOtpRequest body) {
         return userDao.findByEmail(body.email())
                 .map(user -> {
                     otpProvider.send(user, body.reason());
