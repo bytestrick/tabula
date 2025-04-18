@@ -136,5 +136,3 @@ create table table_card
             references my_table on delete cascade
 );
 
-
-
