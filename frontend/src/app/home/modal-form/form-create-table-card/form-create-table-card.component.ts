@@ -5,7 +5,7 @@ import {HomeService} from "../../home.service";
 import {TableCard} from "../../table-card/table-card.interface";
 
 @Component({
-  selector: 'app-form-create-table-card',
+  selector: 'tbl-form-create-table-card',
   standalone: true,
   imports: [
     FormsModule

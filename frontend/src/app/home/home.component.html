@@ -1,15 +1,15 @@
-<app-navbar (onSearchedTableCard)="onSearchedTableCard($event)"/>
+<tbl-navbar (onSearchedTableCard)="onSearchedTableCard($event)"/>
 
 <main style="margin-top: 82px">
-  <app-table-card-infinite-scroll
+  <tbl-table-card-infinite-scroll
     #tableCardInfiniteScroll
     [parentComponent]="this"
     class="row g-3 row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 row-cols-xxl-6">
-    <app-create-table-card (createTableCard)="createTableCard()"/>
+    <tbl-create-table-card (createTableCard)="createTableCard()"/>
     <ng-container #tableCardContainer></ng-container>
-  </app-table-card-infinite-scroll>
+  </tbl-table-card-infinite-scroll>
 </main>
 
-<app-form-create-table-card #formCreateTableCard
+<tbl-form-create-table-card #formCreateTableCard
                             (addTableCard)="addTableCard($event)"/>
-<app-form-edit-table-card #formEditTableCard/>
+<tbl-form-edit-table-card #formEditTableCard/>

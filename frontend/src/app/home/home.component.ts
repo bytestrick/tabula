@@ -17,7 +17,7 @@ import {NavbarComponent} from '../navbar/navbar.component';
 
 
 @Component({
-  selector: 'app-table-cards-container',
+  selector: 'tbl-table-cards-container',
   standalone: true,
   imports: [
     CreateTableCardComponent,

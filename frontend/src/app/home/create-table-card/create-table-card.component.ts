@@ -1,7 +1,7 @@
 import {Component, EventEmitter, Output} from '@angular/core';
 
 @Component({
-  selector: 'app-create-table-card',
+  selector: 'tbl-create-table-card',
   standalone: true,
   imports: [],
   templateUrl: './create-table-card.component.html',
