@@ -13,14 +13,14 @@ public class InvalidJwtDao {
     private final JdbcClient jdbcClient;
 
     public void save(String token) throws ParseException {
-        jdbcClient.sql("INSERT INTO invalid_jwt VALUES (:token, :expiration_date)")
+        jdbcClient.sql("INSERT INTO invalid_jwts VALUES (:token, :expiration_date)")
                 .param("token", token)
                 .param("expiration_date", JwtProvider.getExpiration(token))
                 .update();
     }
 
     public boolean exists(String token) {
-        return jdbcClient.sql("SELECT * FROM invalid_jwt WHERE token = :token")
+        return jdbcClient.sql("SELECT * FROM invalid_jwts WHERE token = :token")
                 .param("token", token)
                 .query()
                 .optionalValue().isPresent();
