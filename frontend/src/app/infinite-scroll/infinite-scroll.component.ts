@@ -24,7 +24,7 @@ export abstract class InfiniteScrollComponent<T extends ComponentRef<any>> {
 
   protected abstract fetchElements(): void;
 
-  protected provideElements(elements: T[]): void {
+  public provideElements(elements: T[], fill: boolean = true): void {
     this.isDataFetched = true;
     this.isLoading = false;
 
@@ -32,7 +32,7 @@ export abstract class InfiniteScrollComponent<T extends ComponentRef<any>> {
     this.appendElementsToDOM(elements);
 
     // Carica finché la pagina non si riempie di elementi
-    if (!this.selectorElementRef) return;
+    if (!this.selectorElementRef || !fill) return;
     if (this.selectorElementRef.nativeElement.scrollHeight <= window.innerHeight)
       this.fetchElements();
   }
@@ -61,5 +61,13 @@ export abstract class InfiniteScrollComponent<T extends ComponentRef<any>> {
 
   getLastElement(): T | undefined {
     return this.getElementAt(this.elements.length - 1);
+  }
+
+  clearAll(): void {
+    let element = this.elements.pop();
+    while (element) {
+      element.destroy();
+      element = this.elements.pop();
+    }
   }
 }

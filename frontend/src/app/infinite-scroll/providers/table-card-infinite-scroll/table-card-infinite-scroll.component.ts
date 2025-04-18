@@ -39,12 +39,12 @@ export class TableCardInfiniteScrollComponent extends InfiniteScrollComponent<Co
 
   protected fetchElements(): void {
     let request: Observable<TableCard[]>;
-
     if (this.isEmpty()) {
       request = this.homeService.fetchTableCards(this.nElementToFetch);
     }
     else {
       const id: string | undefined = this.getLastElement()?.instance.getId();
+      console.log(id);
       if (!id) return;
       request = this.homeService.fetchNextTableCards(id, this.nElementToFetch);
     }
@@ -61,7 +61,7 @@ export class TableCardInfiniteScrollComponent extends InfiniteScrollComponent<Co
     });
   }
 
-  private createComponentsFromData(data: TableCard[]): ComponentRef<TableCardComponent>[] {
+  public createComponentsFromData(data: TableCard[]): ComponentRef<TableCardComponent>[] {
     return data.map((tableCard: TableCard): ComponentRef<TableCardComponent> => {
       const tableCardCmpRef: ComponentRef<TableCardComponent> = TableCardComponent.create(this.injector);
       tableCardCmpRef.instance.init(tableCard);

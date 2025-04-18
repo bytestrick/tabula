@@ -13,6 +13,7 @@ import {HomeService} from './home.service';
 import {
   TableCardInfiniteScrollComponent
 } from '../infinite-scroll/providers/table-card-infinite-scroll/table-card-infinite-scroll.component';
+import {NavbarComponent} from '../navbar/navbar.component';
 
 
 @Component({
@@ -24,6 +25,7 @@ import {
     FormCreateTableCardComponent,
     FormEditTableCardComponent,
     TableCardInfiniteScrollComponent,
+    NavbarComponent,
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
@@ -33,6 +35,7 @@ export class HomeComponent {
   @ViewChild('formCreateTableCard') private formCreateTableCard!: FormCreateTableCardComponent;
   @ViewChild('formEditTableCard') private formEditTableCard!: FormEditTableCardComponent;
   @ViewChild('tableCardContainer', { read: ViewContainerRef }) private tableCardContainerView!: ViewContainerRef;
+  @ViewChild('tableCardInfiniteScroll') private tableCardInfiniteScroll!: TableCardInfiniteScrollComponent;
 
   constructor(private homeService: HomeService,
               private injector: EnvironmentInjector) {}
@@ -43,7 +46,7 @@ export class HomeComponent {
   }
 
   addTableCard(tableCard: TableCard): void {
-    let tableCardCmp: TableCardComponent = TableCardComponent.create(this.injector).instance;
+    const tableCardCmp: TableCardComponent = TableCardComponent.create(this.injector).instance;
     tableCardCmp.init(tableCard).insert(this.tableCardContainerView, 0);
 
     tableCardCmp.editTableCard.subscribe((tableCardCmp: TableCardComponent): void => {
@@ -54,5 +57,14 @@ export class HomeComponent {
   editTableCard(tableCardComponent: TableCardComponent): void {
     this.formEditTableCard.setTableCardComponentToEdit(tableCardComponent)
     this.formEditTableCard.show();
+  }
+
+  onSearchedTableCard(tableCards: TableCard[]): void {
+    this.tableCardInfiniteScroll.clearAll();
+
+    this.tableCardInfiniteScroll.provideElements(
+      this.tableCardInfiniteScroll.createComponentsFromData(tableCards),
+      false
+    );
   }
 }

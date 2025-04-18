@@ -22,14 +22,14 @@ public class HomeDao {
                 .query(LocalDateTime.class)
                 .single();
 
-        return jdbcClient.sql("SELECT * FROM table_card WHERE creationdate < :date LIMIT :quantity")
+        return jdbcClient.sql("SELECT * FROM table_card WHERE creationdate < :date ORDER BY creationdate DESC LIMIT :quantity")
                 .param("date", date)
                 .param("quantity", quantity)
                 .query(TableCard.class)
-                .list().reversed();
+                .list();
     }
 
-    public List<TableCard>findFirst(int quantity) {
+    public List<TableCard>findLast(int quantity) {
         return jdbcClient.sql("SELECT * FROM table_card  ORDER BY creationdate DESC LIMIT :quantity")
                 .param("quantity", quantity)
                 .query(TableCard.class)
@@ -68,6 +68,15 @@ public class HomeDao {
         jdbcClient.sql("DELETE FROM table_card WHERE id = :id")
                 .param("id", id)
                 .update();
+    }
+
+    public List<TableCard> findTableCardPaginated(int page, int pageSize) {
+        int offset = page * pageSize;
+        return jdbcClient.sql("SELECT * FROM table_card LIMIT :limit OFFSET :offset")
+                .param("limit", pageSize)
+                .param("offset", offset)
+                .query(TableCard.class)
+                .list();
     }
 }
 

@@ -93,7 +93,7 @@ export class TableCardComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
   insert(parent: ViewContainerRef, index?: number): void {
