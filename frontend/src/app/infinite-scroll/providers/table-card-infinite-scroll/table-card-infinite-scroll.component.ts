@@ -44,7 +44,6 @@ export class TableCardInfiniteScrollComponent extends InfiniteScrollComponent<Co
     }
     else {
       const id: string | undefined = this.getLastElement()?.instance.getId();
-      console.log(id);
       if (!id) return;
       request = this.homeService.fetchNextTableCards(id, this.nElementToFetch);
     }
