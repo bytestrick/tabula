@@ -1,0 +1,43 @@
+<form (submit)="onSubmit($event)" class="needs-validation" novalidate>
+  <h3 class="mb-5 text-center">{{ reason }}</h3>
+
+  @if (view === View.InputCode) {
+    <h5 class="row mb-5 justify-content-center text-center">Insert the 6 digits code that was sent to<br><span
+      class="text-primary-emphasis">{{ email }}</span></h5>
+
+    <div class="m-auto pt-4" style="max-width: 80%">
+      <div class="row mb-5">
+        <div class="input-group has-validation p-0">
+          <input class="font-monospace form-control text-center" autocomplete="off" [formControl]="otp"
+                 [class.is-valid]="otp.touched && otp.valid" [class.is-invalid]="otp.touched && otp.invalid">
+          <div class="invalid-tooltip">
+            @if (otp.touched && otp.invalid) {
+              @if (otp.errors?.['required']) {
+                Code required
+              } @else if (otp.errors?.['minlength'] || otp.errors?.['maxlength']) {
+                Code must be 6 digits long
+              } @else if (otp.errors?.['pattern']) {
+                Code can contain only numbers
+              } @else if (otp.errors?.['incorrect']) {
+                Incorrect code
+              } @else if (otp.errors?.['expired']) {
+                Code expired
+              }
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="row gap-3">
+        <button (click)="onResend()" type="button" class="col btn btn-secondary">Resend</button>
+        <button class="col btn btn-primary">Verify</button>
+      </div>
+    </div>
+  } @else if (view === View.InputResetPassword) {
+    <tbl-password-input/>
+
+    <div class="row mt-5">
+      <button class="btn btn-primary">Confirm</button>
+    </div>
+  }
+</form>
