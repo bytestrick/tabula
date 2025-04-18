@@ -15,7 +15,7 @@ import {PrettyDatePipe} from '../pretty-date.pipe';
 
 
 @Component({
-  selector: 'app-table-card',
+  selector: 'tbl-table-card',
   standalone: true,
   imports: [
     DatePipe,

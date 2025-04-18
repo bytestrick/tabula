@@ -6,7 +6,7 @@ import {TableCard} from '../home/table-card/table-card.interface';
 import {HomeComponent} from '../home/home.component';
 
 @Component({
-  selector: 'app-navbar',
+  selector: 'tbl-navbar',
   standalone: true,
   imports: [
     FormsModule,

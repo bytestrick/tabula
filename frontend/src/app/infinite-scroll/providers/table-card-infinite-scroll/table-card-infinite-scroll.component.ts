@@ -15,7 +15,7 @@ import {Observable} from 'rxjs';
 import {HomeComponent} from '../../../home/home.component';
 
 @Component({
-  selector: 'app-table-card-infinite-scroll',
+  selector: 'tbl-table-card-infinite-scroll',
   standalone: true,
   imports: [
     IntersectionListenerDirective,
