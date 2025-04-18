@@ -14,10 +14,6 @@ export class HomeService {
 
 
   public fetchNextTableCards(id: string, quantity: number): Observable<TableCard[]> {
-    // const headers = new HttpHeaders({
-    //   'Authorization': 'Bearer ' + ''
-    // });
-
     const params: HttpParams = new HttpParams()
       .set('quantity', quantity)
       .set('id', id);
