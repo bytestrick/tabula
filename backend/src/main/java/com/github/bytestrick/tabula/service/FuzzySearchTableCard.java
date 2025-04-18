@@ -37,10 +37,9 @@ public class FuzzySearchTableCard {
         }
 
         result.sort(Comparator.comparingDouble(TableCardWithSimilarity::similarity));
-
         List<TableCard> sortedTableCards = new ArrayList<>();
         for (TableCardWithSimilarity entry : result) {
-            sortedTableCards.add(entry.tableCard());
+            sortedTableCards.addFirst(entry.tableCard());
         }
 
         return sortedTableCards;

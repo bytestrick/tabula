@@ -19,12 +19,15 @@
                (keyup)="onKeyUp($event)">
 
         <!-- Bottone di ricerca -->
-        <button class="btn btn-light border rounded-end-5" type="submit">
+        <button class="btn btn-light border rounded-end-5"
+                type="submit">
           <i class="bi bi-search"></i>
         </button>
 
         <!-- Bottone per cancellare -->
-        <button *ngIf="searchFieldOnFocus" id="clear-search-field-button"
+        <button *ngIf="searchFieldOnFocus"
+                type="submit"
+                id="clear-search-field-button"
                 class="btn btn-hover rounded-circle p-0"
                 (click)="clearSearch()">
           <i class="bi bi-x-lg"></i>
