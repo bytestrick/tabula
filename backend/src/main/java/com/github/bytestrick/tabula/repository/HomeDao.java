@@ -17,12 +17,12 @@ public class HomeDao {
     }
 
     public List<TableCard> findByCreationDateAfter(UUID id, int quantity) {
-        LocalDateTime date = jdbcClient.sql("SELECT creationdate FROM table_card WHERE id = :id")
+        LocalDateTime date = jdbcClient.sql("SELECT creation_date FROM table_card WHERE id = :id")
                 .param("id", id)
                 .query(LocalDateTime.class)
                 .single();
 
-        return jdbcClient.sql("SELECT * FROM table_card WHERE creationdate < :date ORDER BY creationdate DESC LIMIT :quantity")
+        return jdbcClient.sql("SELECT * FROM table_card WHERE creation_date < :date ORDER BY creation_date DESC LIMIT :quantity")
                 .param("date", date)
                 .param("quantity", quantity)
                 .query(TableCard.class)
@@ -30,7 +30,7 @@ public class HomeDao {
     }
 
     public List<TableCard>findLast(int quantity) {
-        return jdbcClient.sql("SELECT * FROM table_card  ORDER BY creationdate DESC LIMIT :quantity")
+        return jdbcClient.sql("SELECT * FROM table_card  ORDER BY creation_date DESC LIMIT :quantity")
                 .param("quantity", quantity)
                 .query(TableCard.class)
                 .list();
@@ -49,7 +49,7 @@ public class HomeDao {
     }
 
     public void updateTableCard(TableCard tableCard) {
-        jdbcClient.sql("UPDATE table_card SET title = :title, description = :description, lasteditdate = :lastEditDate WHERE id = :id")
+        jdbcClient.sql("UPDATE table_card SET title = :title, description = :description, last_edit_date = :lastEditDate WHERE id = :id")
                 .param("id", tableCard.getId())
                 .param("title", tableCard.getTitle())
                 .param("description", tableCard.getDescription())
