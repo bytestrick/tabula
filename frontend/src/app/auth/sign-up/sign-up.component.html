@@ -1,0 +1,96 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="needs-validation" novalidate>
+  <h1 class="mb-5 d-flex justify-content-center"><i class="me-3 bi bi-table" style="color: orangered"></i>Tabula</h1>
+
+  <h5 class="row mb-5 p-0 justify-content-center">Create an account</h5>
+
+  <div class="row mb-3">
+    <label for="name" class="form-label p-0">Name</label>
+    <div class="input-group p-0 has-validation">
+      <input id="name" class="form-control" placeholder="John" type="text" formControlName="name" autofocus
+             [class.is-valid]="form.controls.name.touched && form.controls.name.valid"
+             [class.is-invalid]="form.controls.name.touched && form.controls.name.invalid">
+      <div class="invalid-tooltip">
+        @if (form.controls.name.touched && form.controls.name.invalid) {
+          @if (form.controls.name.errors?.['required']) {
+            Name required
+          } @else if (form.controls.name.errors?.['minlength']) {
+            Name must be at least 2 characters long
+          } @else if (form.controls.name.errors?.['maxlength']) {
+            Name can't be longer than 100 characters
+          }
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="row mb-3 position-relative">
+    <label for="surname" class="form-label p-0">Surname</label>
+    <div class="input-group p-0 has-validation">
+      <input id="surname" class="form-control" placeholder="Doe" type="text" formControlName="surname"
+             [class.is-valid]="form.controls.surname.touched && form.controls.surname.valid"
+             [class.is-invalid]="form.controls.surname.touched && form.controls.surname.invalid">
+      <div class="invalid-tooltip">
+        @if (form.controls.surname.touched && form.controls.surname.invalid) {
+          @if (form.controls.surname.errors?.['required']) {
+            Surname required
+          } @else if (form.controls.surname.errors?.['minlength']) {
+            Surname must be at least 2 characters long
+          } @else if (form.controls.surname.errors?.['maxlength']) {
+            Surname can't be longer than 100 characters
+          }
+        }
+      </div>
+    </div>
+  </div>
+
+    <div class="row mb-3">
+      <label for="country" class="form-label p-0">Country</label>
+      <div class="input-group p-0 has-validation position-relative">
+        <select id="country" class="form-select" formControlName="country"
+                [class.is-valid]="form.controls.country.touched && form.controls.country.valid"
+                [class.is-invalid]="form.controls.country.touched && form.controls.country.invalid">
+          <option value="-1" disabled>Select your country</option>
+          <option [value]="i" *ngFor="let country of countries; index as i">
+            {{ country.name.length > 26 ? country.name.substring(0, 26) + '…' : country.name }}&nbsp;
+            {{ country.flag }}
+          </option>
+        </select>
+        <div class="invalid-tooltip">Country required</div>
+      </div>
+    </div>
+
+    <div class="row mb-3">
+      <label for="email" class="form-label p-0">Email address</label>
+      <div class="input-group p-0 has-validation position-relative">
+        <input id="email" class="form-control" type="email" formControlName="email" placeholder="john.doe@example.com"
+               autocomplete="username" [class.is-valid]="form.controls.email.touched && form.controls.email.valid"
+               [class.is-invalid]="form.controls.email.touched && form.controls.email.invalid">
+        <div class="invalid-tooltip">
+          @if (form.controls.email.touched && form.controls.email.invalid) {
+            @if (form.controls.email.errors?.['required']) {
+              Email required
+            } @else if (form.controls.email.errors?.['email']) {
+              Invalid email
+            } @else if (form.controls.email.errors?.['alreadyRegistered']) {
+              Email already registered
+            }
+          }
+        </div>
+      </div>
+    </div>
+
+    <tbl-password-input/>
+
+    <div class="row mb-5">
+      <div class="form-check">
+        <input id="rememberMe" class="form-check-input" type="checkbox" formControlName="rememberMe" checked>
+        <label for="rememberMe" class="form-check-label">Keep me signed in</label>
+      </div>
+    </div>
+
+    <div class="row mb-4">
+      <button class="btn btn-primary">Sign up</button>
+    </div>
+
+    <a class="row pb-5" routerLink="/sign-in">Already have an account?</a>
+</form>
