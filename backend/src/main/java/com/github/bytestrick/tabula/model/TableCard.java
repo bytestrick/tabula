@@ -27,4 +27,9 @@ public class TableCard {
 
     @PastOrPresent
     private LocalDateTime lastEditDate;
+
+    @NotNull
+    private UUID userId;
+
+    private UUID tableId;
 }

@@ -21,18 +21,6 @@ CREATE TABLE invalid_jwts
     expiration_date TIMESTAMP NOT NULL
 );
 
-CREATE OR REPLACE FUNCTION delete_expired_jwt()
-    RETURNS VOID AS
-$$
-BEGIN
-    DELETE FROM invalid_jwts WHERE expiration_date < NOW();
-END;
-$$ LANGUAGE plpgsql;
-
---SELECT cron.schedule('delete-expired-jwt-daily', '0 0 * * *', 'SELECT delete_expired_jwt()');
-
---TODO: cron job to delete all users that are not verified and have an expired OTP
-
 
 CREATE TABLE data_type 
 (
@@ -120,10 +108,17 @@ FOR EACH ROW
 EXECUTE FUNCTION deleteRowCellsOnRowDelete();
 
 
-CREATE TABLE table_card (
-    id uuid primary key default gen_random_uuid(),
-    title varchar(50) not null default '',
-    description varchar(500) not null default '',
-    creation_date timestamp not null default now(),
-    last_edit_date timestamp default null
+create table table_card
+(
+    id             uuid         default gen_random_uuid() not null primary key,
+    title          varchar(50)  default ''                not null,
+    description    varchar(500) default ''                not null,
+    creation_date  timestamp    default now()             not null,
+    last_edit_date timestamp,
+    user_id        uuid
+        constraint table_card_users__fk
+            references users,
+    table_id       uuid
+        constraint table_card_my_table__fk
+            references my_table on delete cascade
 );

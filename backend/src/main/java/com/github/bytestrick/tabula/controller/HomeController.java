@@ -1,9 +1,14 @@
 package com.github.bytestrick.tabula.controller;
 
+import com.github.bytestrick.tabula.controller.dto.TableCardDto;
 import com.github.bytestrick.tabula.model.TableCard;
 import com.github.bytestrick.tabula.repository.HomeDao;
 import com.github.bytestrick.tabula.service.FuzzySearchTableCard;
+import com.github.bytestrick.tabula.service.HomeService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,49 +16,39 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/")
+@RequiredArgsConstructor
 public class HomeController {
 
-    private final HomeDao homeDao;
-    private final FuzzySearchTableCard fuzzySearchTableCard;
-
-
-    public HomeController(HomeDao homeDao, FuzzySearchTableCard fuzzySearchTableCard) {
-        this.homeDao = homeDao;
-        this.fuzzySearchTableCard = fuzzySearchTableCard;
-    }
+    private final HomeService homeService;
 
 
     @GetMapping("table-card/next")
-    public ResponseEntity<List<TableCard>> getNextTableCard(@RequestParam UUID id, @RequestParam int quantity) {
-        return ResponseEntity.ok().body(homeDao.findByCreationDateAfter(id, quantity));
+    public ResponseEntity<List<TableCardDto>> getNextTableCard(@RequestParam UUID id, @RequestParam int quantity) {
+        return ResponseEntity.ok().body(homeService.getNextTableCard(id, quantity));
     }
 
     @GetMapping("table-card")
-    public ResponseEntity<List<TableCard>> getLastTableCard(@RequestParam int quantity) {
-        return ResponseEntity.ok().body(homeDao.findLast(quantity));
+    public ResponseEntity<List<TableCardDto>> getLastTableCard(@RequestParam int quantity) {
+        return ResponseEntity.ok().body(homeService.getLastTableCard(quantity));
     }
 
     @PostMapping("table-card")
-    public ResponseEntity<TableCard> createTableCard(@RequestBody TableCard tableCard) {
-        return ResponseEntity.ok().body(homeDao.saveTableCard(tableCard));
+    public ResponseEntity<TableCardDto> createTableCard(@RequestBody TableCard tableCard) {
+        return ResponseEntity.ok().body(homeService.createTableCard(tableCard));
     }
 
     @PutMapping("table-card")
     public ResponseEntity<String> updateTableCard(@RequestBody TableCard tableCard) {
-        System.out.println("Table: " + tableCard);
-
-        homeDao.updateTableCard(tableCard);
-        return ResponseEntity.ok().body("TableCard updated successfully");
+        return ResponseEntity.ok().body(homeService.updateTableCard(tableCard));
     }
 
     @DeleteMapping("table-card")
     public ResponseEntity<String> deleteTableCard(@RequestParam UUID id) {
-        homeDao.deleteTableCardById(id);
-        return ResponseEntity.ok().body("TableCard deleted successfully");
+        return ResponseEntity.ok().body(homeService.deleteTableCard(id));
     }
 
     @GetMapping("search")
-    public ResponseEntity<List<TableCard>> fuzzySearch(@RequestParam String pattern) {
-        return ResponseEntity.ok(fuzzySearchTableCard.fuzzySearch(pattern));
+    public ResponseEntity<List<TableCardDto>> fuzzySearch(@RequestParam String pattern) {
+        return ResponseEntity.ok(homeService.fuzzySearch(pattern));
     }
 }
