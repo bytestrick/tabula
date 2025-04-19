@@ -1,6 +1,7 @@
 package com.github.bytestrick.tabula.repository;
 
 import com.github.bytestrick.tabula.model.TableCard;
+import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
@@ -9,41 +10,45 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
+@RequiredArgsConstructor
 public class HomeDao {
+
     private final JdbcClient jdbcClient;
 
-    public HomeDao(JdbcClient jdbcClient) {
-        this.jdbcClient = jdbcClient;
-    }
 
-    public List<TableCard> findByCreationDateAfter(UUID id, int quantity) {
-        LocalDateTime date = jdbcClient.sql("SELECT creation_date FROM table_card WHERE id = :id")
-                .param("id", id)
+    public List<TableCard> findByCreationDateAfter(UUID tableCardId, int quantity, UUID userId) {
+        LocalDateTime date = jdbcClient.sql("SELECT creation_date FROM table_card WHERE id = :id AND user_id = :userId")
+                .param("id", tableCardId)
+                .param("userId", userId)
                 .query(LocalDateTime.class)
                 .single();
 
-        return jdbcClient.sql("SELECT * FROM table_card WHERE creation_date < :date ORDER BY creation_date DESC LIMIT :quantity")
+        return jdbcClient.sql("SELECT * FROM table_card WHERE creation_date < :date AND user_id = :userId ORDER BY creation_date DESC LIMIT :quantity")
                 .param("date", date)
                 .param("quantity", quantity)
+                .param("userId", userId)
                 .query(TableCard.class)
                 .list();
     }
 
-    public List<TableCard>findLast(int quantity) {
-        return jdbcClient.sql("SELECT * FROM table_card  ORDER BY creation_date DESC LIMIT :quantity")
+    public List<TableCard>findLast(int quantity, UUID userId) {
+        return jdbcClient.sql("SELECT * FROM table_card WHERE user_id = :userId ORDER BY creation_date DESC LIMIT :quantity")
                 .param("quantity", quantity)
+                .param("userId", userId)
                 .query(TableCard.class)
                 .list();
     }
 
-    public TableCard saveTableCard(TableCard tableCard) {
+    public TableCard saveTableCard(TableCard tableCard, UUID userId) {
         UUID uuid = UUID.randomUUID();
-        jdbcClient.sql("INSERT INTO table_card VALUES (:id, :title, :description, :creationDate, :lastEditDate)")
+        jdbcClient.sql("INSERT INTO table_card (id, title, description, creation_date, last_edit_date, user_id, table_id) VALUES (:id, :title, :description, :creationDate, :lastEditDate, :userId, :tableId)")
                 .param("id", uuid)
                 .param("title", tableCard.getTitle())
                 .param("description", tableCard.getDescription())
                 .param("creationDate", tableCard.getCreationDate())
                 .param("lastEditDate", tableCard.getLastEditDate())
+                .param("userId", userId)
+                .param("tableId", null)
                 .update();
         return findTableCardById(uuid);
     }
@@ -57,24 +62,25 @@ public class HomeDao {
                 .update();
     }
 
-    public TableCard findTableCardById(UUID id) {
-        return jdbcClient.sql("SELECT * FROM table_card WHERE id = :id")
-                .param("id", id)
+    public TableCard findTableCardById(UUID tableCardId) {
+        return jdbcClient.sql("SELECT * FROM table_card WHERE id = :tableCardId")
+                .param("tableCardId", tableCardId)
                 .query(TableCard.class)
                 .single();
     }
 
-    public void deleteTableCardById(UUID id) {
-        jdbcClient.sql("DELETE FROM table_card WHERE id = :id")
-                .param("id", id)
+    public void deleteTableCardById(UUID tableCardId) {
+        jdbcClient.sql("DELETE FROM table_card WHERE id = :tableCardId")
+                .param("tableCardId", tableCardId)
                 .update();
     }
 
-    public List<TableCard> findTableCardPaginated(int page, int pageSize) {
+    public List<TableCard> findTableCardPaginated(int page, int pageSize, UUID userId) {
         int offset = page * pageSize;
-        return jdbcClient.sql("SELECT * FROM table_card LIMIT :limit OFFSET :offset")
+        return jdbcClient.sql("SELECT * FROM table_card WHERE user_id = :userId LIMIT :limit OFFSET :offset")
                 .param("limit", pageSize)
                 .param("offset", offset)
+                .param("userId", userId)
                 .query(TableCard.class)
                 .list();
     }

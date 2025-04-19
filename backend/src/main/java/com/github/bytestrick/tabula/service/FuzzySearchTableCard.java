@@ -2,25 +2,24 @@ package com.github.bytestrick.tabula.service;
 
 import com.github.bytestrick.tabula.model.TableCard;
 import com.github.bytestrick.tabula.repository.HomeDao;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 public class FuzzySearchTableCard {
 
     private final HomeDao homeDao;
 
-    public FuzzySearchTableCard(HomeDao homeDao) {
-        this.homeDao = homeDao;
-    }
 
-    public List<TableCard> fuzzySearch(String pattern) {
+    public List<TableCard> fuzzySearch(String pattern, UUID userId) {
         List<TableCardWithSimilarity> result = new ArrayList<>();
 
         int page = 0;
         int pageSize = 50;
-        List<TableCard> tableCards = homeDao.findTableCardPaginated(page, pageSize);
+        List<TableCard> tableCards = homeDao.findTableCardPaginated(page, pageSize, userId);
 
         while (!tableCards.isEmpty()) {
             for (TableCard tableCard : tableCards) {
@@ -31,18 +30,13 @@ public class FuzzySearchTableCard {
                     result.add(new TableCardWithSimilarity(tableCard, similarity));
                 }
             }
-
             page += 1;
-            tableCards = homeDao.findTableCardPaginated(page, pageSize);
+            tableCards = homeDao.findTableCardPaginated(page, pageSize, userId);
         }
 
-        result.sort(Comparator.comparingDouble(TableCardWithSimilarity::similarity));
-        List<TableCard> sortedTableCards = new ArrayList<>();
-        for (TableCardWithSimilarity entry : result) {
-            sortedTableCards.addFirst(entry.tableCard());
-        }
-
-        return sortedTableCards;
+        result.sort(
+                (t1, t2) -> Float.compare(t2.similarity(), t1.similarity()));
+        return result.stream().map(TableCardWithSimilarity::tableCard).toList();
     }
 
     public record TableCardWithSimilarity(TableCard tableCard, float similarity) {}
