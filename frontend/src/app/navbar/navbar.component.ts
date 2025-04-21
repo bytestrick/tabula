@@ -3,7 +3,7 @@ import {FormsModule} from '@angular/forms';
 import {NavbarService} from './navbar.service';
 import {NgIf} from '@angular/common';
 import {TableCard} from '../home/table-card/table-card.interface';
-import {HomeComponent} from '../home/home.component';
+import {AuthService} from '../auth/auth.service';
 
 @Component({
   selector: 'tbl-navbar',
@@ -24,7 +24,8 @@ export class NavbarComponent {
   @Output() onSearchedTableCard: EventEmitter<TableCard[]> = new EventEmitter;
 
 
-  constructor(private navbarService: NavbarService) {}
+  constructor(private navbarService: NavbarService,
+              private authService: AuthService) {}
 
 
   protected onSearchSubmit(searchForm: HTMLFormElement): void {
@@ -61,5 +62,9 @@ export class NavbarComponent {
       },
       error: (err: any): any => console.debug(err)
     });
+  }
+
+  onSingOut(): void {
+    this.authService.signOut();
   }
 }
