@@ -1,25 +1,31 @@
 package com.github.bytestrick.tabula.service;
 
+import com.github.bytestrick.tabula.controller.dto.TableDTO;
 import com.github.bytestrick.tabula.controller.dto.TableDto;
 import com.github.bytestrick.tabula.model.Table;
 import com.github.bytestrick.tabula.model.User;
+import com.github.bytestrick.tabula.model.table.Cell;
+import com.github.bytestrick.tabula.model.table.Row;
 import com.github.bytestrick.tabula.repository.TableDao;
 import com.github.bytestrick.tabula.repository.UserDao;
+import com.github.bytestrick.tabula.repository.proxy.table.TableProxy;
+import com.github.bytestrick.tabula.repository.table.TableDAO;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TableService {
 
     private final UserDao userDao;
+    private final TableDAO tableDAO;
     private final TableDao tableDao;
     private final FuzzySearchTable fuzzySearchTable;
 
@@ -68,5 +74,32 @@ public class TableService {
     public List<TableDto> fuzzySearch(String pattern) {
         return fuzzySearchTable.fuzzySearch(pattern, getAuthUser().getId())
                 .stream().map(this::toTableCardDto).toList();
+    }
+
+
+    @Transactional
+    public TableDTO createNewTable() {
+        UUID id = UUID.randomUUID();
+
+        tableDAO.saveTable(id);
+        TableProxy table = tableDAO.findTable(id);
+
+        return new TableDTO(table.getId(), null, null);
+    }
+
+
+    @Transactional
+    public TableDTO getTable(UUID tableId) {
+        TableProxy table = tableDAO.findTable(tableId);
+        List<List<String>> content = new ArrayList<>();
+        List<String> headers = tableDAO.getTableDataTypesNames(tableId);
+
+        for (Row row : table.getRows()) {
+            content.add(
+                    row.getCells().stream().map(Cell::getValue).toList()
+            );
+        }
+
+        return new TableDTO(table.getId(), headers, content);
     }
 }

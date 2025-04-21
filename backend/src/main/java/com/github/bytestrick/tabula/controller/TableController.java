@@ -1,8 +1,12 @@
 package com.github.bytestrick.tabula.controller;
 
+
 import com.github.bytestrick.tabula.controller.dto.InformativeResponse;
 import com.github.bytestrick.tabula.controller.dto.TableDto;
 import com.github.bytestrick.tabula.model.Table;
+
+import com.github.bytestrick.tabula.controller.dto.TableDTO;
+
 import com.github.bytestrick.tabula.service.TableService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -46,5 +50,20 @@ public class TableController {
     @GetMapping("search")
     public ResponseEntity<List<TableDto>> fuzzySearch(@RequestParam String pattern) {
         return ResponseEntity.ok(tableService.fuzzySearch(pattern));
+    }
+
+    
+    @PutMapping
+    public ResponseEntity<?> createTable() {
+        tableService.createNewTable();
+        return ResponseEntity.ok().build();
+    }
+
+
+    @GetMapping
+    public ResponseEntity<TableDTO> getTable(
+            @RequestParam(name = "table-id") String tableId) {
+
+        return ResponseEntity.ok(tableService.getTable(UUID.fromString(tableId)));
     }
 }
