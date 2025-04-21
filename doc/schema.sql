@@ -49,6 +49,7 @@ VALUES
     ('Numeric'),
     ('Monetary');
 
+
 CREATE TABLE my_table 
 (
     id              UUID PRIMARY KEY
@@ -62,7 +63,7 @@ CREATE TABLE my_column
     data_type       SMALLSERIAL,
     column_index    INT NOT NULL,
 
-    FOREIGN KEY (my_table) REFERENCES my_table (id),
+    FOREIGN KEY (my_table) REFERENCES my_table (id) ON DELETE CASCADE,
     FOREIGN KEY (data_type) REFERENCES data_type (id),
     UNIQUE(column_index, my_table)
 );
@@ -74,7 +75,7 @@ CREATE TABLE my_row
     my_table        UUID,
     row_index       INT NOT NULL,
 
-    FOREIGN KEY (my_table) REFERENCES my_table (id),
+    FOREIGN KEY (my_table) REFERENCES my_table (id) ON DELETE CASCADE,
     UNIQUE(row_index, my_table)
 );
 
@@ -86,39 +87,11 @@ CREATE TABLE cell
     my_column       UUID,
     value           VARCHAR(1000),
 
-    FOREIGN KEY (my_column) REFERENCES my_column(id),
-    FOREIGN KEY (my_row) REFERENCES my_row(id)
+    FOREIGN KEY (my_column) REFERENCES my_column(id) ON DELETE CASCADE,
+    FOREIGN KEY (my_row) REFERENCES my_row(id) ON DELETE CASCADE,
+    UNIQUE(my_row, my_column)
 );
 
-
-CREATE OR REPLACE FUNCTION deleteColumnCellsOnColumnDelete()
-RETURNS trigger AS $$
-BEGIN
-    DELETE FROM cell WHERE my_column = OLD.id;
-    RETURN OLD;
-END;
-$$ LANGUAGE plpgsql;
-
-
-CREATE OR REPLACE TRIGGER onDeleteColumn
-AFTER DELETE ON my_column
-FOR EACH ROW
-EXECUTE FUNCTION deleteColumnCellsOnColumnDelete();
-
-
-CREATE OR REPLACE FUNCTION deleteRowCellsOnRowDelete()
-RETURNS trigger AS $$
-BEGIN
-    DELETE FROM cell WHERE my_row = OLD.id;
-    RETURN OLD;
-END;
-$$ LANGUAGE plpgsql;
-
-
-CREATE OR REPLACE TRIGGER onDeleteRow
-AFTER DELETE ON my_row
-FOR EACH ROW
-EXECUTE FUNCTION deleteRowCellsOnRowDelete();
 
 
 create table table_card
@@ -133,6 +106,6 @@ create table table_card
             references users,
     table_id       uuid
         constraint table_card_my_table__fk
-            references my_table on delete cascade
+            references my_table
 );
 

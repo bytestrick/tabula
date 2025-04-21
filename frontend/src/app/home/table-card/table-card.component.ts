@@ -1,10 +1,8 @@
 import {
   Component,
   ComponentRef,
-  createComponent,
-  EnvironmentInjector,
-  EventEmitter,
-  inject,
+  createComponent, EnvironmentInjector,
+  EventEmitter, inject,
   OnDestroy,
   Output,
   ViewContainerRef
@@ -14,9 +12,9 @@ import {TableCard} from './table-card.interface';
 import {Subscription} from 'rxjs';
 import {DatePipe} from '@angular/common';
 import {PrettyDatePipe} from '../pretty-date.pipe';
+import {Router, RouterOutlet} from '@angular/router';
 import {ToastService} from '../../toast/toast.service';
 import {ConfirmDialogService} from '../../confirm-dialog/confirm-dialog.service';
-
 
 @Component({
   selector: 'tbl-table-card',
@@ -32,13 +30,15 @@ export class TableCardComponent implements OnDestroy {
   protected description: string = "Description";
   protected creationDate?: Date;
   protected lastEditDate?: Date;
-  private tableId?: string;
 
   private isInit: boolean = false;
   private subscription!: Subscription;
+
   private toast = inject(ToastService);
   private confirmDialog = inject(ConfirmDialogService);
   private homeService = inject(HomeService);
+  private router: Router = inject(Router);
+
 
   init(tableCard: TableCard): TableCardComponent {
     if (this.isInit) return this;
@@ -49,7 +49,6 @@ export class TableCardComponent implements OnDestroy {
     this.description = tableCard.description;
     this.creationDate = tableCard.creationDate ? new Date(tableCard.creationDate + 'Z') : undefined;
     this.lastEditDate = tableCard.lastEditDate ? new Date(tableCard.lastEditDate + 'Z') : this.creationDate;
-    this.tableId = tableCard.id;
     return this;
   }
 
@@ -139,5 +138,9 @@ export class TableCardComponent implements OnDestroy {
     this.title = tableCard.title;
     this.description = tableCard.description;
     this.lastEditDate = tableCard.lastEditDate;
+  }
+
+  onOpenCard(): void {
+    this.router.navigate(['/table']);
   }
 }

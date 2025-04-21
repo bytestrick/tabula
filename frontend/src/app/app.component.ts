@@ -5,12 +5,13 @@ import {ThemeService} from './theme.service';
 
 import {Component, ViewChild, ViewContainerRef, OnInit} from '@angular/core';
 import {PopUpManagerService} from './services/pop-up-manager.service';
+import {ConfirmDialogComponent} from './confirm-dialog/confirm-dialog.component';
 
 
 @Component({
   selector: 'tbl-root',
   standalone: true,
-  imports: [ToastComponent, RouterOutlet],
+  imports: [ToastComponent, RouterOutlet, ConfirmDialogComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
