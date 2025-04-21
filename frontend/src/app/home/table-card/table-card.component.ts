@@ -46,6 +46,8 @@ export class TableCardComponent implements OnDestroy {
     if (this.isInit) return this;
     this.isInit = true;
 
+    console.log(tableCard)
+
     this.id = tableCard.id;
     this.title = tableCard.title;
     this.description = tableCard.description;

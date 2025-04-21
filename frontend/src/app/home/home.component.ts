@@ -37,8 +37,8 @@ export class HomeComponent {
   @ViewChild('tableCardContainer', { read: ViewContainerRef }) private tableCardContainerView!: ViewContainerRef;
   @ViewChild('tableCardInfiniteScroll') private tableCardInfiniteScroll!: TableCardInfiniteScrollComponent;
 
-  constructor(private homeService: HomeService,
-              private injector: EnvironmentInjector) {}
+
+  constructor(private injector: EnvironmentInjector) {}
 
 
   createTableCard(): void {
