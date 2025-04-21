@@ -47,7 +47,7 @@ public class HomeService {
 
     private TableCardDto toTableCardDto(TableCard tableCard) {
         return new TableCardDto(
-                tableCard.getTableId(),
+                tableCard.getId(),
                 tableCard.getTitle(),
                 tableCard.getDescription(),
                 tableCard.getCreationDate(),
