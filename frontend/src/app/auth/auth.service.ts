@@ -42,8 +42,30 @@ export class AuthService {
     this.auth = authenticationRaw ? JSON.parse(authenticationRaw) : null;
   }
 
+  base64urlToBase64(base64url: string): string {
+    let base64: string = base64url
+      .replace("-", "+")
+      .replace("_", "/");
+
+    const padding: number = base64.length % 4;
+    if (padding > 0) {
+      base64 += '='.repeat(4 - padding);
+    }
+
+    return base64;
+  }
+
+  get isExpired(): boolean {
+    const token = this.authentication?.token.split('.')[1];
+    if (!token) return true;
+
+    const payload = JSON.parse(atob(this.base64urlToBase64(token)));
+    const exp = payload.exp;
+    return new Date(exp * 1000) < new Date();
+  }
+
   get isAuthenticated(): boolean {
-    return this.authentication !== null;
+    return this.authentication !== null && !this.isExpired;
   }
 
   signIn(form: SignInRequest): Observable<AuthenticationResponse> {
