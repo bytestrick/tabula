@@ -34,6 +34,7 @@ export class TableCardComponent implements OnDestroy {
   protected description: string = "Description";
   protected creationDate?: Date;
   protected lastEditDate?: Date;
+  private tableId?: string;
 
   private isInit: boolean = false;
   private subscription!: Subscription;
@@ -46,13 +47,12 @@ export class TableCardComponent implements OnDestroy {
     if (this.isInit) return this;
     this.isInit = true;
 
-    console.log(tableCard)
-
     this.id = tableCard.id;
     this.title = tableCard.title;
     this.description = tableCard.description;
     this.creationDate = tableCard.creationDate ? new Date(tableCard.creationDate + 'Z') : undefined;
     this.lastEditDate = tableCard.lastEditDate ? new Date(tableCard.lastEditDate + 'Z') : this.creationDate;
+    this.tableId = tableCard.id;
     return this;
   }
 

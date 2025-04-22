@@ -4,4 +4,5 @@ export interface TableCard {
   description: string;
   creationDate?: Date;
   lastEditDate?: Date;
+  tableId?: string;
 }
