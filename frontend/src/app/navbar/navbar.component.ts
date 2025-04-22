@@ -1,32 +1,53 @@
-import {Component, ElementRef, EventEmitter, inject, Output, ViewChild, viewChild} from '@angular/core';
+import {Component, ElementRef, EventEmitter, OnInit, Output, ViewChild} from '@angular/core';
 import {FormsModule} from '@angular/forms';
-import {NavbarService} from './navbar.service';
-import {NgIf} from '@angular/common';
+import {NavbarService, UserInfo} from './navbar.service';
+import {NgClass, NgIf, TitleCasePipe} from '@angular/common';
 import {TableCard} from '../home/table-card/table-card.interface';
 import {AuthService} from '../auth/auth.service';
+import {ThemeMode, ThemeService} from '../theme.service';
 
 @Component({
   selector: 'tbl-navbar',
   standalone: true,
   imports: [
     FormsModule,
-    NgIf
+    NgIf,
+    NgClass,
+    TitleCasePipe
   ],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css'
 })
-export class NavbarComponent {
+export class NavbarComponent implements OnInit {
 
   protected searchContent: string = '';
   protected searchFieldOnFocus: boolean = false;
   @ViewChild('searchField') private searchField!: ElementRef;
   private timer: any;
   @Output() onSearchedTableCard: EventEmitter<TableCard[]> = new EventEmitter;
+  protected userInfo: UserInfo = {
+    name: '',
+    surname: '',
+    email: ''
+  }
 
 
   constructor(private navbarService: NavbarService,
-              private authService: AuthService) {}
+              private authService: AuthService,
+              protected themeService: ThemeService) {}
 
+
+  ngOnInit(): void {
+    const email: string | undefined = this.authService.authentication?.email
+    if (!email) return;
+
+    this.navbarService.retrievesUserInformation(email).subscribe({
+      next: (data: UserInfo): void => {
+        this.userInfo = data;
+      },
+      error: err => console.error(err)
+    })
+  }
 
   protected onSearchSubmit(searchForm: HTMLFormElement): void {
     this.search(this.searchContent);
@@ -66,5 +87,9 @@ export class NavbarComponent {
 
   onSingOut(): void {
     this.authService.signOut();
+  }
+
+  setTheme(theme: ThemeMode): void {
+    this.themeService.setTheme(theme);
   }
 }
