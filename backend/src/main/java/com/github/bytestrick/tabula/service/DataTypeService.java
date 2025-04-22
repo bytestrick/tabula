@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +19,7 @@ public class DataTypeService {
 
 
     private DataTypeDTO convertToDataTypeDTO(DataType dataType) {
-        return new DataTypeDTO(dataType.name());
+        return new DataTypeDTO(dataType.id(), dataType.name());
     }
 
 

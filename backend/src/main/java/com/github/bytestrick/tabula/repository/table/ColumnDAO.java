@@ -60,7 +60,7 @@ public class ColumnDAO {
             INSERT INTO my_column (id, my_table, data_type, column_index)
             VALUES (:id, :tableId, :dataTypeId, (
                 SELECT COALESCE(MAX(column_index), -1) + 1
-                FROM my_column 
+                FROM my_column
                 WHERE my_table = :tableId)
                 )
         """)
@@ -101,7 +101,8 @@ public class ColumnDAO {
             return new ColumnProxy(
                     UUID.fromString(rs.getString("id")),
                     UUID.fromString(rs.getString("my_table")),
-                    UUID.fromString(rs.getString("data_type")),
+                    rs.getInt("data_type"),
+                    rs.getString("column_name"),
                     rs.getInt("column_index"),
                     cellDAO
             );

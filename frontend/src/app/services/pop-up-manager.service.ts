@@ -1,5 +1,5 @@
 import {ComponentRef, createComponent, EnvironmentInjector, Injectable, ViewContainerRef} from '@angular/core';
-import {PopUp} from '../components/pop-up-component/pop-up.component';
+import {PopUp} from '../table-components/pop-up-component/pop-up.component';
 import {IPopUpContent} from '../model/i-pop-up-content';
 
 @Injectable({

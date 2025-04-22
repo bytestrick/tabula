@@ -1,16 +1,19 @@
-import {Injectable} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {Cell} from '../model/table/cell';
 import {HeaderCell} from '../model/table/header-cell';
 import {IDataType} from '../model/data-types/i-data-type';
 import {TextualDataType} from '../model/data-types/concrete-data-type/textual-data-type';
 import {moveItemInArray} from '@angular/cdk/drag-drop';
 import {CellCord} from '../model/table/cell-cord';
+import {TableApiService, TableDTO} from './table-api.service';
+import {DataTypeRegistryService} from './data-type-registry.service';
 
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class TableService {
+
+  private dataTypeService: DataTypeRegistryService = inject(DataTypeRegistryService);
+  private tableAPI: TableApiService = inject(TableApiService);
 
   private table: Cell[][] = [];
   private headerCells: HeaderCell[] = [];
@@ -492,5 +495,35 @@ export class TableService {
         });
       }
     }
+  }
+
+
+  loadFromTableDTO(tableDTO: TableDTO): void {
+    for (let columnDTO of tableDTO.header) {
+      this.headerCells.push(
+        new HeaderCell(
+          new TextualDataType(),
+          columnDTO.columnName || this.HEADER_CELL_DEFAULT_NAME,
+          this.dataTypeService.convertIntoIDataType(columnDTO.dataType)
+        )
+      )
+    }
+
+    for (let row of tableDTO.content) {
+      this.table.push([])
+
+      for (let j: number = 0; j < row.length; ++j) {
+        this.table[this.getRowsNumber() - 1].push(new Cell(this.headerCells[j].columnDataType.getNewDataType(), null));
+      }
+    }
+  }
+
+
+  init(tableId: string): void {
+    this.tableAPI.getTable(tableId).subscribe(
+      {
+        next: tableDTO => this.loadFromTableDTO(tableDTO)
+      }
+    )
   }
 }

@@ -1,8 +1,8 @@
 import {
   AfterViewInit,
   Component,
-  ElementRef, inject, Input, input, InputSignal,
-  Renderer2, Signal, ViewChild, viewChild,
+  ElementRef, inject, Input,
+  Renderer2, ViewChild,
 } from '@angular/core';
 import {IPopUpContent} from '../../model/i-pop-up-content';
 import {PopUp} from '../pop-up-component/pop-up.component';
@@ -28,11 +28,10 @@ export class TableContextualMenuComponent implements IPopUpContent, AfterViewIni
   protected currentActionTarget: string = this.TARGET_ROW;
 
   private toastService: ToastService = inject(ToastService);
-  private tableService: TableService = inject(TableService);
-
   private renderer: Renderer2 = inject(Renderer2);
 
-  @Input() cellCord: Pair<number, number> = new Pair(this.tableService.INVALID_CELL_INDEX, this.tableService.INVALID_CELL_INDEX);
+  @Input() tableService!: TableService;
+  @Input() cellCord!: Pair<number, number>;
 
 
   onHidden(_action: string): void {}

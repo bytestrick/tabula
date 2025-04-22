@@ -5,12 +5,13 @@ import {authGuard} from './auth/auth.guard';
 import {PageNotFoundComponent} from './page-not-found/page-not-found.component';
 import {OtpComponent} from './auth/otp/otp.component';
 import {HomeComponent} from './home/home.component';
-import {TableComponent} from './components/table/table.component';
+import {tableOwnerGuard} from './guards/table-owner.guard';
+import {TablePageComponent} from './table-page/table-page.component';
 
 export const routes: Routes = [
   {path: '', redirectTo: 'home', pathMatch: 'full'},
   {path: 'home', component: HomeComponent, canActivate: [authGuard]},
-  {path: 'table', component: TableComponent, canActivate: [authGuard]},
+  {path: 'table/:table-id', component: TablePageComponent, canActivate: [authGuard, tableOwnerGuard]},
   {path: 'sign-in', component: SignInComponent},
   {path: 'sign-up', component: SignUpComponent},
   {path: 'otp', component: OtpComponent},

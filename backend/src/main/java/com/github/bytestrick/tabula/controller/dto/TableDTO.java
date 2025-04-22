@@ -5,6 +5,6 @@ import java.util.UUID;
 
 public record TableDTO(
         UUID id,
-        List<String> header,
+        List<ColumnDTO> header,
         List<List<String>> content
 ) {}

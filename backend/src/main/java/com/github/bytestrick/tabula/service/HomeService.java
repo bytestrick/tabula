@@ -94,4 +94,9 @@ public class HomeService {
         return fuzzySearchTableCard.fuzzySearch(pattern, getAuthUser().getId())
                 .stream().map(this::toTableCardDto).toList();
     }
+
+
+    public boolean currentUserHasTable(UUID tableId) {
+        return homeDao.userHasTable(getAuthUser().getId(), tableId);
+    }
 }

@@ -1,13 +1,15 @@
 package com.github.bytestrick.tabula.service;
 
+import com.github.bytestrick.tabula.controller.dto.ColumnDTO;
 import com.github.bytestrick.tabula.controller.dto.TableDTO;
 import com.github.bytestrick.tabula.controller.dto.TableDto;
 import com.github.bytestrick.tabula.model.Table;
 import com.github.bytestrick.tabula.model.User;
 import com.github.bytestrick.tabula.model.table.Cell;
-import com.github.bytestrick.tabula.model.table.Row;
 import com.github.bytestrick.tabula.repository.TableDao;
 import com.github.bytestrick.tabula.repository.UserDao;
+import com.github.bytestrick.tabula.repository.proxy.table.ColumnProxy;
+import com.github.bytestrick.tabula.repository.proxy.table.RowProxy;
 import com.github.bytestrick.tabula.repository.proxy.table.TableProxy;
 import com.github.bytestrick.tabula.repository.table.TableDAO;
 import lombok.RequiredArgsConstructor;
@@ -92,11 +94,17 @@ public class TableService {
     public TableDTO getTable(UUID tableId) {
         TableProxy table = tableDAO.findTable(tableId);
         List<List<String>> content = new ArrayList<>();
-        List<String> headers = tableDAO.getTableDataTypesNames(tableId);
+        List<ColumnDTO> headers = new ArrayList<>();
 
-        for (Row row : table.getRows()) {
+        for (RowProxy row : table.getRows()) {
             content.add(
                     row.getCells().stream().map(Cell::getValue).toList()
+            );
+        }
+
+        for (ColumnProxy column : table.getColumns()) {
+            headers.add(
+                   new ColumnDTO(column.getDataType(), column.getName())
             );
         }
 

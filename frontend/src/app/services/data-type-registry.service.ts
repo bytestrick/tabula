@@ -7,6 +7,7 @@ import {map, Observable} from 'rxjs';
 import {HttpClient, HttpParams} from '@angular/common/http';
 
 export interface DataTypeDTO {
+  id: number,
   name: string
 }
 
@@ -23,18 +24,18 @@ export class DataTypeRegistryService {
 
     return this.httpClient.get<DataTypeDTO[]>("/data-type", { params }).pipe(
       map(dataTypesDTO=> dataTypesDTO.map(
-        dataTypeDTO => this.convertIntoIDataType(dataTypeDTO)
+        dataTypeDTO => this.convertIntoIDataType(dataTypeDTO.id)
       ))
     );
   }
 
 
-  private convertIntoIDataType(dataTypeDTO: DataTypeDTO): IDataType {
-    switch (dataTypeDTO.name) {
-      case "Textual": return new TextualDataType();
-      case "Numeric": return new NumericDataType();
-      case "Monetary": return new MonetaryDataType();
-      default: throw new Error(`${dataTypeDTO.name} does not match any data type`);
+  convertIntoIDataType(dataTypeId: number): IDataType {
+    switch (dataTypeId) {
+      case 1: return new TextualDataType();
+      case 2: return new NumericDataType();
+      case 3: return new MonetaryDataType();
+      default: throw new Error(`${dataTypeId} does not match any data type`);
     }
   }
 }

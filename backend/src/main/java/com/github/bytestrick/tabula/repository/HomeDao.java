@@ -1,6 +1,7 @@
 package com.github.bytestrick.tabula.repository;
 
 import com.github.bytestrick.tabula.model.Table;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
@@ -83,6 +84,21 @@ public class HomeDao {
                 .param("userId", userId)
                 .query(Table.class)
                 .list();
+    }
+
+
+    public Boolean userHasTable(@NotNull UUID userId, @NotNull UUID tableId) {
+        return jdbcClient.sql("""
+            SELECT EXISTS (
+                SELECT 1
+                FROM table_card
+                WHERE user_id = :userId AND table_id = :tableId
+            )
+            """)
+                .param("userId", userId)
+                .param("tableId", tableId)
+                .query(Boolean.class)
+                .single();
     }
 }
 

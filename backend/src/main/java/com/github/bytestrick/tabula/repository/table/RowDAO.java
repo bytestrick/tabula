@@ -1,10 +1,7 @@
 package com.github.bytestrick.tabula.repository.table;
 
-import com.github.bytestrick.tabula.model.table.DataType;
-import com.github.bytestrick.tabula.model.table.Row;
 import com.github.bytestrick.tabula.repository.proxy.table.RowProxy;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -39,7 +36,7 @@ public class RowDAO {
         jdbcClient.sql("""
                 DELETE FROM
                 my_row
-                WHERE column_index = :rowIndex and my_table = :tableId
+                WHERE row_index = :rowIndex and my_table = :tableId
             """)
                 .param("rowIndex", rowIndex)
                 .param("tableId", tableId)
@@ -51,7 +48,11 @@ public class RowDAO {
         jdbcClient.sql("""
                 UPDATE cell
                 SET value = :newValue
-                WHERE row_index = :rowIndex and my_table = :tableId
+                WHERE my_row = (
+                    SELECT id
+                    FROM my_row
+                    WHERE row_index = :rowIndex AND my_table = :tableId
+                )
             """)
                 .param("newValue", newValue)
                 .param("rowIndex", rowIndex)

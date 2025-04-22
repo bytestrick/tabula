@@ -62,6 +62,7 @@ CREATE TABLE my_column
     my_table        UUID,
     data_type       SMALLSERIAL,
     column_index    INT NOT NULL,
+    column_name     VARCHAR(300),
 
     FOREIGN KEY (my_table) REFERENCES my_table (id) ON DELETE CASCADE,
     FOREIGN KEY (data_type) REFERENCES data_type (id),
