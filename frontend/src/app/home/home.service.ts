@@ -13,7 +13,7 @@ export class HomeService {
   constructor(private http: HttpClient) {}
 
 
-  public fetchNextTableCards(id: string, quantity: number): Observable<TableCard[]> {
+  fetchNextTableCards(id: string, quantity: number): Observable<TableCard[]> {
     const params: HttpParams = new HttpParams()
       .set('quantity', quantity)
       .set('id', id);
@@ -24,7 +24,7 @@ export class HomeService {
     );
   }
 
-  public fetchTableCards(quantity: number): Observable<TableCard[]> {
+  fetchTableCards(quantity: number): Observable<TableCard[]> {
     const params: HttpParams = new HttpParams()
       .set('quantity', quantity);
 
@@ -34,7 +34,7 @@ export class HomeService {
     );
   }
 
-  public createTableCard(tableCard: TableCard): Observable<TableCard> {
+  createTableCard(tableCard: TableCard): Observable<TableCard> {
     return this.http.post<TableCard>(
       '/table-card',
       tableCard,
@@ -42,7 +42,7 @@ export class HomeService {
     );
   }
 
-  public editTableCard(tableCard: TableCard) : Observable<string> {
+  editTableCard(tableCard: TableCard) : Observable<string> {
     return this.http.put<string>(
       '/table-card',
       tableCard,
@@ -51,7 +51,7 @@ export class HomeService {
   }
 
 
-  public deleteTableCard(id: string): Observable<string> {
+  deleteTableCard(id: string): Observable<string> {
     const params: HttpParams = new HttpParams().set('id', id);
 
     return this.http.delete<string>(
