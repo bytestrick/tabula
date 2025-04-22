@@ -51,7 +51,8 @@ public class HomeService {
                 tableCard.getTitle(),
                 tableCard.getDescription(),
                 tableCard.getCreationDate(),
-                tableCard.getLastEditDate()
+                tableCard.getLastEditDate(),
+                tableCard.getTableId()
         );
     }
 

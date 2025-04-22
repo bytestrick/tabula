@@ -12,5 +12,6 @@ public record TableCardDto(
         @NotNull @Size(min = 1, max = 50) String title,
         @Size(max = 500) String description,
         @NotNull @PastOrPresent LocalDateTime creationDate,
-        LocalDateTime lastEditDate
+        LocalDateTime lastEditDate,
+        UUID tableId
 ) {}
