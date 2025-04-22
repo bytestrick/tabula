@@ -1,6 +1,6 @@
-import {BaseInputComponent} from '../../components/input-components/base-input-component';
+import {BaseInputComponent} from '../../table-components/input-components/base-input-component';
 import {Type} from '@angular/core';
-import {BaseCellComponent} from '../../components/table/cells/base-cell-component';
+import {BaseCellComponent} from '../../table-components/table/cells/base-cell-component';
 
 export interface IDataType {
 

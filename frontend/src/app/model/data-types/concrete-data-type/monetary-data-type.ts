@@ -1,9 +1,9 @@
 import { Type } from '@angular/core';
-import { BaseInputComponent } from '../../../components/input-components/base-input-component';
-import { BaseCellComponent } from '../../../components/table/cells/base-cell-component';
+import { BaseInputComponent } from '../../../table-components/input-components/base-input-component';
+import { BaseCellComponent } from '../../../table-components/table/cells/base-cell-component';
 import {IDataType} from '../i-data-type';
-import {MonetaryInputComponent} from '../../../components/input-components/monetary-input/monetary-input.component';
-import {TextualCellComponent} from '../../../components/table/cells/textual-cell/textual-cell.component';
+import {MonetaryInputComponent} from '../../../table-components/input-components/monetary-input/monetary-input.component';
+import {TextualCellComponent} from '../../../table-components/table/cells/textual-cell/textual-cell.component';
 
 
 export class MonetaryDataType implements IDataType {

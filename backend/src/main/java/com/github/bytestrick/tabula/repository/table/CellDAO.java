@@ -72,8 +72,8 @@ public class CellDAO {
         @Override
         public Cell mapRow(ResultSet rs, int rowNum) throws SQLException {
             return new Cell(
-                    UUID.fromString(rs.getString("column_id")),
-                    UUID.fromString(rs.getString("row_id")),
+                    UUID.fromString(rs.getString("my_column")),
+                    UUID.fromString(rs.getString("my_row")),
                     rs.getString("value")
             );
         }

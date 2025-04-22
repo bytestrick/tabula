@@ -17,7 +17,11 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
+<<<<<<< HEAD
 @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+=======
+@RequestMapping(value = "/table")
+>>>>>>> 932db89 (- **Backend**)
 @RequiredArgsConstructor
 public class TableController {
     private final TableService tableService;
@@ -27,6 +31,7 @@ public class TableController {
         return ResponseEntity.ok().body(tableService.getNextTables(id, quantity));
     }
 
+<<<<<<< HEAD
     @GetMapping("table")
     public ResponseEntity<List<TableDto>> getLastTables(@RequestParam int quantity) {
         return ResponseEntity.ok().body(tableService.getLastTables(quantity));
@@ -60,6 +65,8 @@ public class TableController {
     }
 
 
+=======
+>>>>>>> 932db89 (- **Backend**)
     @GetMapping
     public ResponseEntity<TableDTO> getTable(
             @RequestParam(name = "table-id") String tableId) {

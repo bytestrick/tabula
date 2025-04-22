@@ -12,7 +12,8 @@ public class Column {
 
     private UUID id;
     private UUID myTable;
-    private UUID dataType;
+    private int dataType;
+    private String name;
     private int columnIndex;
     private List<Cell> cells;
 }

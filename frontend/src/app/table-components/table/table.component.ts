@@ -3,7 +3,6 @@ import {
 } from '@angular/core';
 import {IDataType} from '../../model/data-types/i-data-type';
 import {NgForOf} from '@angular/common';
-import {TextualDataType} from '../../model/data-types/concrete-data-type/textual-data-type';
 import {Pair} from '../../model/pair';
 import {BaseInputComponent} from '../input-components/base-input-component';
 import {CellWrapperComponent} from './cells/cell-wrapper/cell-wrapper.component';
@@ -26,10 +25,11 @@ import {TableContextualMenuComponent} from '../table-contextual-menu/table-conte
 import {PopUp} from '../pop-up-component/pop-up.component';
 import {TableService} from '../../services/table.service';
 import {CellCord} from '../../model/table/cell-cord';
+import {TableApiService} from '../../services/table-api.service';
+import {ActivatedRoute} from '@angular/router';
 
 @Component({
   selector: 'tbl-table',
-  standalone: true,
   imports: [
     NgForOf,
     CellWrapperComponent,
@@ -44,7 +44,8 @@ import {CellCord} from '../../model/table/cell-cord';
     UpdateColumnsWidthDirective,
   ],
   templateUrl: './table.component.html',
-  styleUrl: './table.component.css'
+  styleUrl: './table.component.css',
+  providers: [TableService]
 })
 export class TableComponent implements OnInit, OnDestroy {
 
@@ -61,12 +62,10 @@ export class TableComponent implements OnInit, OnDestroy {
 
   protected previewLimit: number = 5; // Preview che compare durante il drag di righe e colonne.
 
-
-  constructor(private tableRef: ElementRef, private envInj: EnvironmentInjector, protected popUpManagerService: PopUpManagerService) {
-    // Inizializza il componente in modo tale da avere già una colonna e una riga.
-    this.tableService.addNewHeader(new TextualDataType());
-    this.tableService.addNewRow();
-  }
+  private tableRef: ElementRef = inject(ElementRef);
+  private envInj: EnvironmentInjector = inject(EnvironmentInjector);
+  private popUpManagerService: PopUpManagerService = inject(PopUpManagerService);
+  private activatedRoute: ActivatedRoute = inject(ActivatedRoute);
 
 
   ngOnDestroy(): void {
@@ -77,16 +76,20 @@ export class TableComponent implements OnInit, OnDestroy {
 
 
   ngOnInit(): void {
-    this.createTableContextualMenu();
+    this.createTableContextualMenu(this.tableService);
     this.createDataTypeChooser();
+
+    const tableId: string = this.activatedRoute.snapshot.paramMap.get('table-id') || '';
+    this.tableService.init(tableId);
   }
 
 
-  private createTableContextualMenu(): void {
+  private createTableContextualMenu(tableService: TableService): void {
     const tableContextualMenu: ComponentRef<TableContextualMenuComponent> = createComponent<TableContextualMenuComponent>(
       TableContextualMenuComponent,
       { environmentInjector: this.envInj }
     );
+    tableContextualMenu.setInput('tableService', tableService);
 
     this.popUpManagerService.createPopUp(this.TABLE_CONTEXTUAL_MENU, tableContextualMenu);
   }

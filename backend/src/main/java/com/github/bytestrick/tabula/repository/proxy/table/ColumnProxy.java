@@ -12,8 +12,8 @@ public class ColumnProxy extends Column {
     private final CellDAO cellDAO;
 
 
-    public ColumnProxy(UUID id, UUID myTable, UUID dataType, int columnIndex, CellDAO cellDAO) {
-        super(id, myTable, dataType, columnIndex, null);
+    public ColumnProxy(UUID id, UUID myTable, int dataType, String name, int columnIndex, CellDAO cellDAO) {
+        super(id, myTable, dataType, name, columnIndex, null);
 
         this.cellDAO = cellDAO;
     }

@@ -1,9 +1,9 @@
 import {IDataType} from '../i-data-type';
-import { BaseInputComponent } from '../../../components/input-components/base-input-component';
+import { BaseInputComponent } from '../../../table-components/input-components/base-input-component';
 import {Type} from '@angular/core';
-import {TextualInputComponent} from '../../../components/input-components/textual-input/textual-input.component';
-import {BaseCellComponent} from '../../../components/table/cells/base-cell-component';
-import {TextualCellComponent} from '../../../components/table/cells/textual-cell/textual-cell.component';
+import {TextualInputComponent} from '../../../table-components/input-components/textual-input/textual-input.component';
+import {BaseCellComponent} from '../../../table-components/table/cells/base-cell-component';
+import {TextualCellComponent} from '../../../table-components/table/cells/textual-cell/textual-cell.component';
 
 export class TextualDataType implements IDataType {
 
