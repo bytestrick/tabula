@@ -68,7 +68,7 @@ public class FuzzySearch {
 
             for (int j = 1; j <= lenB; j += 1) {
                 int act = prv + (a.charAt(i - 1) == b.charAt(j - 1) ? 0 : 1);
-                cost[j] = min(1+(prv = cost[j]), 1+cost[j - 1], act);
+                cost[j] = min(1 + (prv = cost[j]), 1 + cost[j - 1], act);
                 if (prv < min) min = prv;
             }
 
