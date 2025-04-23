@@ -2,7 +2,7 @@ import {
   Component,
   ComponentRef,
   createComponent, EnvironmentInjector,
-  EventEmitter,
+  EventEmitter, inject,
   OnDestroy,
   Output,
   ViewContainerRef
@@ -12,6 +12,7 @@ import {TableCard} from './table-card.interface';
 import {Subscription} from 'rxjs';
 import {DatePipe, NgIf} from '@angular/common';
 import {PrettyDatePipe} from '../pretty-date.pipe';
+import {ToastService} from '../../toast/toast.service';
 
 
 @Component({
@@ -38,6 +39,7 @@ export class TableCardComponent implements OnDestroy {
 
   private isInit: boolean = false;
   private subscription!: Subscription;
+  private toast: ToastService = inject(ToastService);
 
 
   constructor(private homeService: HomeService) {}
@@ -107,10 +109,22 @@ export class TableCardComponent implements OnDestroy {
 
     this.subscription = this.homeService.deleteTableCard(this.id).subscribe({
       next: (data: string): void => {
-        console.log(data)
+        this.toast.show({
+          title: 'Table Deleted',
+          body: `The table has been successfully deleted.`,
+          icon: 'bi bi-trash-fill',
+          background: 'success',
+        });
         this.componentRef.destroy();
       },
-      error: (err: any): void => console.log(err)
+      error: (err: any): void => {
+        this.toast.show({
+          title: 'Table Not Deleted',
+          body: 'An error occurred the table was not deleted.\nPlease try again later.',
+          icon: 'x-circle-fill',
+          background: 'danger',
+        });
+      }
     });
   }
 
