@@ -78,7 +78,7 @@ export class TableApiService {
   }
 
 
-  updateCellValue(value: string, rowIndex: number, columnIndex: number, tableId: string = ''): void {
+  updateCellValue(rowIndex: number, columnIndex: number, value: string, tableId: string = ''): void {
     const cell: CellDTO = {
       tableId: tableId || this.tableId,
       rowIndex: rowIndex,
