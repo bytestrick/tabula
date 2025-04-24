@@ -7,6 +7,7 @@ import {moveItemInArray} from '@angular/cdk/drag-drop';
 import {CellCord} from '../model/table/cell-cord';
 import {TableApiService, TableDTO} from './table-api.service';
 import {DataTypeRegistryService} from './data-type-registry.service';
+import {Pair} from '../model/pair';
 
 
 @Injectable()
@@ -481,27 +482,45 @@ export class TableService {
 
   setCellValue(cord: CellCord, value: any): void {
     if (value !== null) {
-      const cell: Cell | null = this.getCellFromCoords(cord);
+      const clickedCell: Cell | null = this.getCellFromCoords(cord);
 
-      if (cell === null)
+      if (clickedCell === null)
         return;
 
+      let updatedCells: Pair<CellCord, any>[] = [];
+
       if (!this.isRowSelected(cord.i) && !this.isColumnSelected(cord.j)) {
-        cell.value = value;
-        this.tableAPI.updateCellValue(value, cord.i, cord.j);
+        clickedCell.value = value;
+        updatedCells.push(new Pair(cord, value));
       }
       else {
-        this.doForEachRowSelected((e: number): void => {
-          for (let r of this.getRow(e)) {
-            if (cell.cellDataType.constructor === r.cellDataType.constructor)
-              r.value = value;
+        this.doForEachRowSelected((i: number): void => {
+          const row: Cell[] = this.getRow(i);
+
+          for (let j: number = 0; j < row.length; ++j) {
+            if (clickedCell.cellDataType.constructor === row[j].cellDataType.constructor) {
+              row[j].value = value;
+              updatedCells.push(new Pair(new CellCord(i, j), value));
+            }
           }
         });
 
-        this.doForEachColumnSelected((e: number): void => {
-          for (let c of this.getColumn(e))
-            c.value = value;
+        this.doForEachColumnSelected((j: number): void => {
+          const column: Cell[] = this.getColumn(j);
+
+          for (let i: number = 0; i < column.length; ++i) {
+            // per settare i valori delle colonne che hanno lo stesso tipo di dato della cella selezionata
+            if (clickedCell.cellDataType.constructor !== column[i].cellDataType.constructor)
+              break;
+
+            column[i].value = value;
+            updatedCells.push(new Pair(new CellCord(i, j), value));
+          }
         });
+      }
+
+      for (let updatedCell of updatedCells) {
+        this.tableAPI.updateCellValue(updatedCell.first.i, updatedCell.first.j, updatedCell.second);
       }
     }
   }
