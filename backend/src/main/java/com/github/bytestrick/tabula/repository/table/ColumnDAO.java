@@ -76,6 +76,7 @@ public class ColumnDAO {
                 SELECT *
                 FROM my_column
                 WHERE my_table = :tableId
+                ORDER BY column_index
             """)
                 .param("tableId", tableId)
                 .query(new ColumnMapper()).list();
@@ -90,6 +91,32 @@ public class ColumnDAO {
             """)
                 .param("name", name)
                 .query(Integer.class)
+                .single();
+    }
+
+    public void changeColumnDataType(@NotNull UUID tableId, int columnIndex, int dataTypeId) {
+        System.out.printf("Changing column data type %d to %d\n", columnIndex, dataTypeId);
+        jdbcClient.sql("""
+                UPDATE my_column
+                SET data_type = :dataTypeId
+                WHERE column_index = :columnIndex AND my_table = :tableId
+            """)
+                .param("dataTypeId", dataTypeId)
+                .param("columnIndex", columnIndex)
+                .param("tableId", tableId)
+                .update();
+    }
+
+
+    public UUID findColumnIdByIndex(@NotNull UUID tableId, int columnIndex) {
+        return jdbcClient.sql("""
+                SELECT id
+                FROM my_column
+                WHERE my_table = :tableId AND column_index = :columnIndex
+            """)
+                .param("tableId", tableId)
+                .param("columnIndex", columnIndex)
+                .query(UUID.class)
                 .single();
     }
 

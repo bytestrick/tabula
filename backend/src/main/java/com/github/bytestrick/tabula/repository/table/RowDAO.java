@@ -80,11 +80,24 @@ public class RowDAO {
                 SELECT *
                 FROM my_row
                 WHERE my_table = :tableId
+                ORDER BY row_index
             """)
                 .param("tableId", tableId)
                 .query(new MyRowMapper()).list();
     }
 
+
+    public UUID findRowIdByIndex(@NotNull UUID tableId, int rowIndex) {
+        return jdbcClient.sql("""
+                SELECT id
+                FROM my_row
+                WHERE my_table = :tableId AND row_index = :rowIndex
+            """)
+                .param("tableId", tableId)
+                .param("rowIndex", rowIndex)
+                .query(UUID.class)
+                .single();
+    }
 
 
     private class MyRowMapper implements RowMapper<RowProxy> {

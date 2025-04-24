@@ -11,7 +11,11 @@ import com.github.bytestrick.tabula.repository.UserDao;
 import com.github.bytestrick.tabula.repository.proxy.table.ColumnProxy;
 import com.github.bytestrick.tabula.repository.proxy.table.RowProxy;
 import com.github.bytestrick.tabula.repository.proxy.table.TableProxy;
+import com.github.bytestrick.tabula.repository.table.CellDAO;
+import com.github.bytestrick.tabula.repository.table.ColumnDAO;
+import com.github.bytestrick.tabula.repository.table.RowDAO;
 import com.github.bytestrick.tabula.repository.table.TableDAO;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -30,6 +34,9 @@ public class TableService {
     private final TableDAO tableDAO;
     private final TableDao tableDao;
     private final FuzzySearchTable fuzzySearchTable;
+    private final ColumnDAO columnDAO;
+    private final RowDAO rowDAO;
+    private final CellDAO cellDAO;
 
 
     public User getAuthUser() {
@@ -68,10 +75,6 @@ public class TableService {
         return "TableCard updated successfully";
     }
 
-    public String deleteTable(UUID id) {
-        tableDao.deleteById(id);
-        return "TableCard deleted successfully";
-    }
 
     public List<TableDto> fuzzySearch(String pattern) {
         return fuzzySearchTable.fuzzySearch(pattern, getAuthUser().getId())
@@ -91,7 +94,7 @@ public class TableService {
 
 
     @Transactional
-    public TableDTO getTable(UUID tableId) {
+    public TableDTO getTable(@NotNull UUID tableId) {
         TableProxy table = tableDAO.findTable(tableId);
         List<List<String>> content = new ArrayList<>();
         List<ColumnDTO> headers = new ArrayList<>();
@@ -104,10 +107,41 @@ public class TableService {
 
         for (ColumnProxy column : table.getColumns()) {
             headers.add(
-                   new ColumnDTO(column.getDataType(), column.getName())
+                   new ColumnDTO(table.getId(), column.getDataType(), column.getName(), column.getColumnIndex())
             );
         }
 
         return new TableDTO(table.getId(), headers, content);
+    }
+
+
+    public String deleteTable(@NotNull UUID tableCardId) {
+        tableDAO.deleteTable(tableCardId);
+        return "Table deleted successfully";
+    }
+
+
+    public void appendNewRow(@NotNull UUID tableID) {
+        rowDAO.appendRow(tableID);
+    }
+
+
+    public void appendNewColumn(@NotNull UUID tableID, int dataType) {
+        columnDAO.appendColumn(tableID, dataType);
+    }
+
+
+    public void changeColumnDataType(@NotNull UUID tableId, int columnIndex, int dataTypeId) {
+        columnDAO.changeColumnDataType(tableId, columnIndex, dataTypeId);
+    }
+
+
+    @Transactional
+    public void updateCellValue(@NotNull UUID tableId, int rowIndex, int columnIndex, String value) {
+        cellDAO.updateCell(
+                rowDAO.findRowIdByIndex(tableId, rowIndex),
+                columnDAO.findColumnIdByIndex(tableId, columnIndex),
+                value
+        );
     }
 }

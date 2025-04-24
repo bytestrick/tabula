@@ -7,6 +7,11 @@ import {TextualCellComponent} from '../../../table-components/table/cells/textua
 
 export class TextualDataType implements IDataType {
 
+  getDataTypeId(): number {
+    return 1;
+  }
+
+
   getInputComponent(): Type<BaseInputComponent> {
     return TextualInputComponent;
   }

@@ -1,10 +1,10 @@
 package com.github.bytestrick.tabula.controller;
 
-
 import com.github.bytestrick.tabula.controller.dto.InformativeResponse;
 import com.github.bytestrick.tabula.controller.dto.TableDto;
 import com.github.bytestrick.tabula.model.Table;
-
+import com.github.bytestrick.tabula.controller.dto.CellDTO;
+import com.github.bytestrick.tabula.controller.dto.ColumnDTO;
 import com.github.bytestrick.tabula.controller.dto.TableDTO;
 
 import com.github.bytestrick.tabula.service.TableService;
@@ -17,11 +17,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-<<<<<<< HEAD
-@RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-=======
-@RequestMapping(value = "/table")
->>>>>>> 932db89 (- **Backend**)
+@RequestMapping("/table")
 @RequiredArgsConstructor
 public class TableController {
     private final TableService tableService;
@@ -31,7 +27,6 @@ public class TableController {
         return ResponseEntity.ok().body(tableService.getNextTables(id, quantity));
     }
 
-<<<<<<< HEAD
     @GetMapping("table")
     public ResponseEntity<List<TableDto>> getLastTables(@RequestParam int quantity) {
         return ResponseEntity.ok().body(tableService.getLastTables(quantity));
@@ -65,12 +60,44 @@ public class TableController {
     }
 
 
-=======
->>>>>>> 932db89 (- **Backend**)
     @GetMapping
-    public ResponseEntity<TableDTO> getTable(
-            @RequestParam(name = "table-id") String tableId) {
+    public ResponseEntity<TableDTO> getTable(@RequestParam("table-id") String tableId) {
 
         return ResponseEntity.ok(tableService.getTable(UUID.fromString(tableId)));
+    }
+
+
+    @PostMapping("/row")
+    public ResponseEntity<Void> appendNewRow(@RequestParam("table-id") String tableId) {
+        System.out.println(tableId);
+        tableService.appendNewRow(UUID.fromString(tableId));
+
+        return ResponseEntity.ok().build();
+    }
+
+
+    @PostMapping("/column")
+    public ResponseEntity<Void> appendNewColumn(@RequestBody ColumnDTO columnDTO) {
+        tableService.appendNewColumn(columnDTO.tableId(), columnDTO.dataType());
+
+        return ResponseEntity.ok().build();
+    }
+
+
+    @PostMapping("/column-data-type")
+    public ResponseEntity<Void> changeColumnDataType(@RequestBody ColumnDTO columnDTO) {
+        tableService.changeColumnDataType(columnDTO.tableId(), columnDTO.columnIndex(), columnDTO.dataType());
+
+        return ResponseEntity.ok().build();
+    }
+
+
+    @PostMapping("/cell")
+    public ResponseEntity<Void> updateCellValue(@RequestBody CellDTO cellDTO) {
+        tableService.updateCellValue(
+                UUID.fromString(cellDTO.tableId()), cellDTO.rowIndex(), cellDTO.columnIndex(), cellDTO.value()
+        );
+
+        return ResponseEntity.ok().build();
     }
 }

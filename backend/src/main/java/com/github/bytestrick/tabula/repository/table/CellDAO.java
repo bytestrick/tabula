@@ -18,28 +18,28 @@ public class CellDAO {
     private final JdbcClient jdbcClient;
 
 
-    public void saveCell(int rowIndex, UUID columnId, String value) {
-        jdbcClient.sql("INSERT INTO cell (id, row_index, my_column, value) VALUES (:id, :rowIndex, :myColumn, :value)")
+    public void saveCell(int rowId, UUID columnId, String value) {
+        jdbcClient.sql("INSERT INTO cell (id, my_row, my_column, value) VALUES (:id, :rowId, :myColumn, :value)")
                 .param("id", UUID.randomUUID())
-                .param("rowIndex", rowIndex)
+                .param("rowId", rowId)
                 .param("myColumn", columnId)
                 .param("value", value)
                 .update();
     }
 
 
-    public void updateCell(int rowIndex, UUID columnId, String newValue) {
-        jdbcClient.sql("UPDATE cell SET value = :newValue WHERE row_index = :rowIndex and my_column = :columnId")
+    public void updateCell(UUID rowId, UUID columnId, String newValue) {
+        jdbcClient.sql("UPDATE cell SET value = :newValue WHERE my_row = :rowId and my_column = :columnId")
                 .param("newValue", newValue)
-                .param("rowIndex", rowIndex)
+                .param("rowId", rowId)
                 .param("columnId", columnId)
                 .update();
     }
 
 
-    public void deleteCell(int rowIndex, UUID columnId) {
-        jdbcClient.sql("DELETE FROM cell WHERE row_index = :rowIndex AND my_column IN (SELECT id FROM column WHERE table_id = :tableId")
-                .param("rowIndex", rowIndex)
+    public void deleteCell(UUID rowId, UUID columnId) {
+        jdbcClient.sql("DELETE FROM cell WHERE my_row = :rowId AND my_column = :columnId")
+                .param("rowId", rowId)
                 .param("columnId", columnId)
                 .update();
     }
@@ -47,9 +47,11 @@ public class CellDAO {
 
     public List<Cell> findRowCells(UUID rowId) {
         return jdbcClient.sql("""
-                SELECT *
-                FROM cell
-                WHERE my_row = :rowId
+                SELECT c.*
+                FROM cell c
+                INNER JOIN my_column mc on mc.id = c.my_column
+                WHERE c.my_row = :rowId
+                ORDER BY mc.column_index
             """)
                 .param("rowId", rowId)
                 .query(new CellMapper()).list();
@@ -58,9 +60,11 @@ public class CellDAO {
 
     public List<Cell> findColumnCells(UUID columnId) {
         return jdbcClient.sql("""
-                SELECT *
-                FROM cell
-                WHERE my_row = :columnId
+                SELECT c.*
+                FROM cell c
+                INNER JOIN my_row mr on mr.id = c.my_row
+                WHERE c.my_column = :columnId
+                ORDER BY mr.row_index
             """)
                 .param("columnId", columnId)
                 .query(new CellMapper()).list();
