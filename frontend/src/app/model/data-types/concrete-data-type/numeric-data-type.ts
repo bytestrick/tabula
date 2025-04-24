@@ -7,6 +7,11 @@ import {NumericInputComponent} from '../../../table-components/input-components/
 
 export class NumericDataType implements IDataType {
 
+  getDataTypeId(): number {
+    return 2;
+  }
+
+
   getInputComponent(): Type<BaseInputComponent> {
     return NumericInputComponent;
   }

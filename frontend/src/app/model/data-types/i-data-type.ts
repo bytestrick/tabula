@@ -9,4 +9,5 @@ export interface IDataType {
   getCellComponent(): Type<BaseCellComponent>; // Ritorna il tipo di componente che andrà messo come cella nella tabella.
   getIconName(): string;
   getDataTypeName(): string;
+  getDataTypeId(): number;
 }

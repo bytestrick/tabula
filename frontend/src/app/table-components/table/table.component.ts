@@ -2,7 +2,7 @@ import {
   Component, ComponentRef, createComponent, ElementRef, EnvironmentInjector, HostListener, inject, OnDestroy, OnInit,
 } from '@angular/core';
 import {IDataType} from '../../model/data-types/i-data-type';
-import {NgForOf} from '@angular/common';
+import {NgForOf, NgIf} from '@angular/common';
 import {Pair} from '../../model/pair';
 import {BaseInputComponent} from '../input-components/base-input-component';
 import {CellWrapperComponent} from './cells/cell-wrapper/cell-wrapper.component';
@@ -25,7 +25,6 @@ import {TableContextualMenuComponent} from '../table-contextual-menu/table-conte
 import {PopUp} from '../pop-up-component/pop-up.component';
 import {TableService} from '../../services/table.service';
 import {CellCord} from '../../model/table/cell-cord';
-import {TableApiService} from '../../services/table-api.service';
 import {ActivatedRoute} from '@angular/router';
 
 @Component({
@@ -42,6 +41,7 @@ import {ActivatedRoute} from '@angular/router';
     SelectDirective,
     ResizableTableColumnDirective,
     UpdateColumnsWidthDirective,
+    NgIf,
   ],
   templateUrl: './table.component.html',
   styleUrl: './table.component.css',
@@ -51,7 +51,7 @@ export class TableComponent implements OnInit, OnDestroy {
 
   protected isAnElementDragged: boolean = false;
 
-  protected tableService: TableService = inject(TableService)
+  protected tableService: TableService = inject(TableService);
 
   protected hoveredRowIndex: number = this.tableService.INVALID_CELL_INDEX;
   protected hoveredColIndex: number = this.tableService.INVALID_CELL_INDEX;

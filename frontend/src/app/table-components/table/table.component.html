@@ -1,4 +1,11 @@
-<div class="table-responsive space-left-right">
+<ng-template #tableLoad>
+  <div class="position-fixed top-50 start-50 translate-middle">
+    <div class="spinner-border" role="status">
+    </div>
+  </div>
+</ng-template>
+
+<div *ngIf="tableService.isLoaded; else tableLoad" class="table-responsive space-left-right">
   <table class="table app-table-bordered" (mouseleave)="onMouseLeaveTable()">
     <colgroup #colgroup tblUpdateColumnsWidth [colgroup]="colgroup">
       <col class="first-column">

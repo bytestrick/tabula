@@ -21,6 +21,8 @@ export class TableService {
   private selectedRows: Set<number> = new Set<number>;
   private selectedColumns: Set<number> = new Set<number>;
 
+  private _isLoaded: boolean = false;
+
   private readonly HEADER_CELL_DEFAULT_NAME: string = 'New Column';
 
   readonly INVALID_CELL_INDEX: number = -2; // deve essere un numero negativo
@@ -35,6 +37,8 @@ export class TableService {
         this.table[i].push(new Cell(currentDataType.getNewDataType(), null));
       }
     }
+
+    this.tableAPI.appendNewColumn(dataType.getDataTypeId());
   }
 
 
@@ -45,6 +49,8 @@ export class TableService {
     for (let i: number = 0; i < this.getHeadersCellsAmount(); ++i) {
       this.table[lastRowI].push(new Cell(this.headerCells[i].columnDataType.getNewDataType(), null));
     }
+
+    this.tableAPI.appendNewRow();
   }
 
 
@@ -455,6 +461,8 @@ export class TableService {
     for (let i: number = 0; i < this.getRowsNumber(); ++i) {
       this.table[i][columnIndex] = new Cell(newDataType.getNewDataType(), null);
     }
+
+    this.tableAPI.changeColumnDataType(columnIndex, newDataType.getDataTypeId());
   }
 
 
@@ -480,6 +488,7 @@ export class TableService {
 
       if (!this.isRowSelected(cord.i) && !this.isColumnSelected(cord.j)) {
         cell.value = value;
+        this.tableAPI.updateCellValue(value, cord.i, cord.j);
       }
       else {
         this.doForEachRowSelected((e: number): void => {
@@ -513,17 +522,28 @@ export class TableService {
       this.table.push([])
 
       for (let j: number = 0; j < row.length; ++j) {
-        this.table[this.getRowsNumber() - 1].push(new Cell(this.headerCells[j].columnDataType.getNewDataType(), null));
+        this.table[this.getRowsNumber() - 1].push(new Cell(this.headerCells[j].columnDataType.getNewDataType(), row[j]));
       }
     }
   }
 
 
   init(tableId: string): void {
+    this.isLoaded = false;
     this.tableAPI.getTable(tableId).subscribe(
       {
-        next: tableDTO => this.loadFromTableDTO(tableDTO)
+        next: tableDTO => { this.loadFromTableDTO(tableDTO); this.isLoaded = true; }
       }
     )
+  }
+
+
+  set isLoaded(value: boolean) {
+    this._isLoaded = value;
+  }
+
+
+  get isLoaded(): boolean {
+    return this._isLoaded;
   }
 }

@@ -8,6 +8,10 @@ import {TextualCellComponent} from '../../../table-components/table/cells/textua
 
 export class MonetaryDataType implements IDataType {
 
+  getDataTypeId(): number {
+    return 3;
+  }
+
   getInputComponent(): Type<BaseInputComponent> {
     return MonetaryInputComponent;
   }
