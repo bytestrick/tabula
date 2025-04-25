@@ -24,12 +24,13 @@ export class NavbarComponent implements OnInit {
   protected searchFieldOnFocus: boolean = false;
   @ViewChild('searchField') private searchField!: ElementRef;
   private timer: any;
-  @Output() onSearchedTableCard: EventEmitter<TableCard[]> = new EventEmitter;
+  @Output() onSearchedTableCard: EventEmitter<TableCard[] | "noSearchContent"> = new EventEmitter;
   protected userInfo: UserInfo = {
     name: '',
     surname: '',
     email: ''
   }
+  private static searching: boolean = false;
 
 
   constructor(private navbarService: NavbarService,
@@ -58,11 +59,15 @@ export class NavbarComponent implements OnInit {
     this.searchField.nativeElement.focus();
   }
 
-  protected onFocusIn(): void {
+  protected onFocus(): void {
     this.searchFieldOnFocus = true;
   }
 
-  protected onFocusOut(): void {
+  protected onFocusOut($event: FocusEvent): void {
+    const relatedTarget = $event.relatedTarget as HTMLElement | null;
+    if (relatedTarget && relatedTarget.id === 'clear-search-field-button') {
+      return;
+    }
     this.searchFieldOnFocus = false;
   }
 
@@ -76,6 +81,13 @@ export class NavbarComponent implements OnInit {
   }
 
   public search(text: string): void {
+    if (text === "") {
+      NavbarComponent.searching = false;
+      this.onSearchedTableCard.emit("noSearchContent");
+      return;
+    }
+
+    NavbarComponent.searching = true;
     this.navbarService.fuzzySearch(text).subscribe({
       next: (tableCards: TableCard[]): void => {
         console.debug(tableCards);
@@ -83,6 +95,10 @@ export class NavbarComponent implements OnInit {
       },
       error: (err: any): any => console.debug(err)
     });
+  }
+
+  static isSearching(): boolean {
+    return NavbarComponent.searching;
   }
 
   onSingOut(): void {
