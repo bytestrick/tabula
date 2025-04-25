@@ -33,7 +33,7 @@ export class TableCardInfiniteScrollComponent extends InfiniteScrollComponent<Co
 
   constructor(private homeService: HomeService,
               private injector: EnvironmentInjector,
-              protected selectorElementRef: ElementRef) {
+              protected override selectorElementRef: ElementRef) {
     super();
   }
 

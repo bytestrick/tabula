@@ -5,8 +5,7 @@
 
     <form #searchForm
           class="d-flex w-50 mx-2"
-          (focusin)="onFocusIn()"
-          (focusout)="onFocusOut()"
+          (focusout)="onFocusOut($event)"
           (ngSubmit)="onSearchSubmit(searchForm)">
       <div class="input-group">
         <input #searchField
@@ -16,6 +15,7 @@
                class="form-control rounded-start-5 ps-4 pe-5"
                type="search"
                placeholder="Search"
+               (focusin)="onFocus()"
                (keyup)="onKeyUp($event)">
 
         <!-- Bottone di ricerca -->

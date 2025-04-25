@@ -59,12 +59,15 @@ export class HomeComponent {
     this.formEditTableCard.show();
   }
 
-  onSearchedTableCard(tableCards: TableCard[]): void {
+  onSearchedTableCard(tableCards: TableCard[] | "noSearchContent"): void {
     this.tableCardInfiniteScroll.clearAll();
 
+    if (tableCards === "noSearchContent") {
+      this.tableCardInfiniteScroll.loadMoreElements();
+      return;
+    }
+
     this.tableCardInfiniteScroll.provideElements(
-      this.tableCardInfiniteScroll.createComponentsFromData(tableCards),
-      false
-    );
+      this.tableCardInfiniteScroll.createComponentsFromData(tableCards), false);
   }
 }

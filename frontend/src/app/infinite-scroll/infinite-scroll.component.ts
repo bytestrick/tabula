@@ -2,6 +2,7 @@ import {
   ComponentRef, ElementRef,
   ViewContainerRef,
 } from '@angular/core';
+import {NavbarComponent} from '../navbar/navbar.component';
 
 export abstract class InfiniteScrollComponent<T extends ComponentRef<any>> {
 
@@ -15,7 +16,7 @@ export abstract class InfiniteScrollComponent<T extends ComponentRef<any>> {
 
 
   loadMoreElements(): void {
-    if (!this.isDataFetched) return;
+    if (!this.isDataFetched || NavbarComponent.isSearching()) return;
 
     this.isLoading = true;
     this.isDataFetched = false;
@@ -64,7 +65,7 @@ export abstract class InfiniteScrollComponent<T extends ComponentRef<any>> {
   }
 
   clearAll(): void {
-    let element = this.elements.pop();
+    let element: T | undefined = this.elements.pop();
     while (element) {
       element.destroy();
       element = this.elements.pop();
