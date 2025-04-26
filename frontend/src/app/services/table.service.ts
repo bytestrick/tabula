@@ -283,8 +283,18 @@ export class TableService {
   }
 
 
+  getSelectedColumnNumber(): number {
+    return this.selectedColumns.size;
+  }
+
+
   isRowSelected(rowIndex: number): boolean {
     return this.selectedRows.has(rowIndex);
+  }
+
+
+  getSelectedRowNumber(): number {
+    return this.selectedRows.size;
   }
 
 
@@ -318,9 +328,9 @@ export class TableService {
   }
 
 
-  deleteRow(rowIndex: number): void {
-    if (rowIndex < 0 || rowIndex >= this.getRowsNumber())
-      return;
+  private _deleteRow(rowIndex: number): void {
+      if (rowIndex < 0 || rowIndex >= this.getRowsNumber())
+    return;
 
     this.table.splice(rowIndex, 1);
 
@@ -342,15 +352,30 @@ export class TableService {
   }
 
 
+  deleteRow(rowIndex: number): void {
+    this._deleteRow(rowIndex);
+    this.tableAPI.deleteRows([rowIndex]);
+  }
+
+
   deleteSelectedRow(): void {
-    const rowsToDelete = Array.from(this.selectedRows).sort((a, b) => b - a);
+    const rowsToDelete: number[] = Array.from(this.selectedRows).sort((a, b) => b - a);
+
     for (const rowIndex of rowsToDelete) {
-      this.deleteRow(rowIndex);
+      this._deleteRow(rowIndex);
     }
+
+    this.tableAPI.deleteRows(rowsToDelete);
   }
 
 
   deleteColumn(columnIndex: number): void {
+    this._deleteColumn(columnIndex);
+    this.tableAPI.deleteColumns([columnIndex]);
+  }
+
+
+  private _deleteColumn(columnIndex: number): void {
     if (columnIndex < 0 || columnIndex >= this.getHeadersCellsAmount())
       return;
 
@@ -379,10 +404,13 @@ export class TableService {
 
 
   deleteSelectedColumn(): void {
-    const columnsToDelete = Array.from(this.selectedColumns).sort((a, b) => b - a);
+    const columnsToDelete: number[] = Array.from(this.selectedColumns).sort((a, b) => b - a);
+
     for (const columnIndex of columnsToDelete) {
-      this.deleteColumn(columnIndex);
+      this._deleteColumn(columnIndex);
     }
+
+    this.tableAPI.deleteColumns(columnsToDelete);
   }
 
 
@@ -532,7 +560,7 @@ export class TableService {
         new HeaderCell(
           new TextualDataType(),
           columnDTO.columnName || this.HEADER_CELL_DEFAULT_NAME,
-          this.dataTypeService.convertIntoIDataType(columnDTO.dataType)
+          this.dataTypeService.convertIntoIDataType(columnDTO.dataType || 1)
         )
       )
     }

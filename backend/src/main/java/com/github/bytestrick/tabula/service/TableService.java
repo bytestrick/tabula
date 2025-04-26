@@ -1,6 +1,7 @@
 package com.github.bytestrick.tabula.service;
 
 import com.github.bytestrick.tabula.controller.dto.ColumnDTO;
+import com.github.bytestrick.tabula.controller.dto.RowDTO;
 import com.github.bytestrick.tabula.controller.dto.TableDTO;
 import com.github.bytestrick.tabula.controller.dto.TableDto;
 import com.github.bytestrick.tabula.model.Table;
@@ -143,5 +144,27 @@ public class TableService {
                 columnDAO.findColumnIdByIndex(tableId, columnIndex),
                 value
         );
+    }
+
+
+    @Transactional
+    public void deleteColumns(List<ColumnDTO> columnDTOList) {
+        for (ColumnDTO columnDTO : columnDTOList) {
+            if (columnDTO.tableId() == null)
+                throw new IllegalArgumentException("Column ID must not be null");
+
+            columnDAO.deleteColumn(columnDTO.columnIndex(), columnDTO.tableId());
+        }
+    }
+
+
+    @Transactional
+    public void deleteRows(List<RowDTO> rowDTOList) {
+        for (RowDTO rowDTO : rowDTOList) {
+            if (rowDTO.tableId() == null)
+                throw new IllegalArgumentException("Column ID must not be null");
+
+            rowDAO.deleteRow(rowDTO.rowIndex(), rowDTO.tableId());
+        }
     }
 }

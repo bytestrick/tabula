@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -39,8 +40,21 @@ public class ColumnDAO {
     }
 
 
+    @Transactional
     public void deleteColumn(int columnIndex, @NotNull UUID tableId) {
-        jdbcClient.sql("DELETE FROM my_column WHERE column_index = :columnIndex and my_table = :tableId")
+        jdbcClient.sql("""
+                DELETE FROM my_column
+                WHERE column_index = :columnIndex AND my_table = :tableId
+            """)
+                .param("columnIndex", columnIndex)
+                .param("tableId", tableId)
+                .update();
+
+        jdbcClient.sql("""
+                UPDATE my_column
+                SET column_index = column_index - 1
+                WHERE column_index > :columnIndex AND my_table = :tableId
+            """)
                 .param("columnIndex", columnIndex)
                 .param("tableId", tableId)
                 .update();
