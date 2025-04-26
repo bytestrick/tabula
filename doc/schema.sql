@@ -66,7 +66,7 @@ CREATE TABLE my_column
 
     FOREIGN KEY (my_table) REFERENCES my_table (id) ON DELETE CASCADE,
     FOREIGN KEY (data_type) REFERENCES data_type (id),
-    UNIQUE(column_index, my_table)
+    UNIQUE(column_index, my_table) DEFERRABLE INITIALLY DEFERRED
 );
 
 
@@ -77,7 +77,7 @@ CREATE TABLE my_row
     row_index       INT NOT NULL,
 
     FOREIGN KEY (my_table) REFERENCES my_table (id) ON DELETE CASCADE,
-    UNIQUE(row_index, my_table)
+    UNIQUE(row_index, my_table) DEFERRABLE INITIALLY DEFERRED
 );
 
 

@@ -135,6 +135,19 @@ public class ColumnDAO {
     }
 
 
+    public void updateColumnIndex(UUID columnId, int newColumnIndex, @NotNull UUID tableId) {
+        jdbcClient.sql("""
+                UPDATE my_column
+                SET column_index = :newColumnIndex
+                WHERE id = :columnId AND my_table = :tableId;
+            """)
+                .param("newColumnIndex", newColumnIndex)
+                .param("tableId", tableId)
+                .param("columnId", columnId)
+                .update();
+    }
+
+
     private class ColumnMapper implements RowMapper<ColumnProxy> {
 
         @Override

@@ -2,9 +2,8 @@ package com.github.bytestrick.tabula.controller.dto;
 
 import java.util.UUID;
 
-public record CellDTO(
+public record UpdateRowIndexDTO(
         UUID tableId,
-        int rowIndex,
-        int columnIndex,
-        String value
+        int currentRowIndex,
+        int newRowIndex
 ) {}
