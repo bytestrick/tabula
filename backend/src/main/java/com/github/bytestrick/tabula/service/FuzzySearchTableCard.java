@@ -5,7 +5,9 @@ import com.github.bytestrick.tabula.repository.HomeDao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -39,5 +41,6 @@ public class FuzzySearchTableCard {
         return result.stream().map(TableCardWithSimilarity::tableCard).toList();
     }
 
-    public record TableCardWithSimilarity(TableCard tableCard, float similarity) {}
+    public record TableCardWithSimilarity(TableCard tableCard, float similarity) {
+    }
 }

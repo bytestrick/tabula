@@ -2,13 +2,9 @@ package com.github.bytestrick.tabula.controller;
 
 import com.github.bytestrick.tabula.controller.dto.TableCardDto;
 import com.github.bytestrick.tabula.model.TableCard;
-import com.github.bytestrick.tabula.repository.HomeDao;
-import com.github.bytestrick.tabula.service.FuzzySearchTableCard;
 import com.github.bytestrick.tabula.service.HomeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

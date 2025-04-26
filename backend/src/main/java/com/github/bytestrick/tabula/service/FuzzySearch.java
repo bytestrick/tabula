@@ -22,10 +22,10 @@ public class FuzzySearch {
         return d <= max;
     }
 
-    private static int min(int ... a) {
+    private static int min(int... a) {
         int min = a[0];
 
-        for (int i: a)
+        for (int i : a)
             if (i < min)
                 min = i;
 
