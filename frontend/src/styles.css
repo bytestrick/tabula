@@ -1,7 +1,7 @@
 html, body {
   margin: 0;
   width: 100%;
-  height: max-content;
+  height: 100%;
 }
 
 /* If the body contains either the sign-in or the sign-up component, center it */
