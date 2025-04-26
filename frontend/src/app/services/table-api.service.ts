@@ -1,12 +1,20 @@
 import {inject, Injectable} from '@angular/core';
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {Observable} from 'rxjs';
+import {Pair} from '../model/pair';
 
 export interface ColumnDTO {
   tableId: string,
   dataType?: number,
   columnName?: string,
   columnIndex?: number
+}
+
+
+export interface UpdateColumnIndexDTO {
+  tableId: string,
+  currentColumnIndex: number,
+  newColumnIndex: number
 }
 
 
@@ -28,6 +36,13 @@ export interface CellDTO {
 export interface RowDTO {
   tableId: string,
   rowIndex: number
+}
+
+
+export interface UpdateRowIndexDTO {
+  tableId: string,
+  currentRowIndex: number,
+  newRowIndex: number
 }
 
 
@@ -53,16 +68,16 @@ export class TableApiService {
   }
 
 
-  appendNewRow(tableId: string = ''): void {
-    const params: HttpParams = new HttpParams().set("table-id", tableId || this.tableId);
+  appendNewRow(tableId: string = '' || this.tableId): void {
+    const params: HttpParams = new HttpParams().set("table-id", tableId);
 
     this.httpClient.post('/table/row', {}, { params }).subscribe();
   }
 
 
-  appendNewColumn(dataType: number, tableId: string = ''): void {
+  appendNewColumn(dataType: number, tableId: string = '' || this.tableId): void {
     const newColumn: ColumnDTO = {
-      tableId: tableId || this.tableId,
+      tableId: tableId,
       dataType: dataType
     };
 
@@ -70,9 +85,9 @@ export class TableApiService {
   }
 
 
-  changeColumnDataType(columnIndex: number, newDataType: number, tableId: string = ''): void {
+  changeColumnDataType(columnIndex: number, newDataType: number, tableId: string = '' || this.tableId): void {
     const column: ColumnDTO = {
-      tableId: tableId || this.tableId,
+      tableId: tableId,
       dataType: newDataType,
       columnIndex: columnIndex
     };
@@ -81,9 +96,9 @@ export class TableApiService {
   }
 
 
-  updateCellValue(rowIndex: number, columnIndex: number, value: string, tableId: string = ''): void {
+  updateCellValue(rowIndex: number, columnIndex: number, value: string, tableId: string = '' || this.tableId): void {
     const cell: CellDTO = {
-      tableId: tableId || this.tableId,
+      tableId: tableId,
       rowIndex: rowIndex,
       columnIndex: columnIndex,
       value: value
@@ -93,12 +108,12 @@ export class TableApiService {
   }
 
 
-  deleteRows(rowIndexes: number[], tableId: string = ''): void {
+  deleteRows(rowIndexes: number[], tableId: string = '' || this.tableId): void {
     let rowsToDelete: RowDTO[] = [];
 
     for (let i of rowIndexes)
       rowsToDelete.push({
-        tableId: tableId || this.tableId,
+        tableId: tableId,
         rowIndex: i
       });
 
@@ -106,16 +121,44 @@ export class TableApiService {
   }
 
 
-  deleteColumns(columnsIndexes: number[], tableId: string = ''): void {
+  deleteColumns(columnsIndexes: number[], tableId: string = '' || this.tableId): void {
     let columnsToDelete: ColumnDTO[] = [];
 
     for (let j of columnsIndexes)
       columnsToDelete.push({
-        tableId: tableId || this.tableId,
+        tableId: tableId,
         dataType: 1,
         columnIndex: j
       });
 
     this.httpClient.delete('/table/column', { body: columnsToDelete }).subscribe();
+  }
+
+
+  updateRowsIndexes(rowsIndexes: Pair<number, number>[], tableId: string = '' || this.tableId): void {
+    let rowsToUpdate: UpdateRowIndexDTO[] = [];
+
+    for (let p of rowsIndexes)
+      rowsToUpdate.push({
+        tableId: tableId,
+        currentRowIndex: p.first,
+        newRowIndex: p.second
+      });
+
+    this.httpClient.patch('/table/row', rowsToUpdate).subscribe();
+  }
+
+
+  updateColumnsIndexes(columnsIndexes: Pair<number, number>[], tableId: string = '' || this.tableId): void {
+    let columnsToUpdate: UpdateColumnIndexDTO[] = [];
+
+    for (let p of columnsIndexes)
+      columnsToUpdate.push({
+        tableId: tableId,
+        currentColumnIndex: p.first,
+        newColumnIndex: p.second
+      });
+
+    this.httpClient.patch('/table/column', columnsToUpdate).subscribe();
   }
 }

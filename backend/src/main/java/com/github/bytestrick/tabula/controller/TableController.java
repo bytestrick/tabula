@@ -7,7 +7,7 @@ import com.github.bytestrick.tabula.controller.dto.CellDTO;
 import com.github.bytestrick.tabula.controller.dto.ColumnDTO;
 import com.github.bytestrick.tabula.controller.dto.RowDTO;
 import com.github.bytestrick.tabula.controller.dto.TableDTO;
-
+import com.github.bytestrick.tabula.controller.dto.*;
 import com.github.bytestrick.tabula.service.TableService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -76,9 +76,17 @@ public class TableController {
     }
 
 
+    @PatchMapping("/row")
+    public ResponseEntity<Void> updateRowsIndexes(@RequestBody List<UpdateRowIndexDTO> rowDTOList) {
+        tableService.updateRowsIndexes(rowDTOList);
+
+        return ResponseEntity.ok().build();
+    }
+
+
     @DeleteMapping("/row")
     public ResponseEntity<Void> deleteRows(
-            @RequestBody List<RowDTO> rowDTOList ) {
+            @RequestBody List<RowDTO> rowDTOList) {
 
         tableService.deleteRows(rowDTOList);
 
@@ -89,6 +97,14 @@ public class TableController {
     @PostMapping("/column")
     public ResponseEntity<Void> appendNewColumn(@RequestBody ColumnDTO columnDTO) {
         tableService.appendNewColumn(columnDTO.tableId(), columnDTO.dataType());
+
+        return ResponseEntity.ok().build();
+    }
+
+
+    @PatchMapping("column")
+    public ResponseEntity<Void> updateColumnsIndexes(@RequestBody List<UpdateColumnIndexDTO> columnDTOList) {
+        tableService.updateColumnsIndexes(columnDTOList);
 
         return ResponseEntity.ok().build();
     }
@@ -115,7 +131,7 @@ public class TableController {
     @PostMapping("/cell")
     public ResponseEntity<Void> updateCellValue(@RequestBody CellDTO cellDTO) {
         tableService.updateCellValue(
-                UUID.fromString(cellDTO.tableId()), cellDTO.rowIndex(), cellDTO.columnIndex(), cellDTO.value()
+                cellDTO.tableId(), cellDTO.rowIndex(), cellDTO.columnIndex(), cellDTO.value()
         );
 
         return ResponseEntity.ok().build();

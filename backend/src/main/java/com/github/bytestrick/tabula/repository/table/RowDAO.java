@@ -110,6 +110,19 @@ public class RowDAO {
     }
 
 
+    public void updateRowIndex(@NotNull UUID rowId, int newRowIndex, @NotNull UUID tableId) {
+        jdbcClient.sql("""
+                UPDATE my_row
+                SET row_index = :newRowIndex
+                WHERE id = :rowId AND my_table = :tableId;
+            """)
+                .param("newRowIndex", newRowIndex)
+                .param("tableId", tableId)
+                .param("rowId", rowId)
+                .update();
+    }
+
+
     private class MyRowMapper implements RowMapper<RowProxy> {
 
         @Override

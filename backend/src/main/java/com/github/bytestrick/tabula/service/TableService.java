@@ -6,6 +6,8 @@ import com.github.bytestrick.tabula.controller.dto.TableDTO;
 import com.github.bytestrick.tabula.controller.dto.TableDto;
 import com.github.bytestrick.tabula.model.Table;
 import com.github.bytestrick.tabula.model.User;
+import com.github.bytestrick.tabula.controller.dto.*;
+import com.github.bytestrick.tabula.model.Pair;
 import com.github.bytestrick.tabula.model.table.Cell;
 import com.github.bytestrick.tabula.repository.TableDao;
 import com.github.bytestrick.tabula.repository.UserDao;
@@ -150,10 +152,20 @@ public class TableService {
     @Transactional
     public void deleteColumns(List<ColumnDTO> columnDTOList) {
         for (ColumnDTO columnDTO : columnDTOList) {
-            if (columnDTO.tableId() == null)
-                throw new IllegalArgumentException("Column ID must not be null");
-
             columnDAO.deleteColumn(columnDTO.columnIndex(), columnDTO.tableId());
+        }
+    }
+
+
+    @Transactional
+    public void updateColumnsIndexes(List<UpdateColumnIndexDTO> columnDTOList) {
+        List<Pair<UUID, Integer>> toUpdate = columnDTOList.stream().map(
+                dto -> new Pair<>(columnDAO.findColumnIdByIndex(dto.tableId(), dto.currentColumnIndex()), dto.newColumnIndex())
+        ).toList();
+
+
+        for (int i = 0; i < columnDTOList.size(); ++i) {
+            columnDAO.updateColumnIndex(toUpdate.get(i).getFirst(), toUpdate.get(i).getSecond(), columnDTOList.get(i).tableId());
         }
     }
 
@@ -161,10 +173,19 @@ public class TableService {
     @Transactional
     public void deleteRows(List<RowDTO> rowDTOList) {
         for (RowDTO rowDTO : rowDTOList) {
-            if (rowDTO.tableId() == null)
-                throw new IllegalArgumentException("Column ID must not be null");
-
             rowDAO.deleteRow(rowDTO.rowIndex(), rowDTO.tableId());
+        }
+    }
+
+
+    @Transactional
+    public void updateRowsIndexes(List<UpdateRowIndexDTO> rowDTOList) {
+        List<Pair<UUID, Integer>> toUpdate = rowDTOList.stream().map(
+                dto -> new Pair<>(rowDAO.findRowIdByIndex(dto.tableId(), dto.currentRowIndex()), dto.newRowIndex())
+        ).toList();
+
+        for (int i = 0; i < rowDTOList.size(); ++i) {
+            rowDAO.updateRowIndex(toUpdate.get(i).getFirst(), toUpdate.get(i).getSecond(), rowDTOList.get(i).tableId());
         }
     }
 }

@@ -122,34 +122,7 @@ export class TableService {
   }
 
 
-  moveColumn(fromIndex: number, toIndex: number): void {
-    if (fromIndex < 0 || fromIndex >= this.getHeadersCellsAmount())
-      return;
-
-    if (toIndex < 0 || toIndex >= this.getHeadersCellsAmount())
-      return;
-
-    if (fromIndex === toIndex)
-      return;
-
-    for (let row of this.table) {
-      moveItemInArray(row, fromIndex, toIndex);
-    }
-
-    moveItemInArray(this.headerCells, fromIndex, toIndex);
-
-    if (this.isColumnSelected(fromIndex) && !this.isColumnSelected(toIndex)) {
-      this.deselectColumn(fromIndex);
-      this.selectColumn(toIndex);
-    }
-    else if (!this.isColumnSelected(fromIndex) && this.isColumnSelected(toIndex)) {
-      this.deselectColumn(toIndex);
-      this.selectColumn(fromIndex);
-    }
-  }
-
-
-  moveRow(fromIndex: number, toIndex: number): void {
+  private _moveRow(fromIndex: number, toIndex: number): void {
     if (fromIndex < 0 || fromIndex >= this.getRowsNumber())
       return;
 
@@ -169,6 +142,34 @@ export class TableService {
       this.deselectRow(toIndex);
       this.selectRow(fromIndex);
     }
+  }
+
+
+  private getMovedIndexesToUpdate(fromIndex: number, toIndex: number): Pair<number, number>[] {
+    const indexesToUpdate: Pair<number, number>[] = [];
+
+    if (fromIndex > toIndex) {
+      for (let i: number = toIndex; i <= fromIndex - 1; ++i) {
+        indexesToUpdate.push(new Pair(i, i + 1));
+      }
+    }
+    else if (fromIndex < toIndex) {
+      for (let i: number = fromIndex + 1; i <= toIndex; ++i) {
+        indexesToUpdate.push(new Pair(i, i - 1));
+      }
+    }
+    else
+      return [];
+
+    indexesToUpdate.push(new Pair(fromIndex, toIndex));
+
+    return indexesToUpdate;
+  }
+
+
+  moveRow(fromIndex: number, toIndex: number): void {
+    this._moveRow(fromIndex, toIndex);
+    this.tableAPI.updateRowsIndexes(this.getMovedIndexesToUpdate(fromIndex, toIndex));
   }
 
 
@@ -193,12 +194,46 @@ export class TableService {
       while(rowsToMove[0] + deltaI >= this.getRowsNumber()) // rowsToMove[0] + deltaI corrisponde all'indice in cui finirà l'ultima riga selezionata
         --deltaI;
     }
-
-    if (deltaI === 0)
+    else
       return;
 
-    for (let i of rowsToMove)
-      this.moveRow(i, i + deltaI);
+    for (let i of rowsToMove) {
+      this._moveRow(i, i + deltaI);
+    }
+
+    //TODO: this.tableAPI.updateRowsIndexes();
+  }
+
+
+  private _moveColumn(fromIndex: number, toIndex: number): void {
+    if (fromIndex < 0 || fromIndex >= this.getHeadersCellsAmount())
+      return;
+
+    if (toIndex < 0 || toIndex >= this.getHeadersCellsAmount())
+      return;
+
+    if (fromIndex === toIndex)
+      return;
+
+    for (let row of this.table)
+      moveItemInArray(row, fromIndex, toIndex);
+
+    moveItemInArray(this.headerCells, fromIndex, toIndex);
+
+    if (this.isColumnSelected(fromIndex) && !this.isColumnSelected(toIndex)) {
+      this.deselectColumn(fromIndex);
+      this.selectColumn(toIndex);
+    }
+    else if (!this.isColumnSelected(fromIndex) && this.isColumnSelected(toIndex)) {
+      this.deselectColumn(toIndex);
+      this.selectColumn(fromIndex);
+    }
+  }
+
+
+  moveColumn(fromIndex: number, toIndex: number): void {
+    this._moveColumn(fromIndex, toIndex);
+    this.tableAPI.updateColumnsIndexes(this.getMovedIndexesToUpdate(fromIndex, toIndex));
   }
 
 
@@ -223,12 +258,14 @@ export class TableService {
       while (columnsToMove[0] + deltaI >= this.getHeadersCellsAmount()) // columnsToMove[0] + deltaI corrisponde all'indice in cui finirà l'ultima colonna selezionata
         --deltaI;
     }
-
-    if (deltaI === 0)
+    else
       return;
 
-    for (let i of columnsToMove)
+    for (let i of columnsToMove) {
       this.moveColumn(i, i + deltaI);
+    }
+
+    //TODO: this.tableAPI.updateRowsIndexes();
   }
 
 
