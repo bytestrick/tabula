@@ -22,7 +22,7 @@ CREATE TABLE invalid_jwts
 );
 
 
-CREATE TABLE data_type 
+CREATE TABLE data_type
 (
     id              SMALLSERIAL PRIMARY KEY,
     name            VARCHAR(500) NOT NULL,
@@ -36,89 +36,83 @@ VALUES
     ('Numeric'),
     ('Monetary');
 
-CREATE TABLE my_table 
+CREATE TABLE tbl_table
 (
-    id              UUID PRIMARY KEY
+    id             UUID         DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY,
+    title          VARCHAR(50)  DEFAULT ''                NOT NULL,
+    description    VARCHAR(500) DEFAULT ''                NOT NULL,
+    creation_date  TIMESTAMP    DEFAULT now()             NOT NULL,
+    last_edit_date TIMESTAMP    DEFAULT NULL,
+    user_id        UUID
+        constraint table_card_users__fk
+            references users,
+    table_id       UUID
+        constraint table_card_tbl_table__fk
+            references tbl_table on delete cascade
 );
 
 
-CREATE TABLE my_column
+CREATE TABLE tbl_column
 (
     id              UUID PRIMARY KEY,
-    my_table        UUID,
+    tbl_table       UUID,
     data_type       SMALLSERIAL,
     column_index    INT NOT NULL,
 
-    FOREIGN KEY (my_table) REFERENCES my_table (id),
+    FOREIGN KEY (tbl_table) REFERENCES tbl_table (id),
     FOREIGN KEY (data_type) REFERENCES data_type (id),
-    UNIQUE(column_index, my_table)
+    UNIQUE(column_index, tbl_table)
 );
 
 
-CREATE TABLE my_row
+CREATE TABLE tbl_row
 (
     id UUID         PRIMARY KEY,
-    my_table        UUID,
+    tbl_table       UUID,
     row_index       INT NOT NULL,
 
-    FOREIGN KEY (my_table) REFERENCES my_table (id),
-    UNIQUE(row_index, my_table)
+    FOREIGN KEY (tbl_table) REFERENCES tbl_table (id),
+    UNIQUE(row_index, tbl_table)
 );
 
 
 CREATE TABLE cell
 (
     id              UUID PRIMARY KEY,
-    my_row          UUID,
-    my_column       UUID,
+    tbl_row          UUID,
+    tbl_column       UUID,
     value           VARCHAR(1000),
 
-    FOREIGN KEY (my_column) REFERENCES my_column(id),
-    FOREIGN KEY (my_row) REFERENCES my_row(id)
+    FOREIGN KEY (tbl_column) REFERENCES tbl_column(id),
+    FOREIGN KEY (tbl_row) REFERENCES tbl_row(id)
 );
 
 
 CREATE OR REPLACE FUNCTION deleteColumnCellsOnColumnDelete()
-RETURNS trigger AS $$
+    RETURNS trigger AS $$
 BEGIN
-    DELETE FROM cell WHERE my_column = OLD.id;
+    DELETE FROM cell WHERE tbl_column = OLD.id;
     RETURN OLD;
 END;
 $$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE TRIGGER onDeleteColumn
-AFTER DELETE ON my_column
-FOR EACH ROW
+    AFTER DELETE ON tbl_column
+    FOR EACH ROW
 EXECUTE FUNCTION deleteColumnCellsOnColumnDelete();
 
 
 CREATE OR REPLACE FUNCTION deleteRowCellsOnRowDelete()
-RETURNS trigger AS $$
+    RETURNS trigger AS $$
 BEGIN
-    DELETE FROM cell WHERE my_row = OLD.id;
+    DELETE FROM cell WHERE tbl_row = OLD.id;
     RETURN OLD;
 END;
 $$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE TRIGGER onDeleteRow
-AFTER DELETE ON my_row
-FOR EACH ROW
+    AFTER DELETE ON tbl_row
+    FOR EACH ROW
 EXECUTE FUNCTION deleteRowCellsOnRowDelete();
-
-
-create table table_card
-(
-    id             uuid         default gen_random_uuid() not null primary key,
-    title          varchar(50)  default ''                not null,
-    description    varchar(500) default ''                not null,
-    creation_date  timestamp    default now()             not null,
-    last_edit_date timestamp,
-    user_id        uuid
-        constraint table_card_users__fk
-            references users,
-    table_id       uuid
-        constraint table_card_my_table__fk
-            references my_table on delete cascade
-);

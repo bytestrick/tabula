@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
-public class TableCard {
+public class Table {
 
     @NotNull
     private final UUID id;

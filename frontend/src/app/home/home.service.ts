@@ -19,7 +19,7 @@ export class HomeService {
       .set('id', id);
 
     return this.http.get<TableCard[]>(
-      '/table-card/next',
+      '/table/next',
       {params, responseType: 'json'}
     );
   }
@@ -29,14 +29,14 @@ export class HomeService {
       .set('quantity', quantity);
 
     return this.http.get<TableCard[]>(
-      '/table-card',
+      '/table',
       {params, responseType: 'json'}
     );
   }
 
   createTableCard(tableCard: TableCard): Observable<TableCard> {
     return this.http.post<TableCard>(
-      '/table-card',
+      '/table',
       tableCard,
       { responseType: 'json' }
     );
@@ -44,7 +44,7 @@ export class HomeService {
 
   editTableCard(tableCard: TableCard) : Observable<string> {
     return this.http.put<string>(
-      '/table-card',
+      '/table',
       tableCard,
       { responseType: 'text' as 'json' }
     );
@@ -55,7 +55,7 @@ export class HomeService {
     const params: HttpParams = new HttpParams().set('id', id);
 
     return this.http.delete<string>(
-      '/table-card',
+      '/table',
       { params, responseType: 'text' as 'json' }
     );
   }

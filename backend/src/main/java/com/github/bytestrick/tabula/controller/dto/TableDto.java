@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record TableCardDto(
+public record TableDto(
         @NotNull UUID id,
         @NotNull @Size(min = 1, max = 50) String title,
         @Size(max = 500) String description,
