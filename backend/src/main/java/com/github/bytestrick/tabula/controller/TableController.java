@@ -13,16 +13,10 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping(
-        value = "/",
-        consumes = MediaType.APPLICATION_JSON_VALUE,
-        produces = MediaType.APPLICATION_JSON_VALUE
-)
+@RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
 public class TableController {
-
     private final TableService tableService;
-
 
     @GetMapping("table/next")
     public ResponseEntity<List<TableDto>> getNextTables(@RequestParam UUID id, @RequestParam int quantity) {
@@ -34,12 +28,12 @@ public class TableController {
         return ResponseEntity.ok().body(tableService.getLastTables(quantity));
     }
 
-    @PostMapping("table")
+    @PostMapping(value = "table", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<TableDto> createTable(@RequestBody Table table) {
         return ResponseEntity.ok().body(tableService.createTable(table));
     }
 
-    @PutMapping("table")
+    @PutMapping(value = "table", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> updateTableCard(@RequestBody Table table) {
         return ResponseEntity.ok().body(new InformativeResponse(tableService.updateTable(table)));
     }
