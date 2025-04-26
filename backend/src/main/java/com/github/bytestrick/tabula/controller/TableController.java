@@ -5,6 +5,7 @@ import com.github.bytestrick.tabula.controller.dto.TableDto;
 import com.github.bytestrick.tabula.model.Table;
 import com.github.bytestrick.tabula.controller.dto.CellDTO;
 import com.github.bytestrick.tabula.controller.dto.ColumnDTO;
+import com.github.bytestrick.tabula.controller.dto.RowDTO;
 import com.github.bytestrick.tabula.controller.dto.TableDTO;
 
 import com.github.bytestrick.tabula.service.TableService;
@@ -61,16 +62,25 @@ public class TableController {
 
 
     @GetMapping
-    public ResponseEntity<TableDTO> getTable(@RequestParam("table-id") String tableId) {
+    public ResponseEntity<TableDTO> getTable(@RequestParam("table-id") UUID tableId) {
 
-        return ResponseEntity.ok(tableService.getTable(UUID.fromString(tableId)));
+        return ResponseEntity.ok(tableService.getTable(tableId));
     }
 
 
     @PostMapping("/row")
-    public ResponseEntity<Void> appendNewRow(@RequestParam("table-id") String tableId) {
-        System.out.println(tableId);
-        tableService.appendNewRow(UUID.fromString(tableId));
+    public ResponseEntity<Void> appendNewRow(@RequestParam("table-id") UUID tableId) {
+        tableService.appendNewRow(tableId);
+
+        return ResponseEntity.ok().build();
+    }
+
+
+    @DeleteMapping("/row")
+    public ResponseEntity<Void> deleteRows(
+            @RequestBody List<RowDTO> rowDTOList ) {
+
+        tableService.deleteRows(rowDTOList);
 
         return ResponseEntity.ok().build();
     }
@@ -79,6 +89,16 @@ public class TableController {
     @PostMapping("/column")
     public ResponseEntity<Void> appendNewColumn(@RequestBody ColumnDTO columnDTO) {
         tableService.appendNewColumn(columnDTO.tableId(), columnDTO.dataType());
+
+        return ResponseEntity.ok().build();
+    }
+
+
+    @DeleteMapping("/column")
+    public ResponseEntity<Void> deleteColumns(
+            @RequestBody List<ColumnDTO> columnDTOList) {
+
+        tableService.deleteColumns(columnDTOList);
 
         return ResponseEntity.ok().build();
     }

@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -32,11 +33,20 @@ public class RowDAO {
     }
 
 
+    @Transactional
     public void deleteRow(int rowIndex, @NotNull UUID tableId) {
         jdbcClient.sql("""
-                DELETE FROM
-                my_row
-                WHERE row_index = :rowIndex and my_table = :tableId
+                DELETE FROM my_row
+                WHERE row_index = :rowIndex AND my_table = :tableId
+            """)
+                .param("rowIndex", rowIndex)
+                .param("tableId", tableId)
+                .update();
+
+        jdbcClient.sql("""
+                UPDATE my_row
+                SET row_index = row_index - 1
+                WHERE row_index > :rowIndex AND my_table = :tableId
             """)
                 .param("rowIndex", rowIndex)
                 .param("tableId", tableId)

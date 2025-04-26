@@ -4,9 +4,9 @@ import {Observable} from 'rxjs';
 
 export interface ColumnDTO {
   tableId: string,
-  dataType: number,
-  columnName: string,
-  columnIndex: number
+  dataType?: number,
+  columnName?: string,
+  columnIndex?: number
 }
 
 
@@ -22,6 +22,12 @@ export interface CellDTO {
   rowIndex: number,
   columnIndex: number,
   value: string
+}
+
+
+export interface RowDTO {
+  tableId: string,
+  rowIndex: number
 }
 
 
@@ -57,9 +63,7 @@ export class TableApiService {
   appendNewColumn(dataType: number, tableId: string = ''): void {
     const newColumn: ColumnDTO = {
       tableId: tableId || this.tableId,
-      dataType: dataType,
-      columnName: '',
-      columnIndex: -1
+      dataType: dataType
     };
 
     this.httpClient.post('/table/column', newColumn).subscribe();
@@ -70,7 +74,6 @@ export class TableApiService {
     const column: ColumnDTO = {
       tableId: tableId || this.tableId,
       dataType: newDataType,
-      columnName: '',
       columnIndex: columnIndex
     };
 
@@ -87,5 +90,32 @@ export class TableApiService {
     }
 
     this.httpClient.post('/table/cell', cell).subscribe();
+  }
+
+
+  deleteRows(rowIndexes: number[], tableId: string = ''): void {
+    let rowsToDelete: RowDTO[] = [];
+
+    for (let i of rowIndexes)
+      rowsToDelete.push({
+        tableId: tableId || this.tableId,
+        rowIndex: i
+      });
+
+    this.httpClient.delete('/table/row', { body: rowsToDelete }).subscribe();
+  }
+
+
+  deleteColumns(columnsIndexes: number[], tableId: string = ''): void {
+    let columnsToDelete: ColumnDTO[] = [];
+
+    for (let j of columnsIndexes)
+      columnsToDelete.push({
+        tableId: tableId || this.tableId,
+        dataType: 1,
+        columnIndex: j
+      });
+
+    this.httpClient.delete('/table/column', { body: columnsToDelete }).subscribe();
   }
 }

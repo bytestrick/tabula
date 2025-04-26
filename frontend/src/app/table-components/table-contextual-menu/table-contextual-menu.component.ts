@@ -52,6 +52,11 @@ export class TableContextualMenuComponent implements IPopUpContent, AfterViewIni
       case this.TARGET_ROW: {
         const rowI: number = this.cellCord.first;
 
+        if (this.tableService.getRowsNumber() - this.tableService.getSelectedRowNumber() <= 0) {
+          this.toastService.actionNotAllowed('There must be at least one row');
+          return;
+        }
+
         if (this.tableService.isRowSelected(rowI)) {
           this.tableService.deleteSelectedRow();
           return;
@@ -70,6 +75,11 @@ export class TableContextualMenuComponent implements IPopUpContent, AfterViewIni
       }
       case this.TARGET_COLUMN: {
         const columnI: number = this.cellCord.second;
+
+        if (this.tableService.getHeadersCellsAmount() - this.tableService.getSelectedColumnNumber() <= 0) {
+          this.toastService.actionNotAllowed('There must be at least one column');
+          return;
+        }
 
         if (this.tableService.isColumnSelected(columnI)) {
           this.tableService.deleteSelectedColumn();
