@@ -1,6 +1,7 @@
-import {Component} from '@angular/core';
+import {Component, inject} from '@angular/core';
 import {ToastComponent} from './toast/toast.component';
 import {RouterOutlet} from '@angular/router';
+import {ThemeService} from './theme.service';
 
 @Component({
   selector: 'tbl-root',
@@ -9,6 +10,5 @@ import {RouterOutlet} from '@angular/router';
   styleUrl: './app.component.css'
 })
 export class AppComponent {
-
-  constructor() {}
+  private themeService: ThemeService = inject(ThemeService);
 }
