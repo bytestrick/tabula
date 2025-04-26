@@ -1,7 +1,5 @@
 package com.github.bytestrick.tabula;
 
-import com.github.bytestrick.tabula.repository.HomeDao;
-import com.github.bytestrick.tabula.service.FuzzySearchTableCard;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
