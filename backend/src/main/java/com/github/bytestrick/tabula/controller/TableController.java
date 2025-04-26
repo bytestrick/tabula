@@ -1,9 +1,11 @@
 package com.github.bytestrick.tabula.controller;
 
+import com.github.bytestrick.tabula.controller.dto.InformativeResponse;
 import com.github.bytestrick.tabula.controller.dto.TableDto;
 import com.github.bytestrick.tabula.model.Table;
 import com.github.bytestrick.tabula.service.TableService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,7 +13,11 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/")
+@RequestMapping(
+        value = "/",
+        consumes = MediaType.APPLICATION_JSON_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE
+)
 @RequiredArgsConstructor
 public class TableController {
 
@@ -34,13 +40,13 @@ public class TableController {
     }
 
     @PutMapping("table")
-    public ResponseEntity<String> updateTable(@RequestBody Table table) {
-        return ResponseEntity.ok().body(tableService.updateTable(table));
+    public ResponseEntity<?> updateTableCard(@RequestBody Table table) {
+        return ResponseEntity.ok().body(new InformativeResponse(tableService.updateTable(table)));
     }
 
     @DeleteMapping("table")
-    public ResponseEntity<String> deleteTable(@RequestParam UUID id) {
-        return ResponseEntity.ok().body(tableService.deleteTable(id));
+    public ResponseEntity<?> deleteTableCard(@RequestParam UUID id) {
+        return ResponseEntity.ok().body(new InformativeResponse(tableService.deleteTable(id)));
     }
 
     @GetMapping("search")
