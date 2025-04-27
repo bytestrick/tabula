@@ -13,6 +13,7 @@ import {Subscription} from 'rxjs';
 import {DatePipe, NgIf} from '@angular/common';
 import {PrettyDatePipe} from '../pretty-date.pipe';
 import {ToastService} from '../../toast/toast.service';
+import {ConfirmDeletionDialogService} from '../../confirm-deletion-dialog/confirm-deletion-dialog.service';
 
 
 @Component({
@@ -40,6 +41,7 @@ export class TableCardComponent implements OnDestroy {
   private isInit: boolean = false;
   private subscription!: Subscription;
   private toast: ToastService = inject(ToastService);
+  private confirmDialog: ConfirmDeletionDialogService = inject(ConfirmDeletionDialogService);
 
 
   constructor(private homeService: HomeService) {}
@@ -105,24 +107,31 @@ export class TableCardComponent implements OnDestroy {
   }
 
   onDelete(): void {
-    if (!this.id) return;
+    this.confirmDialog.show({
+      title: 'Delete the table?',
+      description: 'You are about to delete ' + this.title + '.'
+    }).subscribe((confirm: boolean): void => {
+      if (confirm) {
+        if (!this.id) return;
 
-    this.subscription = this.homeService.deleteTableCard(this.id).subscribe({
-      next: (data: string): void => {
-        this.toast.show({
-          title: 'Table Deleted',
-          body: `The table has been successfully deleted.`,
-          icon: 'bi bi-trash-fill',
-          background: 'success',
-        });
-        this.componentRef.destroy();
-      },
-      error: (err: any): void => {
-        this.toast.show({
-          title: 'Table Not Deleted',
-          body: 'An error occurred the table was not deleted.\nPlease try again later.',
-          icon: 'x-circle-fill',
-          background: 'danger',
+        this.subscription = this.homeService.deleteTableCard(this.id).subscribe({
+          next: (data: string): void => {
+            this.toast.show({
+              title: 'Table Deleted',
+              body: `The table has been successfully deleted.`,
+              icon: 'bi bi-trash-fill',
+              background: 'success',
+            });
+            this.componentRef.destroy();
+          },
+          error: (err: any): void => {
+            this.toast.show({
+              title: 'Table Not Deleted',
+              body: 'An error occurred the table was not deleted.\nPlease try again later.',
+              icon: 'x-circle-fill',
+              background: 'danger',
+            });
+          }
         });
       }
     });
