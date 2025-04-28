@@ -145,7 +145,7 @@ export class TableService {
   }
 
 
-  private getMovedIndexesToUpdate(fromIndex: number, toIndex: number): Pair<number, number>[] {
+  private getMovedIndexes(fromIndex: number, toIndex: number): Pair<number, number>[] {
     const indexesToUpdate: Pair<number, number>[] = [];
 
     if (fromIndex > toIndex) {
@@ -169,8 +169,11 @@ export class TableService {
 
   moveRow(fromIndex: number, toIndex: number): void {
     this._moveRow(fromIndex, toIndex);
-    this.tableAPI.updateRowsIndexes(this.getMovedIndexesToUpdate(fromIndex, toIndex));
+    this.tableAPI.updateRowsIndexes(this.getMovedIndexes(fromIndex, toIndex));
   }
+
+
+
 
 
   moveSelectedRows(fromIndex: number, toIndex: number): void {
@@ -197,11 +200,40 @@ export class TableService {
     else
       return;
 
+    const indexesToUpdate: Pair<number, number>[] = [];
+
     for (let i of rowsToMove) {
       this._moveRow(i, i + deltaI);
+
+      const movedIndexes: Pair<number, number>[] = this.getMovedIndexes(i, i + deltaI);
+      const newIndexesDiscovered: Pair<number, number>[] = [];
+      const indexesSnapshot: Pair<number, number>[] = [];
+
+      for (let p of indexesToUpdate)
+        indexesSnapshot.push(new Pair(p.first, p.second));
+
+      for (let p of movedIndexes) {
+        let hasValueI: number = -1;
+
+        for (let k: number = 0; k < indexesSnapshot.length; ++k) {
+          if (indexesSnapshot[k].second === p.first) {
+            hasValueI = k;
+            break;
+          }
+        }
+
+        if (hasValueI >= 0) {
+          indexesToUpdate[hasValueI].second = p.second;
+        }
+        else
+          newIndexesDiscovered.push(p);
+      }
+
+      for (let p of newIndexesDiscovered)
+        indexesToUpdate.push(p);
     }
 
-    //TODO: this.tableAPI.updateRowsIndexes();
+    this.tableAPI.updateRowsIndexes(indexesToUpdate);
   }
 
 
@@ -233,7 +265,7 @@ export class TableService {
 
   moveColumn(fromIndex: number, toIndex: number): void {
     this._moveColumn(fromIndex, toIndex);
-    this.tableAPI.updateColumnsIndexes(this.getMovedIndexesToUpdate(fromIndex, toIndex));
+    this.tableAPI.updateColumnsIndexes(this.getMovedIndexes(fromIndex, toIndex));
   }
 
 
