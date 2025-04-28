@@ -122,6 +122,13 @@ export class TableService {
   }
 
 
+  /**
+   * Moves a single row from one position to another within the table,
+   * and updates selection state if the moved row was selected.
+   *
+   * @param fromIndex - The zero-based index of the row to move.
+   * @param toIndex - The zero-based target index where the row should be placed.
+   */
   private _moveRow(fromIndex: number, toIndex: number): void {
     if (fromIndex < 0 || fromIndex >= this.getRowsNumber())
       return;
@@ -145,6 +152,15 @@ export class TableService {
   }
 
 
+
+  /**
+   * Computes all index‐mapping operations required when a row/column is moved
+   * from one position to another, so that downstream consumers can update.
+   *
+   * @param fromIndex - The original index of the moved row.
+   * @param toIndex - The destination index of the moved row.
+   * @returns An array of Pair&lt;oldIndex, newIndex&gt; describing each shifted index.
+   */
   private getMovedIndexes(fromIndex: number, toIndex: number): Pair<number, number>[] {
     const indexesToUpdate: Pair<number, number>[] = [];
 
@@ -167,24 +183,38 @@ export class TableService {
   }
 
 
+  /**
+   * Move a single row and immediately notify
+   * the table API of which indexes have changed.
+   *
+   * @param fromIndex - The index of the row to move.
+   * @param toIndex - The index to which the row should be moved.
+   */
   moveRow(fromIndex: number, toIndex: number): void {
     this._moveRow(fromIndex, toIndex);
     this.tableAPI.updateRowsIndexes(this.getMovedIndexes(fromIndex, toIndex));
   }
 
 
+  /**
+   * Sorts a list of selected indexes in the correct order for
+   * multi-row movement, based on the direction of movement.
+   *
+   * @param rawDelta - The raw offset (positive or negative) indicating direction.
+   * @param selectedIndexes - Array of selected row or column indexes.
+   * @returns A new array sorted ascending when moving up (delta<0),
+   *          or descending when moving down (delta>0).
+   */
   private getSortedSelectedIndexToMove(rawDelta: number, selectedIndexes: number[]): number[] {
     if (selectedIndexes.length == 0)
       return [];
 
-    let rowsToMove: number[] = [];
-
     if (rawDelta < 0) {
-      // ordina le righe selezionate in modo crescente
+      // sort selected indexes in ascending order
       return selectedIndexes.sort((a, b) => a - b);
     }
     else if (rawDelta > 0) {
-      // ordina le righe selezionate in modo decrescente
+      // sorts the selected indexes in descending order
       return selectedIndexes.sort((a, b) => b - a);
     }
 
@@ -192,6 +222,16 @@ export class TableService {
   }
 
 
+  /**
+   * Ensures the computed delta does not cause any moved index
+   * to go out of the valid bounds [minBounds, maxBounds).
+   *
+   * @param rawDelta - The initial desired delta.
+   * @param sortedIndexesToMove - The sorted list of indexes about to be moved.
+   * @param minBounds - The minimum valid index (inclusive).
+   * @param maxBounds - The maximum valid index (exclusive).
+   * @returns An adjusted delta that keeps all moves within bounds.
+   */
   private getAdjustDeltaToBounds(rawDelta: number, sortedIndexesToMove: number[], minBounds: number, maxBounds: number): number {
     if (sortedIndexesToMove.length === 0)
       return 0;
@@ -209,11 +249,23 @@ export class TableService {
   }
 
 
+  /**
+   * Returns the array of currently selected row indexes.
+   *
+   * @returns A new array containing all selected row indexes.
+   */
   public getSelectedRows(): number[] {
     return Array.from(this.selectedRows);
   }
 
 
+  /**
+   * Merges a new batch of moved index mappings into the existing list,
+   * updating any overlapping oldIndex→newIndex pairs and adding new ones.
+   *
+   * @param indexesToUpdate - The accumulator array of existing mappings.
+   * @param currentMovedIndexes - The latest array of moved index pairs.
+   */
   private reconstructIndexesToUpdate(indexesToUpdate: Pair<number, number>[], currentMovedIndexes: Pair<number, number>[]): void {
     const newIndexesDiscovered: Pair<number, number>[] = [];
     const indexesSnapshot: Pair<number, number>[] = [];
@@ -243,6 +295,13 @@ export class TableService {
   }
 
 
+  /**
+   * Moves all currently selected rows from one index to another,
+   * adjusting for boundaries, preserving order, and batching update notifications.
+   *
+   * @param fromIndex - The reference index from which movement is measured.
+   * @param toIndex - The target index where the selection block should end up.
+   */
   moveSelectedRows(fromIndex: number, toIndex: number): void {
     const rawDelta: number = toIndex - fromIndex;
 
@@ -262,6 +321,13 @@ export class TableService {
   }
 
 
+  /**
+   * Moves a single column from one position to another within the table,
+   * and updates selection state if the moved column was selected.
+   *
+   * @param fromIndex - The zero-based index of the column to move.
+   * @param toIndex - The zero-based target index where the column should be placed.
+   */
   private _moveColumn(fromIndex: number, toIndex: number): void {
     if (fromIndex < 0 || fromIndex >= this.getHeadersCellsAmount())
       return;
@@ -288,17 +354,36 @@ export class TableService {
   }
 
 
+  /**
+   * Moves a single column and immediately notifies the table API
+   * of which column indexes have changed.
+   *
+   * @param fromIndex - The index of the column to move.
+   * @param toIndex - The index to which the column should be moved.
+   */
   moveColumn(fromIndex: number, toIndex: number): void {
     this._moveColumn(fromIndex, toIndex);
     this.tableAPI.updateColumnsIndexes(this.getMovedIndexes(fromIndex, toIndex));
   }
 
 
+  /**
+   * Returns the array of currently selected column indexes.
+   *
+   * @returns A new array containing all selected column indexes.
+   */
   public getSelectedColumns(): number[] {
     return Array.from(this.selectedColumns);
   }
 
 
+  /**
+   * Moves all currently selected columns from one index to another,
+   * adjusting for boundaries, preserving order, and batching update notifications.
+   *
+   * @param fromIndex - The reference index from which movement is measured.
+   * @param toIndex - The target index where the selection block should end up.
+   */
   moveSelectedColumns(fromIndex: number, toIndex: number): void {
     const rawDelta: number = toIndex - fromIndex;
 
