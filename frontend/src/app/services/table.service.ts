@@ -173,64 +173,89 @@ export class TableService {
   }
 
 
+  private getSortedSelectedIndexToMove(rawDelta: number, selectedIndexes: number[]): number[] {
+    if (selectedIndexes.length == 0)
+      return [];
 
+    let rowsToMove: number[] = [];
+
+    if (rawDelta < 0) {
+      // ordina le righe selezionate in modo crescente
+      return selectedIndexes.sort((a, b) => a - b);
+    }
+    else if (rawDelta > 0) {
+      // ordina le righe selezionate in modo decrescente
+      return selectedIndexes.sort((a, b) => b - a);
+    }
+
+    return [];
+  }
+
+
+  private getAdjustDeltaToBounds(rawDelta: number, sortedIndexesToMove: number[], minBounds: number, maxBounds: number): number {
+    if (sortedIndexesToMove.length === 0)
+      return 0;
+
+    if (rawDelta < 0) {
+      while(sortedIndexesToMove[0] + rawDelta < minBounds)
+        ++rawDelta;
+    }
+    else if (rawDelta > 0) {
+      while(sortedIndexesToMove[0] + rawDelta >= maxBounds)
+        --rawDelta;
+    }
+
+    return rawDelta;
+  }
+
+
+  public getSelectedRows(): number[] {
+    return Array.from(this.selectedRows);
+  }
+
+
+  private reconstructIndexesToUpdate(indexesToUpdate: Pair<number, number>[], currentMovedIndexes: Pair<number, number>[]): void {
+    const newIndexesDiscovered: Pair<number, number>[] = [];
+    const indexesSnapshot: Pair<number, number>[] = [];
+
+    for (let p of indexesToUpdate)
+      indexesSnapshot.push(new Pair(p.first, p.second));
+
+    for (let p of currentMovedIndexes) {
+      let hasValueI: number = -1;
+
+      for (let k: number = 0; k < indexesSnapshot.length; ++k) {
+        if (indexesSnapshot[k].second === p.first) {
+          hasValueI = k;
+          break;
+        }
+      }
+
+      if (hasValueI >= 0) {
+        indexesToUpdate[hasValueI].second = p.second;
+      }
+      else
+        newIndexesDiscovered.push(p);
+    }
+
+    for (let p of newIndexesDiscovered)
+      indexesToUpdate.push(p);
+  }
 
 
   moveSelectedRows(fromIndex: number, toIndex: number): void {
-    if (!this.hasRowsSelected())
-      return;
+    const rawDelta: number = toIndex - fromIndex;
 
-    let deltaI: number = toIndex - fromIndex;
-    let rowsToMove: number[] = [];
-
-    if (deltaI < 0) {
-      // ordina le righe selezionate in modo crescente
-      rowsToMove = Array.from(this.selectedRows).sort((a, b) => a - b);
-
-      while(rowsToMove[0] + deltaI < 0) // rowsToMove[0] + deltaI corrisponde all'indice in cui finirà la prima riga selezionata
-        ++deltaI;
-    }
-    else if (deltaI > 0) {
-      // ordina le righe selezionate in modo decrescente
-      rowsToMove = Array.from(this.selectedRows).sort((a, b) => b - a);
-
-      while(rowsToMove[0] + deltaI >= this.getRowsNumber()) // rowsToMove[0] + deltaI corrisponde all'indice in cui finirà l'ultima riga selezionata
-        --deltaI;
-    }
-    else
-      return;
+    const rowsToMove: number[] = this.getSortedSelectedIndexToMove(rawDelta, this.getSelectedRows());
+    const adjustedDelta: number = this.getAdjustDeltaToBounds(rawDelta, rowsToMove, 0, this.getRowsNumber());
 
     const indexesToUpdate: Pair<number, number>[] = [];
 
     for (let i of rowsToMove) {
-      this._moveRow(i, i + deltaI);
+      this._moveRow(i, i + adjustedDelta);
 
-      const movedIndexes: Pair<number, number>[] = this.getMovedIndexes(i, i + deltaI);
-      const newIndexesDiscovered: Pair<number, number>[] = [];
-      const indexesSnapshot: Pair<number, number>[] = [];
-
-      for (let p of indexesToUpdate)
-        indexesSnapshot.push(new Pair(p.first, p.second));
-
-      for (let p of movedIndexes) {
-        let hasValueI: number = -1;
-
-        for (let k: number = 0; k < indexesSnapshot.length; ++k) {
-          if (indexesSnapshot[k].second === p.first) {
-            hasValueI = k;
-            break;
-          }
-        }
-
-        if (hasValueI >= 0) {
-          indexesToUpdate[hasValueI].second = p.second;
-        }
-        else
-          newIndexesDiscovered.push(p);
-      }
-
-      for (let p of newIndexesDiscovered)
-        indexesToUpdate.push(p);
+      const currentMovedIndexes: Pair<number, number>[] = this.getMovedIndexes(i, i + adjustedDelta);
+      this.reconstructIndexesToUpdate(indexesToUpdate, currentMovedIndexes);
     }
 
     this.tableAPI.updateRowsIndexes(indexesToUpdate);
@@ -269,35 +294,27 @@ export class TableService {
   }
 
 
+  public getSelectedColumns(): number[] {
+    return Array.from(this.selectedColumns);
+  }
+
+
   moveSelectedColumns(fromIndex: number, toIndex: number): void {
-    if (!this.hasColumnsSelected())
-      return;
+    const rawDelta: number = toIndex - fromIndex;
 
-    let deltaI: number = toIndex - fromIndex;
-    let columnsToMove: number[] = [];
+    const columnsToMove: number[] = this.getSortedSelectedIndexToMove(rawDelta, this.getSelectedColumns());
+    const adjustedDelta: number = this.getAdjustDeltaToBounds(rawDelta, columnsToMove, 0, this.getHeadersCellsAmount());
 
-    if (deltaI < 0) {
-      // Ordina le colonne selezionate in ordine crescente
-      columnsToMove = Array.from(this.selectedColumns).sort((a, b) => a - b);
+    const indexesToUpdate: Pair<number, number>[] = [];
 
-      while (columnsToMove[0] + deltaI < 0) // columnsToMove[0] + deltaI corrisponde all'indice in cui finirà la prima colonna selezionata
-        ++deltaI;
-    }
-    else if (deltaI > 0) {
-      // Ordina le colonne selezionate in ordine decrescente
-      columnsToMove = Array.from(this.selectedColumns).sort((a, b) => b - a);
+    for (let j of columnsToMove) {
+      this._moveColumn(j, j + adjustedDelta);
 
-      while (columnsToMove[0] + deltaI >= this.getHeadersCellsAmount()) // columnsToMove[0] + deltaI corrisponde all'indice in cui finirà l'ultima colonna selezionata
-        --deltaI;
-    }
-    else
-      return;
-
-    for (let i of columnsToMove) {
-      this.moveColumn(i, i + deltaI);
+      const currentMovedIndexes: Pair<number, number>[] = this.getMovedIndexes(j, j + adjustedDelta);
+      this.reconstructIndexesToUpdate(indexesToUpdate, currentMovedIndexes);
     }
 
-    //TODO: this.tableAPI.updateRowsIndexes();
+    this.tableAPI.updateColumnsIndexes(indexesToUpdate);
   }
 
 
