@@ -206,7 +206,7 @@ export class TableService {
    *          or descending when moving down (delta>0).
    */
   private getSortedSelectedIndexToMove(rawDelta: number, selectedIndexes: number[]): number[] {
-    if (selectedIndexes.length == 0)
+    if (selectedIndexes.length === 0)
       return [];
 
     if (rawDelta < 0) {
@@ -232,7 +232,7 @@ export class TableService {
    * @param maxBounds - The maximum valid index (exclusive).
    * @returns An adjusted delta that keeps all moves within bounds.
    */
-  private getAdjustDeltaToBounds(rawDelta: number, sortedIndexesToMove: number[], minBounds: number, maxBounds: number): number {
+  private getAdjustedDeltaToBounds(rawDelta: number, sortedIndexesToMove: number[], minBounds: number, maxBounds: number): number {
     if (sortedIndexesToMove.length === 0)
       return 0;
 
@@ -274,17 +274,17 @@ export class TableService {
       indexesSnapshot.push(new Pair(p.first, p.second));
 
     for (let p of currentMovedIndexes) {
-      let hasValueI: number = -1;
+      let matchedSnapshotIndex: number = -1;
 
       for (let k: number = 0; k < indexesSnapshot.length; ++k) {
         if (indexesSnapshot[k].second === p.first) {
-          hasValueI = k;
+          matchedSnapshotIndex = k;
           break;
         }
       }
 
-      if (hasValueI >= 0) {
-        indexesToUpdate[hasValueI].second = p.second;
+      if (matchedSnapshotIndex >= 0) {
+        indexesToUpdate[matchedSnapshotIndex].second = p.second;
       }
       else
         newIndexesDiscovered.push(p);
@@ -306,7 +306,7 @@ export class TableService {
     const rawDelta: number = toIndex - fromIndex;
 
     const rowsToMove: number[] = this.getSortedSelectedIndexToMove(rawDelta, this.getSelectedRows());
-    const adjustedDelta: number = this.getAdjustDeltaToBounds(rawDelta, rowsToMove, 0, this.getRowsNumber());
+    const adjustedDelta: number = this.getAdjustedDeltaToBounds(rawDelta, rowsToMove, 0, this.getRowsNumber());
 
     const indexesToUpdate: Pair<number, number>[] = [];
 
@@ -388,7 +388,7 @@ export class TableService {
     const rawDelta: number = toIndex - fromIndex;
 
     const columnsToMove: number[] = this.getSortedSelectedIndexToMove(rawDelta, this.getSelectedColumns());
-    const adjustedDelta: number = this.getAdjustDeltaToBounds(rawDelta, columnsToMove, 0, this.getHeadersCellsAmount());
+    const adjustedDelta: number = this.getAdjustedDeltaToBounds(rawDelta, columnsToMove, 0, this.getHeadersCellsAmount());
 
     const indexesToUpdate: Pair<number, number>[] = [];
 
