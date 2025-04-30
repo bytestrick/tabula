@@ -4,6 +4,7 @@ import com.github.bytestrick.tabula.controller.dto.InformativeResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -28,6 +29,12 @@ public class GlobalExceptionHandler {
         }
         log.warn("Validation failed, responding with 400: {}", msg);
         return ResponseEntity.badRequest().body(new InformativeResponse(msg.toString()));
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<?> handleHttpMediaTypeNotSupportedException(HttpMediaTypeNotSupportedException e) {
+        log.warn("Wrong media type, got '{}' instead of '{}'", e.getContentType(), e.getSupportedMediaTypes());
+        return ResponseEntity.badRequest().body(new InformativeResponse(e.getMessage()));
     }
 
     /**

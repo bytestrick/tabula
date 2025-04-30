@@ -1,0 +1,67 @@
+<div #modal
+     class="modal fade"
+     tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Table</h5>
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <form #form
+              id="edit-form"
+              class="needs-validation"
+              (ngSubmit)="onSubmit()"
+              novalidate>
+          <div class="mb-3">
+            <label for="title"
+                   class="form-label fw-medium">Title</label>
+            <input type="text"
+                   id="title"
+                   class="form-control"
+                   placeholder="Start typing to enter a title"
+                   minlength="1"
+                   maxlength="50"
+                   [(ngModel)]="titleField"
+                   name="title"
+                   required>
+            <div class="invalid-feedback">
+              Please provide a title.
+            </div>
+            <div class="valid-feedback">
+              Looks good!
+            </div>
+          </div>
+          <div>
+            <label for="description"
+                   class="form-label fw-medium">Description</label>
+            <textarea class="form-control"
+                      id="description"
+                      placeholder="Start typing to enter a description"
+                      maxlength="500"
+                      [(ngModel)]="descriptionField" name="description"
+                      style="height: 100px"></textarea>
+            <div class="valid-feedback">
+              Looks good!
+            </div>
+          </div>
+        </form>
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal">Cancel</button>
+        <button type="submit"
+                form="edit-form" class="btn btn-primary">Edit</button>
+      </div>
+
+    </div>
+  </div>
+</div>
