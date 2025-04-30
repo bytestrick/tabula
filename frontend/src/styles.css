@@ -27,3 +27,8 @@ tbl-sign-in form, tbl-sign-up form, tbl-otp form {
   right: 0;
   top: -100% !important;
 }
+
+/* Add a background to the button when the mouse hovers over it */
+.btn-hover:hover {
+  background-color: var(--bs-border-color-translucent) !important;
+}

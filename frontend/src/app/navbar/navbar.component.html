@@ -1,0 +1,117 @@
+<div class="bg-body fixed-top px-2 pt-2">
+<nav class="shadow-sm navbar navbar-expand border rounded">
+  <div class="container-fluid">
+    <button class="btn btn-hover fw-bold fs-4">Tabula</button>
+
+    <form #searchForm
+          class="d-flex w-50 mx-2"
+          (focusout)="onFocusOut($event)"
+          (ngSubmit)="onSearchSubmit(searchForm)">
+      <div class="input-group">
+        <input #searchField
+               id="search-field"
+               [(ngModel)]="searchContent"
+               name="searchField"
+               class="form-control rounded-start-5 ps-4 pe-5"
+               type="search"
+               placeholder="Search"
+               (focusin)="onFocus()"
+               (keyup)="onKeyUp($event)">
+
+        <!-- Bottone di ricerca -->
+        <button class="btn btn-light border rounded-end-5"
+                type="submit">
+          <i class="bi bi-search"></i>
+        </button>
+
+        <!-- Bottone per cancellare -->
+        <button *ngIf="searchFieldOnFocus"
+                type="submit"
+                id="clear-search-field-button"
+                class="btn btn-hover rounded-circle p-0"
+                (click)="clearSearch()">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+    </form>
+
+
+    <button class="btn btn-hover rounded-circle"
+            type="button"
+            data-bs-toggle="offcanvas"
+            data-bs-target="#settings-panel">
+      <i class="bi bi-sliders2 fs-4"></i>
+    </button>
+  </div>
+</nav>
+</div>
+
+
+<div class="offcanvas offcanvas-end shadow m-2 border rounded"
+     data-bs-backdrop="false"
+     data-bs-scroll="true"
+     tabindex="-1"
+     id="settings-panel">
+
+  <div class="offcanvas-header">
+    <h4 class="offcanvas-title fw-bold">Settings</h4>
+    <button type="button"
+            class="btn-close"
+            data-bs-dismiss="offcanvas"></button>
+  </div>
+
+  <div class="offcanvas-body d-flex flex-column p-4">
+    <!-- User Profile -->
+    <section class="d-flex align-items-center mb-4">
+      <div>
+        <h5 class="mb-1">{{ userInfo.name + ' ' + userInfo.surname }}</h5>
+        <small class="text-secondary">{{ userInfo.email }}</small>
+      </div>
+    </section>
+
+    <!-- Appearance Settings -->
+    <section class="mb-4 border-top pt-3">
+      <h6 class="mb-3 fw-bold">Appearance</h6>
+      <div class="dropdown">
+        <button class="btn btn-hover dropdown-toggle d-flex align-items-center justify-content-between w-100" type="button"
+                id="themeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+          <div class="d-flex align-items-center">
+            <i class="bi me-3 fs-5"
+               [ngClass]="themeService.getTheme() === 'dark' ? 'bi-moon-stars-fill' :
+                          themeService.getTheme() === 'light' ? 'bi-sun-fill' :
+                          'bi-circle-half'"></i>
+            <span class="fw-medium">{{ themeService.getTheme() | titlecase }}</span>
+          </div>
+        </button>
+        <ul class="dropdown-menu w-100" aria-labelledby="themeDropdown">
+          <li>
+            <button class="dropdown-item d-flex align-items-center"
+                    (click)="setTheme('light')">
+              <i class="bi bi-sun me-2"></i> Light
+            </button>
+          </li>
+          <li>
+            <button class="dropdown-item d-flex align-items-center"
+                    (click)="setTheme('dark')">
+              <i class="bi bi-moon-stars me-2"></i> Dark
+            </button>
+          </li>
+          <li>
+            <button class="dropdown-item d-flex align-items-center"
+                    (click)="setTheme('auto')">
+              <i class="bi bi-circle-half me-2"></i> Auto
+            </button>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Account Controls -->
+    <section class="mt-auto pt-3 border-top">
+      <h6 class="mb-3 fw-bold">Account Controls</h6>
+      <button class="btn btn-primary w-100 mb-3 py-2 d-flex align-items-center justify-content-center" (click)="onSingOut()">
+        Sign Out <i class="bi bi-box-arrow-right ms-3 fs-5"></i>
+      </button>
+    </section>
+  </div>
+</div>
