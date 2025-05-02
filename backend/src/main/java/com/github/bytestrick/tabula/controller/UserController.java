@@ -1,22 +1,28 @@
 package com.github.bytestrick.tabula.controller;
 
+import com.github.bytestrick.tabula.controller.dto.DeleteAccountRequest;
+import com.github.bytestrick.tabula.controller.dto.InformativeResponse;
 import com.github.bytestrick.tabula.controller.dto.UserInfo;
 import com.github.bytestrick.tabula.repository.UserDao;
+import com.github.bytestrick.tabula.service.UserService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(path = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
 public class UserController {
     private final UserDao userDao;
+    private final UserService userService;
 
-    @GetMapping(value = "/user/info")
+    @GetMapping("/info")
     public ResponseEntity<UserInfo> getUserInfo(@RequestParam String email) {
         return userDao.findByEmail(email).map(user ->
                 ResponseEntity.ok(new UserInfo(
@@ -25,5 +31,16 @@ public class UserController {
                         user.getEmail()
                 ))
         ).orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    public void deleteUser(@NotBlank @Email @RequestParam String email,
+                           @Valid @RequestBody DeleteAccountRequest body) {
+        userService.deleteAccount(email, body.password());
+    }
+
+    @ExceptionHandler({UsernameNotFoundException.class, BadCredentialsException.class})
+    public ResponseEntity<?> handle(Exception e) {
+        return ResponseEntity.badRequest().body(new InformativeResponse(e.getMessage()));
     }
 }

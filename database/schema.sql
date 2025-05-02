@@ -45,11 +45,8 @@ CREATE TABLE tbl_table
     creation_date  TIMESTAMP    DEFAULT now()             NOT NULL,
     last_edit_date TIMESTAMP    DEFAULT NULL,
     user_id        UUID
-        CONSTRAINT table_card_users__fk
-            REFERENCES users,
-    table_id       UUID
-        CONSTRAINT table_card_tbl_table__fk
-            REFERENCES tbl_table ON DELETE CASCADE
+        CONSTRAINT tbl_table_users__fk
+            REFERENCES users ON DELETE CASCADE
 );
 
 

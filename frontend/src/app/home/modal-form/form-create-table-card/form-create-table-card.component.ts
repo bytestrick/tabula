@@ -7,26 +7,21 @@ import {ToastService} from '../../../toast/toast.service';
 
 @Component({
   selector: 'tbl-form-create-table-card',
-  standalone: true,
-  imports: [
-    FormsModule
-  ],
+  imports: [FormsModule],
   templateUrl: './form-create-table-card.component.html',
 })
 export class FormCreateTableCardComponent extends ModalFormComponent implements AfterViewInit {
-
   @ViewChild('form') private formRef!: ElementRef;
   @ViewChild('modal') private modalRef!: ElementRef;
   titleField: string = '';
   descriptionField: string = '';
   @Output('addTableCard') addTableCard: EventEmitter<TableCard> = new EventEmitter;
-  private toast: ToastService = inject(ToastService);
+  private toast = inject(ToastService);
+  private homeService = inject(HomeService);
 
-
-  constructor(private homeService: HomeService) {
+  constructor() {
     super();
   }
-
 
   ngAfterViewInit(): void {
     this.init(this.formRef, this.modalRef);
