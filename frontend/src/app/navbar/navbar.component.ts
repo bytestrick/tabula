@@ -1,45 +1,34 @@
-import {Component, ElementRef, EventEmitter, OnInit, Output, ViewChild} from '@angular/core';
+import {Component, ElementRef, EventEmitter, inject, OnInit, Output, Signal, viewChild} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {NavbarService, UserInfo} from './navbar.service';
 import {NgClass, NgIf, TitleCasePipe} from '@angular/common';
 import {TableCard} from '../home/table-card/table-card.interface';
 import {AuthService} from '../auth/auth.service';
 import {ThemeMode, ThemeService} from '../theme.service';
+import {ConfirmDialogService} from '../confirm-dialog/confirm-dialog.service';
 
 @Component({
   selector: 'tbl-navbar',
-  standalone: true,
-  imports: [
-    FormsModule,
-    NgIf,
-    NgClass,
-    TitleCasePipe
-  ],
+  imports: [FormsModule, NgIf, NgClass, TitleCasePipe],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css'
 })
 export class NavbarComponent implements OnInit {
+  private navbarService = inject(NavbarService);
+  private authService = inject(AuthService);
+  protected themeService = inject(ThemeService);
+  private confirmDialog = inject(ConfirmDialogService);
 
-  protected searchContent: string = '';
-  protected searchFieldOnFocus: boolean = false;
-  @ViewChild('searchField') private searchField!: ElementRef;
+  protected searchContent = '';
+  protected searchFieldOnFocus = false;
+  private searchField: Signal<ElementRef> = viewChild.required('searchField');
   private timer: any;
   @Output() onSearchedTableCard: EventEmitter<TableCard[] | "noSearchContent"> = new EventEmitter;
-  protected userInfo: UserInfo = {
-    name: '',
-    surname: '',
-    email: ''
-  }
-  private static searching: boolean = false;
-
-
-  constructor(private navbarService: NavbarService,
-              private authService: AuthService,
-              protected themeService: ThemeService) {}
-
+  protected userInfo: UserInfo = {name: '', surname: '', email: ''};
+  private static searching = false;
 
   ngOnInit(): void {
-    const email: string | undefined = this.authService.authentication?.email
+    const email: string | undefined = this.authService.authentication?.email;
     if (!email) return;
 
     this.navbarService.retrievesUserInformation(email).subscribe({
@@ -50,13 +39,13 @@ export class NavbarComponent implements OnInit {
     })
   }
 
-  protected onSearchSubmit(searchForm: HTMLFormElement): void {
+  protected onSearchSubmit(_: HTMLFormElement): void {
     this.search(this.searchContent);
   }
 
   protected clearSearch(): void {
     this.searchContent = '';
-    this.searchField.nativeElement.focus();
+    this.searchField().nativeElement.focus();
   }
 
   protected onFocus(): void {
@@ -102,7 +91,14 @@ export class NavbarComponent implements OnInit {
   }
 
   onSingOut(): void {
-    this.authService.signOut();
+    this.confirmDialog.show({
+      title: 'Sign out from your account?',
+      description: 'Are you sure?'
+    }).subscribe((response: boolean) => {
+      if (response) {
+        this.authService.signOut();
+      }
+    });
   }
 
   setTheme(theme: ThemeMode): void {
