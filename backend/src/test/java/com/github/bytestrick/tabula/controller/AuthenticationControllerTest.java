@@ -141,7 +141,7 @@ public class AuthenticationControllerTest {
                         .content(objectMapper.writeValueAsString(
                                 new SignUpRequest("test@example.com", "John", "Doe", "NefariousMeans9!", false,
                                         new Country("Italy", "🇮🇹", "IT", 39)))))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
 
         verify(userDao).save(ArgumentMatchers.argThat(user -> user.getEmail().equals("test@example.com")
                 && passwordEncoder.matches("NefariousMeans9!", user.getEncodedPassword())));

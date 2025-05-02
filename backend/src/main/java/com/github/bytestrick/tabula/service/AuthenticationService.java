@@ -35,7 +35,7 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final OtpProvider otpProvider;
 
-    public String signIn(String email, String password) throws JOSEException {
+    public String signIn(String email, String password) {
         Optional<User> user = userDao.findByEmail(email);
         if (user.isEmpty()) {
             log.warn("User '{}' tried to sign-in but is not registered", email);
@@ -53,9 +53,13 @@ public class AuthenticationService {
             log.warn("Incorrect password for user '{}'", email);
             throw new BadCredentialsException("Incorrect password");
         }
-        String jwt = jwtProvider.create(Map.of(), email, Duration.ZERO, Duration.ofHours(24));
-        log.info("User '{}' has signed in", email);
-        return jwt;
+        try {
+            String jwt = jwtProvider.create(Map.of(), email, Duration.ZERO, Duration.ofHours(24));
+            log.info("User '{}' has signed in", email);
+            return jwt;
+        } catch (JOSEException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void signUp(String email, String name, String surname, String password, Country country)
@@ -106,7 +110,7 @@ public class AuthenticationService {
 
                     user.setOtp(null);
                     user.setOtpExpiration(null);
-                    userDao.updatePassword(user.getId(), passwordEncoder.encode(newPassword));
+                    userDao.resetPasswordWithOtp(user.getId(), passwordEncoder.encode(newPassword));
                     log.info("password reset for {}", email);
                     return user;
                 })
