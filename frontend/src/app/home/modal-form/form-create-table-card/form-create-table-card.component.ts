@@ -4,7 +4,6 @@ import {FormsModule} from '@angular/forms';
 import {HomeService} from "../../home.service";
 import {TableCard} from "../../table-card/table-card.interface";
 import {ToastService} from '../../../toast/toast.service';
-import {HttpErrorResponse} from '@angular/common/http';
 
 @Component({
   selector: 'tbl-form-create-table-card',
@@ -13,7 +12,6 @@ import {HttpErrorResponse} from '@angular/common/http';
     FormsModule
   ],
   templateUrl: './form-create-table-card.component.html',
-  styleUrl: './form-create-table-card.component.css'
 })
 export class FormCreateTableCardComponent extends ModalFormComponent implements AfterViewInit {
 
@@ -41,9 +39,9 @@ export class FormCreateTableCardComponent extends ModalFormComponent implements 
       description: this.descriptionField,
       creationDate: now,
       lastEditDate: now
-    }
+    };
     this.homeService.createTableCard(tableCard).subscribe({
-      next: (data: TableCard): void => {
+      next: (data: TableCard) => {
         this.toast.show({
           title: 'Table Created',
           body: `The table has been successfully created.`,
@@ -52,7 +50,7 @@ export class FormCreateTableCardComponent extends ModalFormComponent implements 
         });
         this.addTableCard.emit(data);
       },
-      error: (err: any): any => {
+      error: () => {
         this.toast.show({
           title: 'Table Not Created',
           body: 'An error occurred the table was not created.\nPlease try again later.',

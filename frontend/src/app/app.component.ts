@@ -11,5 +11,5 @@ import {ConfirmDialogComponent} from './confirm-dialog/confirm-dialog.component'
   styleUrl: './app.component.css'
 })
 export class AppComponent {
-  private _ = inject(ThemeService);
+  _ = inject(ThemeService);
 }
