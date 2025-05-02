@@ -24,32 +24,7 @@
   </div>
 
   <div class="row mb-3">
-    <label for="pass" class="form-label p-0">Password</label>
-    <div class="input-group p-0 has-validation">
-      <input id="pass" class="form-control" type="password" autocomplete="current-password"
-             formControlName="password"
-             [class.is-valid]="form.controls.password.touched && form.controls.password.valid"
-             [class.is-invalid]="form.controls.password.touched && form.controls.password.invalid">
-      <button tblPasswordVisibility type="button" class="btn btn-outline-secondary"
-              data-bs-toggle="tooltip" data-bs-title="Show password">
-        <i class="bi bi-eye"></i>
-      </button>
-      <div class="invalid-tooltip">
-        @if (form.controls.password.touched && form.controls.password.invalid) {
-          @if (form.controls.password.errors?.['required']) {
-            Password required
-          } @else if (form.controls.password.errors?.['minlength']) {
-            Password must be at least 10 characters long
-          } @else if (form.controls.password.errors?.['maxlength']) {
-            Password can't be longer than 512 characters
-          } @else if (form.controls.password.errors?.['pattern']) {
-            Provided password doesn't match the validity criteria
-          } @else if (form.controls.password.errors?.['incorrect']) {
-            Incorrect password
-          }
-        }
-      </div>
-    </div>
+    <tbl-password-field class="p-0"/>
   </div>
 
   <div class="row mb-5">
