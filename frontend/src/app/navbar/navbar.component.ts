@@ -6,10 +6,11 @@ import {TableCard} from '../home/table-card/table-card.interface';
 import {AuthService} from '../auth/auth.service';
 import {ThemeMode, ThemeService} from '../theme.service';
 import {ConfirmDialogService} from '../confirm-dialog/confirm-dialog.service';
+import {DeleteAccountComponent} from './delete-account/delete-account.component';
 
 @Component({
   selector: 'tbl-navbar',
-  imports: [FormsModule, NgIf, NgClass, TitleCasePipe],
+  imports: [FormsModule, NgIf, NgClass, TitleCasePipe, DeleteAccountComponent],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css'
 })
@@ -39,20 +40,20 @@ export class NavbarComponent implements OnInit {
     })
   }
 
-  protected onSearchSubmit(_: HTMLFormElement): void {
+  protected onSearchSubmit(_: HTMLFormElement) {
     this.search(this.searchContent);
   }
 
-  protected clearSearch(): void {
+  protected clearSearch() {
     this.searchContent = '';
     this.searchField().nativeElement.focus();
   }
 
-  protected onFocus(): void {
+  protected onFocus() {
     this.searchFieldOnFocus = true;
   }
 
-  protected onFocusOut($event: FocusEvent): void {
+  protected onFocusOut($event: FocusEvent) {
     const relatedTarget = $event.relatedTarget as HTMLElement | null;
     if (relatedTarget && relatedTarget.id === 'clear-search-field-button') {
       return;
@@ -60,16 +61,35 @@ export class NavbarComponent implements OnInit {
     this.searchFieldOnFocus = false;
   }
 
-  protected onKeyUp(event: KeyboardEvent): void {
+  protected onKeyUp(event: KeyboardEvent) {
     if (event.key === 'Enter') return;
 
     clearTimeout(this.timer);
-    this.timer = setTimeout((): void => {
+    this.timer = setTimeout(() => {
       this.search(this.searchContent);
     }, 500);
   }
 
-  public search(text: string): void {
+  static isSearching(): boolean {
+    return NavbarComponent.searching;
+  }
+
+  protected onSingOut() {
+    this.confirmDialog.show({
+      title: 'Sign out of your account?',
+      description: 'Are you sure?'
+    }).subscribe((response: boolean) => {
+      if (response) {
+        this.authService.signOut();
+      }
+    });
+  }
+
+  protected setTheme(theme: ThemeMode) {
+    this.themeService.setTheme(theme);
+  }
+
+  search(text: string) {
     if (text === "") {
       NavbarComponent.searching = false;
       this.onSearchedTableCard.emit("noSearchContent");
@@ -84,24 +104,5 @@ export class NavbarComponent implements OnInit {
       },
       error: (err: any): any => console.debug(err)
     });
-  }
-
-  static isSearching(): boolean {
-    return NavbarComponent.searching;
-  }
-
-  onSingOut(): void {
-    this.confirmDialog.show({
-      title: 'Sign out from your account?',
-      description: 'Are you sure?'
-    }).subscribe((response: boolean) => {
-      if (response) {
-        this.authService.signOut();
-      }
-    });
-  }
-
-  setTheme(theme: ThemeMode): void {
-    this.themeService.setTheme(theme);
   }
 }

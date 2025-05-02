@@ -47,7 +47,7 @@ export class AuthService {
       .replace("-", "+")
       .replace("_", "/");
 
-    const padding = base64.length % 4;
+    const padding: number = base64.length % 4;
     if (padding > 0) {
       base64 += '='.repeat(4 - padding);
     }
@@ -81,17 +81,27 @@ export class AuthService {
     );
   }
 
+  /**
+   * Makes a sign-out request to the server and signs out the client regardless of the response
+   */
   signOut() {
     if (this.isAuthenticated) {
       this.http.post('/auth/sign-out', {}).subscribe({
         next: () => this.toast.show({body: 'Sign-out successful', background: 'success'}),
         error: (error: HttpErrorResponse) => this.toast.serverError(error.error?.message)
       });
-      localStorage.removeItem('authentication');
-      this.auth = null;
-      this.router.navigate(['/sign-in']).then();
+      this.clientSignOut();
     } else {
       throw new Error(`Can't sign-out without being signed-in first`);
     }
+  }
+
+  /**
+   * Cleans up the authentication state without making any requests
+   */
+  clientSignOut() {
+    localStorage.removeItem('authentication');
+    this.auth = null;
+    this.router.navigate(['/sign-in']).then();
   }
 }

@@ -71,6 +71,19 @@ public class UserDao {
         return Optional.empty();
     }
 
+    public Optional<String> findPasswordByEmail(String email) {
+        return jdbcClient.sql("SELECT encoded_password from users WHERE email = :email")
+                .param("email", email)
+                .query().optionalValue().map(value -> (String) value);
+    }
+
+    @Transactional
+    public void deleteByEmail(String email) {
+        jdbcClient.sql("DELETE FROM users WHERE email = :email")
+                .param("email", email)
+                .update();
+    }
+
     public void save(User user) {
         jdbcClient.sql("""
                         INSERT INTO users VALUES (:id, :email, :password, :roles, :name, :surname, :country_name,
@@ -111,7 +124,7 @@ public class UserDao {
     }
 
     @Transactional
-    public void updatePassword(@NotNull UUID id, String encodedPassword) {
+    public void resetPasswordWithOtp(@NotNull UUID id, String encodedPassword) {
         jdbcClient.sql("UPDATE users SET otp = NULL, otp_expiration = NULl, encoded_password = :pw WHERE id = :id")
                 .param("id", id)
                 .param("pw", encodedPassword)

@@ -30,8 +30,8 @@ export class ConfirmDialogComponent implements OnInit, OnDestroy {
   private response = false;
   protected title = '';
   protected description = '';
-  protected cancelButton?: DialogButton;
-  protected confirmButton?: DialogButton;
+  protected cancelButton: DialogButton = {text: 'Confirm', background: 'btn-primary'};
+  protected confirmButton: DialogButton = {text: 'Cancel', background: 'btn-secondary'};
 
   ngOnInit() {
     this.modal = new Modal(this.modalRef().nativeElement);

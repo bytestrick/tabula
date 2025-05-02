@@ -20,6 +20,6 @@ export class NavbarService {
   }
 
   retrievesUserInformation(email: string): Observable<UserInfo> {
-    return this.http.get<UserInfo>('/user/info', {params: {email}});
+    return this.http.get<UserInfo>('/users/info', {params: {email}});
   }
 }
