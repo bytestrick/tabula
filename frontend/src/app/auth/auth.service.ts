@@ -43,11 +43,11 @@ export class AuthService {
   }
 
   base64urlToBase64(base64url: string): string {
-    let base64: string = base64url
+    let base64 = base64url
       .replace("-", "+")
       .replace("_", "/");
 
-    const padding: number = base64.length % 4;
+    const padding = base64.length % 4;
     if (padding > 0) {
       base64 += '='.repeat(4 - padding);
     }
