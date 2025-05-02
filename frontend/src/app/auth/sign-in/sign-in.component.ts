@@ -1,20 +1,19 @@
-import {Component, inject, OnInit} from '@angular/core';
+import {AfterViewInit, Component, inject, OnInit, viewChild} from '@angular/core';
 import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
 import {AuthService, SignInRequest} from '../auth.service';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
-import {PasswordVisibilityDirective} from '../password-visibility.directive';
 import {enableTooltips} from '../../tooltips';
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {ToastService} from '../../toast/toast.service';
-import {passwordRegExp} from '../../constants';
 import {Reason} from '../otp/otp.component';
+import {PasswordFieldComponent} from '../single-password-field/password-field.component';
 
 @Component({
   selector: 'tbl-sign-in',
-  imports: [RouterLink, PasswordVisibilityDirective, ReactiveFormsModule],
+  imports: [RouterLink, ReactiveFormsModule, PasswordFieldComponent],
   templateUrl: './sign-in.component.html'
 })
-export class SignInComponent implements OnInit {
+export class SignInComponent implements OnInit, AfterViewInit {
   private auth = inject(AuthService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
@@ -22,15 +21,11 @@ export class SignInComponent implements OnInit {
   private http = inject(HttpClient);
   private formBuilder = inject(FormBuilder);
   private returnUrl = '/';
+  private password = viewChild.required(PasswordFieldComponent);
 
   protected form = this.formBuilder.group({
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [
-      Validators.required,
-      Validators.minLength(10),
-      Validators.maxLength(512),
-      Validators.pattern(passwordRegExp)
-    ]],
+    password: [''],
     rememberMe: [false],
   });
 
@@ -41,6 +36,10 @@ export class SignInComponent implements OnInit {
       return;
     }
     enableTooltips();
+  }
+
+  ngAfterViewInit() {
+    this.form.setControl('password', this.password().password)
   }
 
   protected onSubmit() {
