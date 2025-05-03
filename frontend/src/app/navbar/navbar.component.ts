@@ -7,10 +7,11 @@ import {AuthService} from '../auth/auth.service';
 import {ThemeMode, ThemeService} from '../theme.service';
 import {ConfirmDialogService} from '../confirm-dialog/confirm-dialog.service';
 import {DeleteAccountComponent} from './delete-account/delete-account.component';
+import {ChangePasswordComponent} from './update-password/change-password.component';
 
 @Component({
   selector: 'tbl-navbar',
-  imports: [FormsModule, NgIf, NgClass, TitleCasePipe, DeleteAccountComponent],
+  imports: [FormsModule, NgIf, NgClass, TitleCasePipe, DeleteAccountComponent, ChangePasswordComponent],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css'
 })

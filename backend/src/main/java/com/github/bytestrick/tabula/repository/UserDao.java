@@ -130,4 +130,12 @@ public class UserDao {
                 .param("pw", encodedPassword)
                 .update();
     }
+
+    @Transactional
+    public void updatePasswordByEmail(String email, String encodedPassword) {
+        jdbcClient.sql("UPDATE users SET encoded_password = :encoded_password WHERE email = :email")
+                .param("encoded_password", encodedPassword)
+                .param("email", email)
+                .update();
+    }
 }

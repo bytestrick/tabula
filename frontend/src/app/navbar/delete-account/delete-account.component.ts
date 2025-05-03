@@ -44,7 +44,7 @@ export class DeleteAccountComponent implements AfterViewInit {
   protected onConfirmDeleteAccount() {
     this.password().password.markAllAsTouched();
     if (this.password().password.valid) {
-      this.http.delete('/users', {
+      this.http.delete('/user', {
         body: {password: this.password().password.value},
         params: {email: this.auth.authentication!.email}
       }).subscribe({

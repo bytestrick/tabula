@@ -25,4 +25,15 @@ public class UserService {
             throw new BadCredentialsException("Incorrect password");
         }
     }
+
+    public void changePassword(String email, String oldPassword, String newPassword) {
+        String encodedPassword = userDao.findPasswordByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException(email));
+        if (passwordEncoder.matches(oldPassword, encodedPassword)) {
+            userDao.updatePasswordByEmail(email, passwordEncoder.encode(newPassword));
+            log.info("User '{}' updated their password", email);
+        } else {
+            throw new BadCredentialsException("Incorrect password");
+        }
+    }
 }
