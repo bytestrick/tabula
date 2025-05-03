@@ -1,18 +1,34 @@
 package com.github.bytestrick.tabula.repository.table;
 
 import com.github.bytestrick.tabula.repository.proxy.table.TableProxy;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.UUID;
 
+/**
+ * Handles operations related to the 'my_table' table.
+ * <p>
+ * Database Notes:
+ *   <ul>
+ *      <li>The 'my_table' table is referenced by 'my_column' and 'my_row'.</li>
+ *      <li>
+ *          Both references have the foreign key constraint: ON DELETE CASCADE.
+ *          This means that deleting a record from 'my_table' will automatically delete
+ *          the corresponding rows from 'my_column' and 'my_row'.
+ *      </li>
+ *      <li>
+ *          The 'cell' table references both 'my_row' and 'my_column' with
+ *          ON DELETE CASCADE constraints. Deleting any row or column
+ *          thus also cascades deletion to related 'cell' records.
+ *      </li>
+ *   </ul>
+ * </p>
+ */
 @RequiredArgsConstructor
 @Repository
 public class TableDAO {
@@ -22,7 +38,11 @@ public class TableDAO {
     private final ColumnDAO columnDAO;
 
 
-    @Transactional
+    /**
+     * Persists a new table record with the given UUID.
+     *
+     * @param id UUID of the new table to insert.
+     */
     public void saveTable(UUID id) {
         jdbcClient.sql("""
                 INSERT INTO my_table (id)
@@ -30,13 +50,15 @@ public class TableDAO {
             """)
                 .param("id", id)
                 .update();
-
-        rowDAO.appendRow(id);
-        columnDAO.appendColumn(id, columnDAO.findDataTypeIdByName("Textual"));
     }
 
 
-    public void deleteTable(@NotNull UUID id) {
+    /**
+     * Deletes an existing table record by its UUID.
+     *
+     * @param id UUID of the table to remove.
+     */
+    public void deleteTable(UUID id) {
         jdbcClient.sql("""
                 DELETE FROM my_table
                 WHERE id = :id
@@ -46,7 +68,13 @@ public class TableDAO {
     }
 
 
-    public TableProxy findTable(@NotNull UUID id) {
+    /**
+     * Retrieves a full {@link TableProxy} object, including its rows and columns, for a given table UUID.
+     *
+     * @param id UUID of the table to fetch.
+     * @return   {@link TableProxy} representing the table with populated proxies.
+     */
+    public TableProxy findTable(UUID id) {
         return jdbcClient.sql("""
                 SELECT *
                 FROM my_table
@@ -56,20 +84,6 @@ public class TableDAO {
                 .query(new TableMapper())
                 .single();
     }
-
-
-    public List<String> getTableDataTypesNames(@NotNull UUID tableId) {
-        return jdbcClient.sql("""
-                SELECT d.name
-                FROM my_column c
-                JOIN data_type d ON c.data_type = d.id
-                WHERE c.my_table = :tableId
-                ORDER BY c.column_index
-            """)
-                .param("tableId", tableId)
-                .query(String.class).list();
-    }
-
 
 
     private class TableMapper implements RowMapper<TableProxy> {

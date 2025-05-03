@@ -10,7 +10,7 @@
     <colgroup #colgroup tblUpdateColumnsWidth [colgroup]="colgroup">
       <col class="first-column">
       <col
-        *ngFor="let _ of this.tableService.getHeadersCells(); let columnIndex = index"
+        *ngFor="let _ of this.tableService.getHeadersColumns(); let columnIndex = index"
         [attr.data-index]="columnIndex"
         class="column"
       >
@@ -27,7 +27,7 @@
         <th (mouseenter)="onMouseEnteredCell(tableService.INVALID_CELL_INDEX, tableService.INVALID_CELL_INDEX)"></th>
 
         <th
-          *ngFor="let _ of this.tableService.getHeadersCells(); let colIndex = index"
+          *ngFor="let _ of this.tableService.getHeadersColumns(); let colIndex = index"
           class="center-td-content-v-h"
           (mouseenter)="onMouseEnteredCell(tableService.INVALID_CELL_INDEX, colIndex)"
         >
@@ -71,7 +71,7 @@
         <!-- serve per aggiungere la cella della colonna iniziale, quella per il table-organizer delle righe -->
         <th (mouseenter)="onMouseEnteredCell(tableService.INVALID_CELL_INDEX, tableService.INVALID_CELL_INDEX)"></th>
         <th
-          *ngFor="let headerCell of this.tableService.getHeadersCells(); let colIndex = index"
+          *ngFor="let headerCell of this.tableService.getHeadersColumns(); let colIndex = index"
           class="center-td-content-v-h"
           (mouseenter)="onMouseEnteredCell(tableService.INVALID_CELL_INDEX, colIndex)"
           style="padding: 0; position: relative;"
@@ -80,7 +80,7 @@
           <tbl-cell-wrapper
             #cellWrapper
             tblHighlightBorders [tblHighlightBordersOf]="cellWrapper.bordersToHighLight.nativeElement" [tblHighlightCanDisable]="canDisableCellHighlight()"
-            [headerCell]="headerCell"
+            [headerCell]="headerCell.getHeaderCell()"
             [cord]="createCellCord(-1, colIndex, true)"
             [onChangeDataTypeCallback]="changeDataType.bind(this)"
             (dblclick)="onDoubleClickedCell($event, createCellCord(-1, colIndex, true))"
@@ -142,7 +142,7 @@
         <!-- celle in cui inserire i dati -->
         <td
           #areaToSelect
-          *ngFor="let cell of row; let colIndex = index"
+          *ngFor="let cell of row.getCells(); let colIndex = index"
           (mouseenter)="onMouseEnteredCell(rowIndex, colIndex)"
           style="padding: 0"
         >
@@ -154,7 +154,7 @@
               top: isRowSelected(rowIndex - 1) || (rowIndex - 1 >= 0 && isColumnSelected(colIndex)),
               bottom: isRowSelected(rowIndex + 1) || (rowIndex + 1 < tableService.getRowsNumber() && isColumnSelected(colIndex)),
               left: isColumnSelected(colIndex - 1) || (colIndex - 1 >= 0 && isRowSelected(rowIndex)),
-              right: isColumnSelected(colIndex + 1) || (colIndex + 1 < tableService.getHeadersCellsAmount() && isRowSelected(rowIndex))
+              right: isColumnSelected(colIndex + 1) || (colIndex + 1 < tableService.getColumnsNumber() && isRowSelected(rowIndex))
             }"
             [cell]="cell"
             [cord]="createCellCord(rowIndex, colIndex, false)"
@@ -184,7 +184,7 @@
           aggiunge le restanti celle. Non sfora perché ci sono due colonne in più. Una per il bottone di aggiunta
           colonne e una per i table-organizer delle righe
         -->
-        <td style="border-right-color: transparent; border-left-color: transparent;" *ngFor="let cell of tableService.getHeadersCells()" (mouseenter)="onMouseEnteredCell(tableService.INVALID_CELL_INDEX, tableService.INVALID_CELL_INDEX)"></td>
+        <td style="border-right-color: transparent; border-left-color: transparent;" *ngFor="let cell of tableService.getHeadersColumns()" (mouseenter)="onMouseEnteredCell(tableService.INVALID_CELL_INDEX, tableService.INVALID_CELL_INDEX)"></td>
       </tr>
     </tbody>
   </table>

@@ -1,7 +1,6 @@
 package com.github.bytestrick.tabula.repository.table;
 
 import com.github.bytestrick.tabula.repository.proxy.table.RowProxy;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -12,7 +11,24 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
-
+/**
+ * Handles operations related to the 'my_row' table.
+ * <p>
+ *  Database Notes:
+ *  <ul>
+ *      <li>
+ *          Trigger 'after_row_insertion' is defined on 'my_row' table.
+ *          It automatically creates a 'cell' record for each existing column
+ *          when a new row is inserted on 'my_row'.
+ *      </li>
+ *      <li>
+ *          The 'cell' table has a foreign key on 'my_row' with ON DELETE CASCADE.
+ *          Deleting a row from 'my_row' will automatically delete
+ *          all associated 'cell' records.
+ *      </li>
+ *   </ul>
+ * </p>
+ */
 @RequiredArgsConstructor
 @Repository
 public class RowDAO {
@@ -21,71 +37,133 @@ public class RowDAO {
     private final CellDAO cellDAO;
 
 
-    public void saveRow(int rowIndex, @NotNull UUID dataType, @NotNull UUID tableId) {
-        jdbcClient.sql("""
-                INSERT INTO my_row (id, my_table, row_index)
-                VALUES (:id, :table, :rowIndex)
-            """)
-                .param("id", UUID.randomUUID())
-                .param("table", tableId)
-                .param("rowIndex", rowIndex)
-                .update();
-    }
-
-
+    /**
+     * DAO method to remove a single row and reindex subsequent rows in the same table.
+     * <p>
+     *  Steps:
+     *  <ol>
+     *      <li>Retrieve the current {@code row_index} of the row to delete.</li>
+     *      <li>Perform the DELETE operation for the given row UUID and table ID.</li>
+     *      <li>Update all rows with {@code row_index} greater than the deleted index,
+     *          decrementing their index by one.</li>
+     *  </ol>
+     * </p>
+     * @param tableId  UUID of the table containing the row.
+     * @param id       UUID of the row to delete.
+     * @return         The original integer index of the deleted row.
+     */
     @Transactional
-    public void deleteRow(int rowIndex, @NotNull UUID tableId) {
+    public int deleteRow(UUID tableId, UUID id) {
+        int deletedRowIndex = jdbcClient.sql("""
+                SELECT row_index
+                FROM my_row
+                WHERE id = :id
+            """)
+                .param("id", id)
+                .query(Integer.class)
+                .single();
+
         jdbcClient.sql("""
                 DELETE FROM my_row
-                WHERE row_index = :rowIndex AND my_table = :tableId
+                WHERE id = :id AND my_table = :tableId
             """)
-                .param("rowIndex", rowIndex)
+                .param("id", id)
                 .param("tableId", tableId)
                 .update();
 
         jdbcClient.sql("""
                 UPDATE my_row
                 SET row_index = row_index - 1
-                WHERE row_index > :rowIndex AND my_table = :tableId
+                WHERE my_table = :tableId AND row_index > :deletedRowIndex
             """)
-                .param("rowIndex", rowIndex)
                 .param("tableId", tableId)
+                .param("deletedRowIndex", deletedRowIndex)
                 .update();
+
+        return deletedRowIndex;
     }
 
 
-    public void updateRowCells(int rowIndex, String newValue, @NotNull UUID tableId) {
-        jdbcClient.sql("""
-                UPDATE cell
-                SET value = :newValue
-                WHERE my_row = (
-                    SELECT id
-                    FROM my_row
-                    WHERE row_index = :rowIndex AND my_table = :tableId
-                )
+
+    /**
+     * DAO method to append a new row at the end of the specified table.
+     * <p>
+     *  Calculates the next {@code row_index} as one greater than the current maximum index
+     *  (or 0 if the table is empty), inserts the new row, and returns a proxy object
+     *  representing the newly created row.
+     * </p>
+     * @param tableId  UUID of the table to which the new row will be appended.
+     * @param newRowId UUID of the new row to insert.
+     * @return         {@link RowProxy}
+     */
+    @Transactional
+    public RowProxy appendNewRow(UUID tableId, UUID newRowId) {
+        int rowIndex = jdbcClient.sql("""
+                SELECT COALESCE(MAX(row_index), -1) + 1
+                FROM my_row
+                WHERE my_table = :tableId
             """)
-                .param("newValue", newValue)
-                .param("rowIndex", rowIndex)
                 .param("tableId", tableId)
-                .update();
-    }
+                .query(Integer.class)
+                .single();
 
-
-    public void appendRow(@NotNull UUID tableId) {
         jdbcClient.sql("""
                 INSERT INTO my_row (id, my_table, row_index)
-                VALUES (:id, :tableId,
-                    (SELECT COALESCE(MAX(row_index), -1) + 1
-                     FROM my_row
-                     WHERE my_table = :tableId))
+                VALUES (:id, :tableId, :rowIndex)
             """)
-                .param("id", UUID.randomUUID())
+                .param("id", newRowId)
                 .param("tableId", tableId)
+                .param("rowIndex", rowIndex)
                 .update();
+
+        return new RowProxy(newRowId, tableId, rowIndex, cellDAO);
     }
 
 
-    public List<RowProxy> findAllRows(@NotNull UUID tableId) {
+
+    /**
+     * DAO method to insert a new row at a specific index within the specified table.
+     * <p>
+     *  Shifts existing rows with indexes greater than or equal to the provided index
+     *  by incrementing their {@code row_index}, then inserts the new row at the target position.
+     * </p>
+     * @param tableId  UUID of the table into which the new row will be inserted.
+     * @param newRowId UUID of the new row to insert.
+     * @param rowIndex Target index at which to insert the new row.
+     * @return         {@link RowProxy}
+     */
+    @Transactional
+    public RowProxy insertNewRowAt(UUID tableId, UUID newRowId, int rowIndex) {
+        jdbcClient.sql("""
+                UPDATE my_row
+                SET row_index = row_index + 1
+                WHERE my_table = :tableId AND row_index >= :rowIndex
+            """)
+                .param("rowIndex", rowIndex)
+                .param("tableId", tableId)
+                .update();
+
+        jdbcClient.sql("""
+                INSERT INTO my_row (id, my_table, row_index)
+                VALUES (:id, :tableId, :rowIndex)
+            """)
+                .param("id", newRowId)
+                .param("tableId", tableId)
+                .param("rowIndex", rowIndex)
+                .update();
+
+        return new RowProxy(newRowId, tableId, rowIndex, cellDAO);
+    }
+
+
+    /**
+     * DAO method to retrieve all rows for a given table, ordered by their index.
+     *
+     * @param tableId UUID of the table whose rows are to be fetched.
+     * @return        List of {@link RowProxy} objects representing each row,
+     *                sorted by {@code row_index} in ascending order.
+     */
+    public List<RowProxy> findAllRows(UUID tableId) {
         return jdbcClient.sql("""
                 SELECT *
                 FROM my_row
@@ -97,7 +175,14 @@ public class RowDAO {
     }
 
 
-    public UUID findRowIdByIndex(@NotNull UUID tableId, int rowIndex) {
+    /**
+     * DAO method to find the UUID of a row by its index within a table.
+     *
+     * @param tableId  UUID of the table containing the row.
+     * @param rowIndex Integer index of the row to locate.
+     * @return         UUID of the row matching the specified index.
+     */
+    public UUID findRowIdByIndex(UUID tableId, int rowIndex) {
         return jdbcClient.sql("""
                 SELECT id
                 FROM my_row
@@ -110,7 +195,7 @@ public class RowDAO {
     }
 
 
-    public void updateRowIndex(@NotNull UUID rowId, int newRowIndex, @NotNull UUID tableId) {
+    public void updateRowIndex(UUID rowId, int newRowIndex, UUID tableId) {
         jdbcClient.sql("""
                 UPDATE my_row
                 SET row_index = :newRowIndex

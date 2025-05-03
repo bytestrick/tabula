@@ -1,7 +1,6 @@
 package com.github.bytestrick.tabula.repository.table;
 
 import com.github.bytestrick.tabula.repository.proxy.table.ColumnProxy;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -13,6 +12,24 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Handles operations related to the 'my_column' table.
+ * <p>
+ *   Database Notes:
+ *   <ul>
+ *      <li>
+ *          Trigger 'after_column_insertion' is defined on 'my_column' table.
+ *          It automatically creates a 'cell' record for each existing row
+ *          when a new column is inserted in 'my_column'.
+ *      </li>
+ *      <li>
+ *          The 'cell' table has a foreign key on 'my_column' with ON DELETE CASCADE.
+ *          Deleting a column from 'my_column' will automatically delete
+ *          all associated 'cell' records.
+ *      </li>
+ *   </ul>
+ * </p>
+ */
 @RequiredArgsConstructor
 @Repository
 public class ColumnDAO {
@@ -21,47 +38,54 @@ public class ColumnDAO {
     private final CellDAO cellDAO;
 
 
-    public void saveColumn(int columnIndex, int dataTypeId, @NotNull UUID tableId) {
-        jdbcClient.sql("INSERT INTO my_column (id, my_table, data_type, column_index) VALUES (:id, :table, :dataTypeId, :columnIndex)")
-                .param("id", UUID.randomUUID())
-                .param("table", tableId)
-                .param("dataTypeId", dataTypeId)
-                .param("columnIndex", columnIndex)
-                .update();
-    }
-
-
-    public void updateColumnDatType(int columnIndex, int dataTypeId, @NotNull UUID tableId) {
-        jdbcClient.sql("UPDATE my_column SET data_type = :dataTypeId WHERE column_index = :columnIndex and my_table = :tableId")
-                .param("dataTypeId", dataTypeId)
-                .param("columnIndex", columnIndex)
-                .param("tableId", tableId)
-                .update();
-    }
-
-
+    /**
+     * DAO method to remove a single column and reindex subsequent columns in the same table.
+     * <p>
+     *  Steps:
+     *  <ol>
+     *      <li>Retrieve the current {@code column_index} of the column to delete.</li>
+     *      <li>Perform the DELETE operation for the given column UUID and table ID.</li>
+     *      <li>Update all columns with {@code column_index} greater than the deleted index,
+     *          decrementing their index by one.</li>
+     *  </ol>
+     * </p>
+     * @param id        UUID of the column to delete.
+     * @param tableId   UUID of the table containing the column.
+     * @return          The original integer index of the deleted column.
+     */
     @Transactional
-    public void deleteColumn(int columnIndex, @NotNull UUID tableId) {
+    public int deleteColumn(UUID id, UUID tableId) {
+        int deletedColumnIndex = jdbcClient.sql("""
+                SELECT column_index
+                FROM my_column
+                WHERE id = :id
+            """)
+                .param("id", id)
+                .query(Integer.class)
+                .single();
+
         jdbcClient.sql("""
                 DELETE FROM my_column
-                WHERE column_index = :columnIndex AND my_table = :tableId
+                WHERE id = :id AND my_table = :tableId
             """)
-                .param("columnIndex", columnIndex)
+                .param("id", id)
                 .param("tableId", tableId)
                 .update();
 
         jdbcClient.sql("""
                 UPDATE my_column
                 SET column_index = column_index - 1
-                WHERE column_index > :columnIndex AND my_table = :tableId
+                WHERE my_table = :tableId AND column_index > :deletedColumnIndex
             """)
-                .param("columnIndex", columnIndex)
                 .param("tableId", tableId)
+                .param("deletedColumnIndex", deletedColumnIndex)
                 .update();
+
+        return deletedColumnIndex;
     }
 
 
-    public void updateColumnCells(@NotNull UUID columnId, String newValue) {
+    public void updateColumnCells(UUID columnId, String newValue) {
         jdbcClient.sql("UPDATE cell SET value = :newValue WHERE my_row = :columnIndex")
                 .param("newValue", newValue)
                 .param("columnIndex", columnId)
@@ -69,23 +93,87 @@ public class ColumnDAO {
     }
 
 
-    public void appendColumn(@NotNull UUID tableId, int dataTypeId) {
-        jdbcClient.sql("""
-            INSERT INTO my_column (id, my_table, data_type, column_index)
-            VALUES (:id, :tableId, :dataTypeId, (
+    /**
+     * DAO method to append a new column at the end of the specified table.
+     * <p>
+     *  Calculates the next {@code column_index} as one greater than the current maximum index
+     *  (or 0 if the table is empty), inserts the new column with its data type, and returns a proxy object
+     *  representing the newly created column.
+     * </p>
+     * @param tableId     UUID of the table to which the new column will be appended.
+     * @param newColumnId UUID of the new column to insert.
+     * @param dataTypeId  Integer identifier of the data type for the new column.
+     * @return            {@link ColumnProxy}
+     */
+    public ColumnProxy appendColumn(UUID tableId, UUID newColumnId, int dataTypeId) {
+        int columnIndex = jdbcClient.sql("""
                 SELECT COALESCE(MAX(column_index), -1) + 1
                 FROM my_column
-                WHERE my_table = :tableId)
-                )
-        """)
-                .param("id", UUID.randomUUID())
+                WHERE my_table = :tableId
+            """)
+                .param("tableId", tableId)
+                .query(Integer.class)
+                .single();
+
+        jdbcClient.sql("""
+            INSERT INTO my_column (id, my_table, data_type, column_index)
+            VALUES (:id, :tableId, :dataTypeId, :columnIndex)
+            """)
+                .param("id", newColumnId)
                 .param("tableId", tableId)
                 .param("dataTypeId", dataTypeId)
+                .param("columnIndex", columnIndex)
                 .update();
+
+        return new ColumnProxy(newColumnId, tableId, dataTypeId, "", columnIndex, cellDAO);
     }
 
 
-    public List<ColumnProxy> findAllColumn(@NotNull UUID tableId) {
+    /**
+     * DAO method to insert a new column at a specific index within the specified table.
+     * <p>
+     *  Shifts existing columns with indexes greater than or equal to the provided index
+     *  by incrementing their {@code column_index}, then inserts the new column at the target position.
+     * </p>
+     * @param tableId     UUID of the table into which the new column will be inserted.
+     * @param newColumnId UUID of the new column to insert.
+     * @param dataTypeId  Integer identifier of the data type for the new column.
+     * @param columnIndex Target index at which to insert the new column.
+     * @return            {@link ColumnProxy}
+     */
+    @Transactional
+    public ColumnProxy insertColumnAt(UUID tableId, UUID newColumnId, int dataTypeId, int columnIndex) {
+        jdbcClient.sql("""
+                UPDATE my_column
+                SET column_index = column_index + 1
+                WHERE my_table = :tableId AND column_index >= :columnIndex
+            """)
+                .param("columnIndex", columnIndex)
+                .param("tableId", tableId)
+                .update();
+
+        jdbcClient.sql("""
+                INSERT INTO my_column (id, my_table, data_type, column_index)
+                VALUES (:id, :tableId, :dataTypeId, :columnIndex)
+            """)
+                .param("id", newColumnId)
+                .param("tableId", tableId)
+                .param("dataTypeId", dataTypeId)
+                .param("columnIndex", columnIndex)
+                .update();
+
+        return new ColumnProxy(newColumnId, tableId, dataTypeId, null, columnIndex, cellDAO);
+    }
+
+
+    /**
+     * DAO method to retrieve all columns for a given table, ordered by their index.
+     *
+     * @param tableId UUID of the table whose columns are to be fetched.
+     * @return        List of {@link ColumnProxy} objects representing each column,
+     *                sorted by {@code column_index} in ascending order.
+     */
+    public List<ColumnProxy> findAllColumn(UUID tableId) {
         return jdbcClient.sql("""
                 SELECT *
                 FROM my_column
@@ -97,32 +185,34 @@ public class ColumnDAO {
     }
 
 
-    public int findDataTypeIdByName(@NotNull String name) {
-        return jdbcClient.sql("""
-                SELECT id
-                FROM data_type
-                WHERE name = :name
-            """)
-                .param("name", name)
-                .query(Integer.class)
-                .single();
-    }
-
-    public void changeColumnDataType(@NotNull UUID tableId, int columnIndex, int dataTypeId) {
-        System.out.printf("Changing column data type %d to %d\n", columnIndex, dataTypeId);
+    /**
+     * DAO method to update the data-type of a column within a table.
+     *
+     * @param tableId    UUID of the table containing the column.
+     * @param columnId   UUID of the column whose data type is to be changed.
+     * @param dataTypeId New integer identifier for the column's data type.
+     */
+    public void changeColumnDataType(UUID tableId, UUID columnId, int dataTypeId) {
         jdbcClient.sql("""
                 UPDATE my_column
                 SET data_type = :dataTypeId
-                WHERE column_index = :columnIndex AND my_table = :tableId
+                WHERE id = :columnId AND my_table = :tableId
             """)
                 .param("dataTypeId", dataTypeId)
-                .param("columnIndex", columnIndex)
+                .param("columnId", columnId)
                 .param("tableId", tableId)
                 .update();
     }
 
 
-    public UUID findColumnIdByIndex(@NotNull UUID tableId, int columnIndex) {
+    /**
+     * DAO method to find the UUID of a column by its index within a table.
+     *
+     * @param tableId     UUID of the table containing the column.
+     * @param columnIndex Integer index of the column to locate.
+     * @return            UUID of the column matching the specified index.
+     */
+    public UUID findColumnIdByIndex(UUID tableId, int columnIndex) {
         return jdbcClient.sql("""
                 SELECT id
                 FROM my_column
@@ -135,7 +225,7 @@ public class ColumnDAO {
     }
 
 
-    public void updateColumnIndex(UUID columnId, int newColumnIndex, @NotNull UUID tableId) {
+    public void updateColumnIndex(UUID columnId, int newColumnIndex, UUID tableId) {
         jdbcClient.sql("""
                 UPDATE my_column
                 SET column_index = :newColumnIndex

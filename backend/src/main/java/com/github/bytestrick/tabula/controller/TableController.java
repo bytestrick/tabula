@@ -3,14 +3,13 @@ package com.github.bytestrick.tabula.controller;
 import com.github.bytestrick.tabula.controller.dto.InformativeResponse;
 import com.github.bytestrick.tabula.controller.dto.TableDto;
 import com.github.bytestrick.tabula.model.Table;
-import com.github.bytestrick.tabula.controller.dto.CellDTO;
-import com.github.bytestrick.tabula.controller.dto.ColumnDTO;
-import com.github.bytestrick.tabula.controller.dto.RowDTO;
-import com.github.bytestrick.tabula.controller.dto.TableDTO;
-import com.github.bytestrick.tabula.controller.dto.*;
+import com.github.bytestrick.tabula.controller.dto.table.TableDTO;
+import com.github.bytestrick.tabula.controller.dto.table.*;
 import com.github.bytestrick.tabula.service.TableService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +17,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/table")
+@RequestMapping("/tables")
 @RequiredArgsConstructor
 public class TableController {
     private final TableService tableService;
@@ -61,79 +60,144 @@ public class TableController {
     }
 
 
-    @GetMapping
-    public ResponseEntity<TableDTO> getTable(@RequestParam("table-id") UUID tableId) {
-
+    /**
+     * Retrieves a complete table.
+     *
+     * @param tableId  UUID of the table to fetch.
+     * @return         HTTP 200 OK with a {@link TableDTO} containing the table’s metadata and content.
+     */
+    @GetMapping("/{tableId}")
+    public ResponseEntity<TableDTO> getTable(@PathVariable UUID tableId) {
         return ResponseEntity.ok(tableService.getTable(tableId));
     }
 
 
-    @PostMapping("/row")
-    public ResponseEntity<Void> appendNewRow(@RequestParam("table-id") UUID tableId) {
-        tableService.appendNewRow(tableId);
 
-        return ResponseEntity.ok().build();
+    /**
+     * Creates a new row in the specified table.
+     *
+     * <p>If {@code rowCreateDTO.rowIndex} is null, the new row is appended at the end;
+     * otherwise it is inserted at the given zero-based index.</p>
+     *
+     * @param tableId         UUID of the table in which to insert the row.
+     * @param rowCreateDTO    Payload containing the optional insertion index.
+     * @return                HTTP 201 Created with a {@link RowCreatedDTO} describing the new row.
+     */
+    @PostMapping("/{tableId}/rows")
+    public ResponseEntity<RowCreatedDTO> addNewRow(
+            @PathVariable UUID tableId, @Valid @RequestBody RowCreateDTO rowCreateDTO) {
+
+        RowCreatedDTO rowCreatedDTO = tableService.addNewRow(tableId, rowCreateDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(rowCreatedDTO);
     }
 
 
-    @PatchMapping("/row")
-    public ResponseEntity<Void> updateRowsIndexes(@RequestBody List<UpdateRowIndexDTO> rowDTOList) {
-        tableService.updateRowsIndexes(rowDTOList);
+//    @PatchMapping("/rows")
+//    public ResponseEntity<Void> updateRowsIndexes(@RequestBody List<UpdateRowIndexDTO> rowDTOList) {
+//        tableService.updateRowsIndexes(rowDTOList);
+//        return ResponseEntity.ok().build();
+//    }
 
-        return ResponseEntity.ok().build();
+
+    /**
+     * REST controller endpoint for deleting one or more rows from a specified table.
+     *
+     * @param tableId        UUID of the table from which the rows will be deleted.
+     * @param rowsDeleteDTO  DTO containing a non-null, non-empty list of row UUIDs to delete.
+     * @return               {@code ResponseEntity<RowsDeletedDTO>} containing the indexes
+     *                       of the rows that were deleted; returns HTTP 200 OK.
+     */
+    @DeleteMapping("{tableId}/rows")
+    public ResponseEntity<RowsDeletedDTO> deleteRows(
+            @PathVariable UUID tableId, @Valid @RequestBody RowsDeleteDTO rowsDeleteDTO) {
+
+        RowsDeletedDTO deletedRowsDTO = tableService.deleteRows(tableId, rowsDeleteDTO);
+        return ResponseEntity.ok(deletedRowsDTO);
     }
 
 
-    @DeleteMapping("/row")
-    public ResponseEntity<Void> deleteRows(
-            @RequestBody List<RowDTO> rowDTOList) {
+    /**
+     * Creates a new column in the specified table.
+     *
+     * <p>If {@code columnDTO.columnIndex} is null, the new column is appended at the end;
+     * otherwise it is inserted at the given zero-based index.</p>
+     *
+     * @param tableId       UUID of the table in which to insert the column.
+     * @param columnDTO     Payload containing dataTypeId and optional columnIndex.
+     * @return              HTTP 201 Created with a {@link ColumnCreatedDTO} describing the new column.
+     */
+    @PostMapping("/{tableId}/columns")
+    public ResponseEntity<ColumnCreatedDTO> addNewColumn(
+            @PathVariable UUID tableId, @Valid @RequestBody ColumnCreateDTO columnDTO) {
 
-        tableService.deleteRows(rowDTOList);
-
-        return ResponseEntity.ok().build();
+        ColumnCreatedDTO columnCreatedDTO = tableService.addNewColumn(tableId, columnDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(columnCreatedDTO);
     }
 
 
-    @PostMapping("/column")
-    public ResponseEntity<Void> appendNewColumn(@RequestBody ColumnDTO columnDTO) {
-        tableService.appendNewColumn(columnDTO.tableId(), columnDTO.dataType());
+//    @PatchMapping("columns")
+//    public ResponseEntity<Void> updateColumnsIndexes(@RequestBody List<UpdateColumnIndexDTO> columnDTOList) {
+//        tableService.updateColumnsIndexes(columnDTOList);
+//
+//        return ResponseEntity.ok().build();
+//    }
 
-        return ResponseEntity.ok().build();
+
+    /**
+     * REST controller endpoint for deleting one or more columns from a specified table.
+     *
+     * @param tableId          UUID of the table from which the columns will be deleted.
+     * @param columnsDeleteDTO DTO containing a non-null, non-empty list of column UUIDs to delete.
+     * @return                 HTTP 200 Created with a {@link ColumnsDeletedDTO} containing the indexes
+     *                         of the columns that were deleted.
+     */
+    @DeleteMapping("{tableId}/columns")
+    public ResponseEntity<ColumnsDeletedDTO> deleteColumns(
+            @PathVariable UUID tableId, @Valid @RequestBody ColumnsDeleteDTO columnsDeleteDTO) {
+
+        ColumnsDeletedDTO columnsDeletedDTO = tableService.deleteColumns(tableId, columnsDeleteDTO);
+        return ResponseEntity.ok(columnsDeletedDTO);
     }
 
 
-    @PatchMapping("column")
-    public ResponseEntity<Void> updateColumnsIndexes(@RequestBody List<UpdateColumnIndexDTO> columnDTOList) {
-        tableService.updateColumnsIndexes(columnDTOList);
+    /**
+     * Partially updates a column’s properties: name, position, and/or data type.
+     * Only the non-null fields in the request body will be applied.
+     *
+     * @param tableId          UUID of the parent table.
+     * @param columnId         UUID of the column to update.
+     * @param columnPatchDTO   Payload containing the fields to change. ( see {@link ColumnPatchDTO})
+     * @return                 HTTP 204 No Content on success.
+     */
+    @PatchMapping("/{tableId}/columns/{columnId}")
+    public ResponseEntity<Void> patchColumn(
+            @PathVariable UUID tableId, @PathVariable UUID columnId,
+            @Valid @RequestBody ColumnPatchDTO columnPatchDTO) {
 
-        return ResponseEntity.ok().build();
+        tableService.patchColumn(tableId, columnId, columnPatchDTO);
+        return ResponseEntity.noContent().build();
     }
 
 
-    @DeleteMapping("/column")
-    public ResponseEntity<Void> deleteColumns(
-            @RequestBody List<ColumnDTO> columnDTOList) {
 
-        tableService.deleteColumns(columnDTOList);
+    /**
+     * Updates the value of a single cell, identified by its row and column indices.
+     *
+     * @param tableId       UUID of the table containing the cell.
+     * @param rowIndex      Zero-based index of the row containing the cell.
+     * @param columnIndex   Zero-based index of the column containing the cell.
+     * @param cellPatchDTO  {@link CellPatchDTO} carrying the new cell value.
+     * @return              {@link CellPatchedDTO} containing the updated cell's row
+     *                      index, column index, and new value. HTTP 200 OK on success.
+     */
+    @PatchMapping("/{tableId}/cells/{rowIndex}/{columnIndex}")
+    public ResponseEntity<CellPatchedDTO> patchCellByCoords(
+            @PathVariable UUID tableId,
+            @PathVariable int rowIndex,
+            @PathVariable int columnIndex,
+            @RequestBody CellPatchDTO cellPatchDTO) {
 
-        return ResponseEntity.ok().build();
-    }
-
-
-    @PostMapping("/column-data-type")
-    public ResponseEntity<Void> changeColumnDataType(@RequestBody ColumnDTO columnDTO) {
-        tableService.changeColumnDataType(columnDTO.tableId(), columnDTO.columnIndex(), columnDTO.dataType());
-
-        return ResponseEntity.ok().build();
-    }
-
-
-    @PostMapping("/cell")
-    public ResponseEntity<Void> updateCellValue(@RequestBody CellDTO cellDTO) {
-        tableService.updateCellValue(
-                cellDTO.tableId(), cellDTO.rowIndex(), cellDTO.columnIndex(), cellDTO.value()
-        );
-
-        return ResponseEntity.ok().build();
+        CellPatchedDTO cellPatchedDTO = tableService.updateCellValue(tableId, rowIndex, columnIndex, cellPatchDTO);
+        return ResponseEntity.ok(cellPatchedDTO);
     }
 }
