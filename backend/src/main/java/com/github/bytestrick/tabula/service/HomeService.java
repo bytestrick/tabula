@@ -71,7 +71,7 @@ public class HomeService {
     @Transactional
     public TableDto createTableCard(Table tableCard) {
         return toTableCardDto(
-                homeDao.saveTableCard(tableCard, getAuthUser().getId(), tableService.createNewTable().id())
+                homeDao.saveTableCard(tableCard, getAuthUser().getId(), tableService.createNewTable())
         );
     }
 

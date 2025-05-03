@@ -18,16 +18,13 @@ public class CellDAO {
     private final JdbcClient jdbcClient;
 
 
-    public void saveCell(int rowId, UUID columnId, String value) {
-        jdbcClient.sql("INSERT INTO cell (id, my_row, my_column, value) VALUES (:id, :rowId, :myColumn, :value)")
-                .param("id", UUID.randomUUID())
-                .param("rowId", rowId)
-                .param("myColumn", columnId)
-                .param("value", value)
-                .update();
-    }
-
-
+    /**
+     * Updates the value of a single cell identified by its row and column UUIDs.
+     *
+     * @param rowId     UUID of the row containing the cell.
+     * @param columnId  UUID of the column containing the cell.
+     * @param newValue  New string value to set in the cell.
+     */
     public void updateCell(UUID rowId, UUID columnId, String newValue) {
         jdbcClient.sql("UPDATE cell SET value = :newValue WHERE my_row = :rowId and my_column = :columnId")
                 .param("newValue", newValue)
@@ -37,14 +34,12 @@ public class CellDAO {
     }
 
 
-    public void deleteCell(UUID rowId, UUID columnId) {
-        jdbcClient.sql("DELETE FROM cell WHERE my_row = :rowId AND my_column = :columnId")
-                .param("rowId", rowId)
-                .param("columnId", columnId)
-                .update();
-    }
-
-
+    /**
+     * Retrieves all cells belonging to a specific row, ordered by their column index.
+     *
+     * @param rowId UUID of the row whose cells are to be fetched.
+     * @return      List of {@link Cell} objects in ascending order of their column positions.
+     */
     public List<Cell> findRowCells(UUID rowId) {
         return jdbcClient.sql("""
                 SELECT c.*
@@ -58,6 +53,12 @@ public class CellDAO {
     }
 
 
+    /**
+     * Retrieves all cells belonging to a specific column, ordered by their row index.
+     *
+     * @param columnId UUID of the column whose cells are to be fetched.
+     * @return         List of {@link Cell} objects in ascending order of their row positions.
+     */
     public List<Cell> findColumnCells(UUID columnId) {
         return jdbcClient.sql("""
                 SELECT c.*
@@ -76,6 +77,7 @@ public class CellDAO {
         @Override
         public Cell mapRow(ResultSet rs, int rowNum) throws SQLException {
             return new Cell(
+                    UUID.fromString(rs.getString("id")),
                     UUID.fromString(rs.getString("my_column")),
                     UUID.fromString(rs.getString("my_row")),
                     rs.getString("value")

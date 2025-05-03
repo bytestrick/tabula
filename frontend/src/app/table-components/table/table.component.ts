@@ -113,7 +113,7 @@ export class TableComponent implements OnInit, OnDestroy {
   onNewHeaderAdded(event: MouseEvent): void {
     this.showDataTypeChooser(
       new Pair(event.x, event.y),
-      (value: any): void => this.tableService.addNewHeader(value as IDataType)
+      (value: any): void => this.tableService.appendNewColumn(value as IDataType)
     );
   }
 
@@ -164,7 +164,7 @@ export class TableComponent implements OnInit, OnDestroy {
   onColumnAddedAt(event: MouseEvent, colIndex: number): void {
     this.showDataTypeChooser(
       new Pair(event.x, event.y),
-      (value: any): void => this.tableService.insertNewDataTypeAt(colIndex, value as IDataType)
+      (value: any): void => this.tableService.insertNewColumnAt(colIndex, value as IDataType)
     );
   }
 

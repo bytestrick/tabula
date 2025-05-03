@@ -76,7 +76,7 @@ export class TableContextualMenuComponent implements IPopUpContent, AfterViewIni
       case this.TARGET_COLUMN: {
         const columnI: number = this.cellCord.second;
 
-        if (this.tableService.getHeadersCellsAmount() - this.tableService.getSelectedColumnNumber() <= 0) {
+        if (this.tableService.getColumnsNumber() - this.tableService.getSelectedColumnNumber() <= 0) {
           this.toastService.actionNotAllowed('There must be at least one column');
           return;
         }
@@ -89,7 +89,7 @@ export class TableContextualMenuComponent implements IPopUpContent, AfterViewIni
         if (columnI == this.tableService.INVALID_CELL_INDEX) {
           this.toastService.actionNotAllowed('you can\'t delete this column');
         }
-        else if (this.tableService.getHeadersCellsAmount() <= 1) {
+        else if (this.tableService.getColumnsNumber() <= 1) {
           this.toastService.actionNotAllowed('There must be at least one column');
         }
         else {

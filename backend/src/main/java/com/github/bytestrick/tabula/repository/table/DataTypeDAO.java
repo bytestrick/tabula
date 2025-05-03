@@ -14,12 +14,11 @@ public class DataTypeDAO {
     private final JdbcClient jdbcClient;
 
 
-    public void save(@NotNull String name) {
-        jdbcClient.sql("INSERT INTO data_type (name) VALUES (:name)")
-                .param("name", name).update();
-    }
-
-
+    /**
+     * Retrieves all data types available in the system.
+     *
+     * @return list of {@link DataType} objects representing each row in the data_type table.
+     */
     public List<DataType> findAll() {
         return jdbcClient.sql("SELECT * FROM data_type")
                 .query(DataType.class)
@@ -27,10 +26,34 @@ public class DataTypeDAO {
     }
 
 
+    /**
+     * Finds a single data type by its unique name.
+     *
+     * @param name non-null name of the data type to retrieve.
+     * @return the {@link DataType} object matching the given name.
+     */
     public DataType findByName(@NotNull String name) {
         return jdbcClient.sql("SELECT * FROM data_type WHERE name = :name")
                 .param("name", name)
                 .query(DataType.class)
+                .single();
+    }
+
+
+    /**
+     * Retrieves the integer ID of a data type given its name.
+     *
+     * @param dataTypeName name of the data type to lookup.
+     * @return integer ID corresponding to the data type.
+     */
+    public int findDataTypeIdByName(String dataTypeName) {
+        return jdbcClient.sql("""
+                SELECT id
+                FROM data_type
+                WHERE name = :dataTypeName
+            """)
+                .param("dataTypeName", dataTypeName)
+                .query(Integer.class)
                 .single();
     }
 }

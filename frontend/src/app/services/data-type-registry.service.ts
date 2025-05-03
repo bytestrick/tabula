@@ -5,11 +5,7 @@ import {NumericDataType} from '../model/data-types/concrete-data-type/numeric-da
 import {MonetaryDataType} from '../model/data-types/concrete-data-type/monetary-data-type';
 import {map, Observable} from 'rxjs';
 import {HttpClient, HttpParams} from '@angular/common/http';
-
-export interface DataTypeDTO {
-  id: number,
-  name: string
-}
+import {DataTypeDTO} from '../model/dto/table/data-type-dto';
 
 @Injectable({
   providedIn: 'root'

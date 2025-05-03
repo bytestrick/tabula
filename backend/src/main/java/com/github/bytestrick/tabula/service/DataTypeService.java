@@ -1,7 +1,7 @@
 package com.github.bytestrick.tabula.service;
 
 
-import com.github.bytestrick.tabula.controller.dto.DataTypeDTO;
+import com.github.bytestrick.tabula.controller.dto.table.DataTypeDTO;
 import com.github.bytestrick.tabula.model.Pair;
 import com.github.bytestrick.tabula.model.table.DataType;
 import com.github.bytestrick.tabula.repository.table.DataTypeDAO;
