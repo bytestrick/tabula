@@ -2,12 +2,15 @@ package com.github.bytestrick.tabula.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.bytestrick.tabula.controller.dto.DeleteAccountRequest;
+import com.github.bytestrick.tabula.controller.dto.UpdatePasswordRequest;
 import com.github.bytestrick.tabula.repository.UserDao;
 import org.junit.jupiter.api.Test;
+import org.mockito.verification.VerificationMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -18,6 +21,7 @@ import java.util.Optional;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -40,7 +44,7 @@ public class UserControllerTest {
     void deleteUserFailsWhenPasswordIsWrong() throws Exception {
         when(userDao.findPasswordByEmail(email)).thenReturn(Optional.of(passwordEncoder.encode("foobar")));
 
-        mockMvc.perform(delete("/users")
+        mockMvc.perform(delete("/user")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("email", email)
                         .content(objectMapper.writeValueAsString(new DeleteAccountRequest(password))))
@@ -52,12 +56,38 @@ public class UserControllerTest {
     void deleteUserWorks() throws Exception {
         when(userDao.findPasswordByEmail(email)).thenReturn(Optional.of(passwordEncoder.encode(password)));
 
-        mockMvc.perform(delete("/users")
+        mockMvc.perform(delete("/user")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("email", email)
                         .content(objectMapper.writeValueAsString(new DeleteAccountRequest(password))))
                 .andExpect(status().isOk());
 
         verify(userDao).deleteByEmail(email);
+    }
+
+    @Test
+    void updatePasswordFailsWhenPasswordIsWrong() throws Exception {
+        when(userDao.findPasswordByEmail(email)).thenReturn(Optional.of(passwordEncoder.encode(password)));
+
+        mockMvc.perform(patch("/user/password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("email", email)
+                        .content(objectMapper.writeValueAsString(
+                                new UpdatePasswordRequest("DostoevskyPresident9#", "QuietlyUnholy1!"))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Incorrect password"));
+    }
+
+    @Test
+    void updatePasswordWorks() throws Exception {
+        when(userDao.findPasswordByEmail(email)).thenReturn(Optional.of(passwordEncoder.encode(password)));
+
+        String newPassword = "VulgarismDecimating8-";
+        mockMvc.perform(patch("/user/password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("email", email)
+                        .content(objectMapper.writeValueAsString(
+                                new UpdatePasswordRequest(password, newPassword))))
+                .andExpect(status().isOk());
     }
 }

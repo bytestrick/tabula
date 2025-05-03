@@ -2,6 +2,7 @@ package com.github.bytestrick.tabula.controller;
 
 import com.github.bytestrick.tabula.controller.dto.DeleteAccountRequest;
 import com.github.bytestrick.tabula.controller.dto.InformativeResponse;
+import com.github.bytestrick.tabula.controller.dto.UpdatePasswordRequest;
 import com.github.bytestrick.tabula.controller.dto.UserInfo;
 import com.github.bytestrick.tabula.repository.UserDao;
 import com.github.bytestrick.tabula.service.UserService;
@@ -16,7 +17,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(path = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(path = "/user", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
 public class UserController {
     private final UserDao userDao;
@@ -37,6 +38,12 @@ public class UserController {
     public void deleteUser(@NotBlank @Email @RequestParam String email,
                            @Valid @RequestBody DeleteAccountRequest body) {
         userService.deleteAccount(email, body.password());
+    }
+
+    @PatchMapping(path = "/password", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public void changePassword(@NotBlank @Email @RequestParam String email,
+                               @Valid @RequestBody UpdatePasswordRequest body) {
+        userService.changePassword(email, body.oldPassword(), body.newPassword());
     }
 
     @ExceptionHandler({UsernameNotFoundException.class, BadCredentialsException.class})
