@@ -48,7 +48,7 @@
 
                 <ul class="list-group w-100">
                   <li
-                    *ngFor="let cell of tableService.getColumn(colIndex, previewLimit)"
+                    *ngFor="let cell of tableService.getColumnCells(colIndex, previewLimit)"
                     class="list-group-item d-inline-flex align-items-center"
                     style="min-height: var(--cell-table-min-height)"
                   >
@@ -125,7 +125,7 @@
 
                 <ul class="list-group list-group-horizontal">
                   <li
-                    *ngFor="let cell of tableService.getRow(rowIndex, previewLimit)"
+                    *ngFor="let cell of tableService.getRowCells(rowIndex, previewLimit)"
                     class="list-group-item d-inline-flex align-items-center"
                     style="min-width: var(--cell-table-min-width); max-width: var(--cell-table-min-width); min-height: var(--cell-table-min-height)"
                   >
