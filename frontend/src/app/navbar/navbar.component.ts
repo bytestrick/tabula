@@ -1,17 +1,18 @@
 import {Component, ElementRef, EventEmitter, inject, OnInit, Output, Signal, viewChild} from '@angular/core';
 import {FormsModule} from '@angular/forms';
-import {NavbarService, UserInfo} from './navbar.service';
+import {NavbarService, UserDetails} from './navbar.service';
 import {NgClass, NgIf, TitleCasePipe} from '@angular/common';
 import {TableCard} from '../home/table-card/table-card.interface';
 import {AuthService} from '../auth/auth.service';
-import {ThemeMode, ThemeService} from '../theme.service';
+import {ThemeService} from '../theme.service';
 import {ConfirmDialogService} from '../confirm-dialog/confirm-dialog.service';
 import {DeleteAccountComponent} from './delete-account/delete-account.component';
 import {ChangePasswordComponent} from './update-password/change-password.component';
+import {UpdateAccountDetailsComponent} from './update-account-details/update-account-details.component';
 
 @Component({
   selector: 'tbl-navbar',
-  imports: [FormsModule, NgIf, NgClass, TitleCasePipe, DeleteAccountComponent, ChangePasswordComponent],
+  imports: [FormsModule, NgIf, NgClass, TitleCasePipe, DeleteAccountComponent, ChangePasswordComponent, UpdateAccountDetailsComponent],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css'
 })
@@ -26,19 +27,18 @@ export class NavbarComponent implements OnInit {
   private searchField: Signal<ElementRef> = viewChild.required('searchField');
   private timer: any;
   @Output() onSearchedTableCard: EventEmitter<TableCard[] | "noSearchContent"> = new EventEmitter;
-  protected userInfo: UserInfo = {name: '', surname: '', email: ''};
+  protected _userDetails: UserDetails = {name: '', surname: '', email: ''};
   private static searching = false;
 
-  ngOnInit(): void {
-    const email: string | undefined = this.authService.authentication?.email;
-    if (!email) return;
-
-    this.navbarService.retrievesUserInformation(email).subscribe({
-      next: (data: UserInfo): void => {
-        this.userInfo = data;
-      },
+  ngOnInit() {
+    this.navbarService.retrievesUserInformation(this.authService.authentication!.email).subscribe({
+      next: (data: UserDetails) => this._userDetails = data,
       error: err => console.error(err)
     })
+  }
+
+  protected set userDetails(details: UserDetails) {
+    this._userDetails = details;
   }
 
   protected onSearchSubmit(_: HTMLFormElement) {
@@ -84,10 +84,6 @@ export class NavbarComponent implements OnInit {
         this.authService.signOut();
       }
     });
-  }
-
-  protected setTheme(theme: ThemeMode) {
-    this.themeService.setTheme(theme);
   }
 
   search(text: string) {

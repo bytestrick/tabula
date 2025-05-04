@@ -63,8 +63,8 @@
     <!-- User Profile -->
     <section class="d-flex align-items-center mb-4">
       <div>
-        <h5 class="mb-1">{{ userInfo.name + ' ' + userInfo.surname }}</h5>
-        <small class="text-secondary">{{ userInfo.email }}</small>
+        <h5 class="mb-1">{{ _userDetails.name + ' ' + _userDetails.surname }}</h5>
+        <small class="text-secondary">{{ _userDetails.email }}</small>
       </div>
     </section>
 
@@ -85,17 +85,17 @@
         </button>
         <ul class="dropdown-menu w-100" aria-labelledby="themeDropdown">
           <li>
-            <button class="dropdown-item d-flex align-items-center" (click)="setTheme('light')"><i
+            <button class="dropdown-item d-flex align-items-center" (click)="themeService.setTheme('light')"><i
               class="bi bi-sun me-2"></i> Light
             </button>
           </li>
           <li>
-            <button class="dropdown-item d-flex align-items-center" (click)="setTheme('dark')"><i
+            <button class="dropdown-item d-flex align-items-center" (click)="themeService.setTheme('dark')"><i
               class="bi bi-moon-stars me-2"></i> Dark
             </button>
           </li>
           <li>
-            <button class="dropdown-item d-flex align-items-center" (click)="setTheme('auto')"><i
+            <button class="dropdown-item d-flex align-items-center" (click)="themeService.setTheme('auto')"><i
               class="bi bi-circle-half me-2"></i> Auto
             </button>
           </li>
@@ -105,11 +105,12 @@
 
     <!-- Account Controls -->
     <section class="mt-auto pt-3 border-top">
-      <h6 class="mb-3 fw-bold">Account Controls</h6>
+      <h6 class="mb-3 fw-bold">Account</h6>
       <button class="btn btn-primary w-100 mb-3 py-2 d-flex align-items-center justify-content-center"
               (click)="onSingOut()">
         Sign Out <i class="bi bi-box-arrow-right ms-3 fs-5"></i>
       </button>
+      <tbl-update-account-details (detailsUpdated)="userDetails = $event"/>
       <tbl-change-password/>
       <tbl-delete-account/>
     </section>

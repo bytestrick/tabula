@@ -49,7 +49,7 @@ export class OtpComponent implements OnInit {
 
   protected onResend() {
     this.otp.reset();
-    this.http.post('/auth/send-otp', {email: this.email, reason: this.reason}).subscribe({
+    this.http.post('/auth/send-otp', {email: this.email, receiver: this.email, reason: this.reason}).subscribe({
       next: () => this.toast.show({
         title: 'Code resent',
         body: 'Another code was sent to your email address',

@@ -2,11 +2,13 @@ import {inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {TableCard} from '../home/table-card/table-card.interface';
+import {Country} from '../auth/sign-up/country-select.component';
 
-export interface UserInfo {
+export interface UserDetails {
   name: string,
   surname: string,
   email: string
+  country?: Country
 }
 
 @Injectable({
@@ -19,7 +21,7 @@ export class NavbarService {
     return this.http.get<TableCard[]>('/search', {params: {pattern}});
   }
 
-  retrievesUserInformation(email: string): Observable<UserInfo> {
-    return this.http.get<UserInfo>('/user/info', {params: {email}});
+  retrievesUserInformation(email: string): Observable<UserDetails> {
+    return this.http.get<UserDetails>('/user', {params: {email}});
   }
 }

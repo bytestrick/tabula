@@ -63,7 +63,7 @@ export class SignInComponent implements OnInit, AfterViewInit {
             this.form.controls.password.setErrors({incorrect: true});
           } else if (error.error?.message?.startsWith('Not enabled')) {
             const otpRequest = {email: this.form.controls.email.value, reason: Reason.VerifyEmail};
-            this.http.post('/auth/send-otp', otpRequest).subscribe({
+            this.http.post('/auth/send-otp', {...otpRequest, receiver: this.form.controls.email.value}).subscribe({
               next: () => {
                 localStorage.setItem('otpData', JSON.stringify(otpRequest));
                 this.toast.show({
@@ -92,6 +92,7 @@ export class SignInComponent implements OnInit, AfterViewInit {
     if (this.form.controls.email.valid) {
       this.http.post('/auth/send-otp', {
         email: this.form.controls.email.value,
+        receiver: this.form.controls.email.value,
         reason: Reason.ResetPassword.toLowerCase()
       }).subscribe({
         next: () => {

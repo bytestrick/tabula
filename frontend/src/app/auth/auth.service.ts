@@ -37,6 +37,13 @@ export class AuthService {
     return this.auth;
   }
 
+  set authentication(authentication: Authentication) {
+    if (this.auth) {
+      this.auth = authentication;
+      localStorage.setItem('authentication', JSON.stringify(this.auth));
+    }
+  }
+
   constructor() {
     const authenticationRaw = localStorage.getItem('authentication');
     this.auth = authenticationRaw ? JSON.parse(authenticationRaw) : null;

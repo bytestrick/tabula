@@ -55,7 +55,7 @@ public class AuthenticationController {
 
     @PostMapping("/send-otp")
     public void sendOtp(@Valid @RequestBody SendOtpRequest body) {
-        authenticationService.sendOtp(body.email(), body.reason());
+        authenticationService.sendOtp(body.email(), body.receiver(), body.reason());
     }
 
     @PostMapping("/sign-out")

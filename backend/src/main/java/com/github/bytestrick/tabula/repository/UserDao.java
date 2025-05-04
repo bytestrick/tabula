@@ -138,4 +138,24 @@ public class UserDao {
                 .param("email", email)
                 .update();
     }
+
+    @Transactional
+    public void updateDetailsByEmail(String email, String name, String surname, Country country, String newEmail) {
+        jdbcClient.sql("""
+                        UPDATE users
+                        SET name = :name, surname = :surname, country_code = :country_code,
+                            country_dial_code = :country_dial_code, country_flag = :country_flag,
+                            country_name = :country_name, email = :new_email
+                        WHERE email = :email
+                        """)
+                .param("email", email)
+                .param("name", name)
+                .param("surname", surname)
+                .param("country_code", country.code())
+                .param("country_dial_code", country.dialCode())
+                .param("country_flag", country.flag())
+                .param("country_name", country.name())
+                .param("new_email", newEmail)
+                .update();
+    }
 }
