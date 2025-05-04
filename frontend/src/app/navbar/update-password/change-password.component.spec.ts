@@ -1,16 +1,17 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { ChangePasswordComponent } from './change-password.component';
+import {ChangePasswordComponent} from './change-password.component';
+import {provideHttpClient} from '@angular/common/http';
 
-describe('UpdatePasswordComponent', () => {
+describe('ChangePasswordComponent', () => {
   let component: ChangePasswordComponent;
   let fixture: ComponentFixture<ChangePasswordComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ChangePasswordComponent]
-    })
-    .compileComponents();
+      imports: [ChangePasswordComponent],
+      providers: [provideHttpClient()]
+    }).compileComponents();
 
     fixture = TestBed.createComponent(ChangePasswordComponent);
     component = fixture.componentInstance;
