@@ -5,7 +5,7 @@ html, body {
 }
 
 /* If the body contains either the sign-in or the sign-up component, center it */
-body:has(tbl-sign-in, tbl-sign-up, tbl-page-not-found, tbl-otp) {
+body:has(tbl-sign-in, tbl-sign-up, tbl-page-not-found, *:not(.modal-body) > tbl-otp) {
   display: flex;
   justify-content: center;
   align-items: center;

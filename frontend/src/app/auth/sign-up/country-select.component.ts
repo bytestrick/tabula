@@ -3,7 +3,7 @@ import {NgForOf} from '@angular/common';
 import {AbstractControl, FormControl, ReactiveFormsModule} from '@angular/forms';
 import {HttpClient} from '@angular/common/http';
 
-interface Country {
+export interface Country {
   name: string,
   flag: string,
   code: string,

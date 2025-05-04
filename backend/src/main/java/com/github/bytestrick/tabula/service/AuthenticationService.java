@@ -78,7 +78,7 @@ public class AuthenticationService {
                 .roles(List.of(new SimpleGrantedAuthority("USER")))
                 .build();
 
-        otpProvider.send(user, OtpProvider.Reason.VERIFY_EMAIL.getReason());
+        otpProvider.send(user, user.getEmail(), OtpProvider.Reason.VERIFY_EMAIL.getReason());
         userDao.save(user);
         log.info("User '{}' has signed up", user.getEmail());
     }
@@ -117,10 +117,10 @@ public class AuthenticationService {
                 .orElseThrow(() -> new UsernameNotFoundException("No user found with this email"));
     }
 
-    public void sendOtp(String email, String reason) throws UsernameNotFoundException {
+    public void sendOtp(String email, String receiver, String reason) throws UsernameNotFoundException {
         userDao.findByEmail(email)
                 .map(user -> {
-                    otpProvider.send(user, reason);
+                    otpProvider.send(user, receiver, reason);
                     userDao.updateOtp(user);
                     return user;
                 })

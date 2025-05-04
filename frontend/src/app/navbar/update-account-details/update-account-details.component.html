@@ -1,0 +1,71 @@
+<button class="btn btn-primary w-100 mb-3 py-2 d-flex align-items-center justify-content-center"
+        (click)="onUpdateAccountDetails()">Update account details<i class="bi bi-person-gear ms-2 fs-5"></i></button>
+
+<div #accountDetailsDialog class="modal fade" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Update account details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <form>
+          <tbl-name-field/>
+          <tbl-surname-field/>
+          <tbl-country-select/>
+          <tbl-email-field/>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="onDismiss()">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="onConfirm()">Update</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div #verifyNewEmailDialog class="modal fade" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Verify your new email</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <h5 class="row mt-2 mb-3 justify-content-center text-center">Insert the 6 digits code that was sent to<br><span
+          class="text-primary-emphasis">{{ form.controls.email.value }}</span></h5>
+
+        <div class="row mb-3 px-5">
+          <div class="input-group has-validation p-0">
+            <input class="font-monospace form-control text-center" autocomplete="off" [formControl]="otp"
+                   [class.is-valid]="otp.touched && otp.valid" [class.is-invalid]="otp.touched && otp.invalid">
+            <div class="invalid-tooltip">
+              @if (otp.touched && otp.invalid) {
+                @if (otp.errors?.['required']) {
+                  Code required
+                } @else if (otp.errors?.['minlength'] || otp.errors?.['maxlength']) {
+                  Code must be 6 digits long
+                } @else if (otp.errors?.['pattern']) {
+                  Code can contain only numbers
+                } @else if (otp.errors?.['incorrect']) {
+                  Incorrect code
+                } @else if (otp.errors?.['expired']) {
+                  Code expired
+                }
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="onGoBack()">Back</button>
+        <button type="button" class="btn btn-secondary" (click)="sendOtp()">Resend</button>
+        <button type="button" class="btn btn-primary" (click)="onOtpConfirm()">Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>

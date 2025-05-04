@@ -197,10 +197,10 @@ public class AuthenticationControllerTest {
         String reason = "Hello world";
         mockMvc.perform(post("/auth/send-otp")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new SendOtpRequest(email, reason))))
+                        .content(objectMapper.writeValueAsString(new SendOtpRequest(email, email, reason))))
                 .andExpect(status().isOk());
 
-        verify(otpProvider).send(user, reason);
+        verify(otpProvider).send(user, user.getEmail(), reason);
         userDao.updateOtp(user);
     }
 

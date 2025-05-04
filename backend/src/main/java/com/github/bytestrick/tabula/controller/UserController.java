@@ -1,11 +1,11 @@
 package com.github.bytestrick.tabula.controller;
 
-import com.github.bytestrick.tabula.controller.dto.DeleteAccountRequest;
-import com.github.bytestrick.tabula.controller.dto.InformativeResponse;
-import com.github.bytestrick.tabula.controller.dto.UpdatePasswordRequest;
-import com.github.bytestrick.tabula.controller.dto.UserInfo;
+import com.github.bytestrick.tabula.controller.dto.*;
+import com.github.bytestrick.tabula.exception.InvalidOtpException;
 import com.github.bytestrick.tabula.repository.UserDao;
+import com.github.bytestrick.tabula.service.JwtProvider;
 import com.github.bytestrick.tabula.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -23,15 +23,26 @@ public class UserController {
     private final UserDao userDao;
     private final UserService userService;
 
-    @GetMapping("/info")
-    public ResponseEntity<UserInfo> getUserInfo(@RequestParam String email) {
-        return userDao.findByEmail(email).map(user ->
-                ResponseEntity.ok(new UserInfo(
-                        user.getName(),
-                        user.getSurname(),
-                        user.getEmail()
-                ))
-        ).orElse(ResponseEntity.notFound().build());
+    @GetMapping
+    public UserDetails getUserDetails(@RequestParam String email) {
+        return userDao.findByEmail(email).map(user -> new UserDetails(
+                        user.getName(), user.getSurname(), user.getEmail(), user.getCountry()))
+                .orElseThrow(() -> new UsernameNotFoundException(email));
+    }
+
+    @PatchMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    public SignInResponse updateUserDetails(@RequestParam String email,
+                                            @RequestBody @Valid UpdateUserDetailsRequest body,
+                                            HttpServletRequest request) {
+        return new SignInResponse(userService.updateUserDetails(
+                email,
+                body.userDetails().name(),
+                body.userDetails().surname(),
+                body.userDetails().country(),
+                body.userDetails().email(),
+                body.otp(),
+                JwtProvider.fromRequest(request)
+        ));
     }
 
     @DeleteMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -46,7 +57,7 @@ public class UserController {
         userService.changePassword(email, body.oldPassword(), body.newPassword());
     }
 
-    @ExceptionHandler({UsernameNotFoundException.class, BadCredentialsException.class})
+    @ExceptionHandler({UsernameNotFoundException.class, BadCredentialsException.class, InvalidOtpException.class})
     public ResponseEntity<?> handle(Exception e) {
         return ResponseEntity.badRequest().body(new InformativeResponse(e.getMessage()));
     }
