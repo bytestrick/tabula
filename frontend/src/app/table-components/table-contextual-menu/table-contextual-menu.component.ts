@@ -58,7 +58,7 @@ export class TableContextualMenuComponent implements IPopUpContent, AfterViewIni
         }
 
         if (this.tableService.isRowSelected(rowI)) {
-          this.tableService.deleteSelectedRow();
+          this.tableService.deleteSelectedRows();
           return;
         }
 
@@ -82,7 +82,7 @@ export class TableContextualMenuComponent implements IPopUpContent, AfterViewIni
         }
 
         if (this.tableService.isColumnSelected(columnI)) {
-          this.tableService.deleteSelectedColumn();
+          this.tableService.deleteSelectedColumns();
           return;
         }
 

@@ -1,5 +1,13 @@
 import {
-  Component, ComponentRef, createComponent, ElementRef, EnvironmentInjector, HostListener, inject, OnDestroy, OnInit,
+  Component,
+  ComponentRef,
+  createComponent,
+  ElementRef,
+  EnvironmentInjector,
+  HostListener,
+  inject, NgIterable,
+  OnDestroy,
+  OnInit, TrackByFunction,
 } from '@angular/core';
 import {IDataType} from '../../model/data-types/i-data-type';
 import {NgForOf, NgIf} from '@angular/common';
@@ -26,6 +34,7 @@ import {PopUp} from '../pop-up-component/pop-up.component';
 import {TableService} from '../../services/table.service';
 import {CellCord} from '../../model/table/cell-cord';
 import {ActivatedRoute} from '@angular/router';
+import {Row} from '../../model/table/row';
 
 @Component({
   selector: 'tbl-table',

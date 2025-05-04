@@ -10,7 +10,8 @@ import {Pair} from '../model/pair';
 import {Row} from '../model/table/row';
 import {HeaderColumn} from '../model/table/headerColumn';
 import {TableDTO} from '../model/dto/table/table-dto';
-import {CellPatchDTO, CellPatchedDTO} from '../model/dto/table/cell-dto';
+import {CellPatchedDTO} from '../model/dto/table/cell-dto';
+import {Selection} from '../model/table/selection';
 
 
 @Injectable()
@@ -22,8 +23,8 @@ export class TableService {
   private table: Row[] = [];
   private header: HeaderColumn[] = [];
 
-  private selectedRows: Set<number> = new Set<number>;
-  private selectedColumns: Set<number> = new Set<number>;
+  private selectedRows: Selection = new Selection();
+  private selectedColumns: Selection = new Selection();
 
   private _isLoaded: boolean = false;
 
@@ -295,16 +296,6 @@ export class TableService {
 
 
   /**
-   * Returns the array of currently selected row indexes.
-   *
-   * @returns A new array containing all selected row indexes.
-   */
-  public getSelectedRows(): number[] {
-    return Array.from(this.selectedRows);
-  }
-
-
-  /**
    * Merges a new batch of moved index mappings into the existing list,
    * updating any overlapping oldIndex→newIndex pairs and adding new ones.
    *
@@ -350,7 +341,7 @@ export class TableService {
   moveSelectedRows(fromIndex: number, toIndex: number): void {
     const rawDelta: number = toIndex - fromIndex;
 
-    const rowsToMove: number[] = this.getSortedSelectedIndexToMove(rawDelta, this.getSelectedRows());
+    const rowsToMove: number[] = this.getSortedSelectedIndexToMove(rawDelta, this.selectedRows.getSelectedIndexes());
     const adjustedDelta: number = this.getAdjustedDeltaToBounds(rawDelta, rowsToMove, 0, this.getRowsNumber());
 
     const indexesToUpdate: Pair<number, number>[] = [];
@@ -404,16 +395,6 @@ export class TableService {
 
 
   /**
-   * Returns the array of currently selected column indexes.
-   *
-   * @returns A new array containing all selected column indexes.
-   */
-  public getSelectedColumns(): number[] {
-    return Array.from(this.selectedColumns);
-  }
-
-
-  /**
    * Moves all currently selected columns from one index to another,
    * adjusting for boundaries, preserving order, and batching update notifications.
    *
@@ -423,7 +404,7 @@ export class TableService {
   moveSelectedColumns(fromIndex: number, toIndex: number): void {
     const rawDelta: number = toIndex - fromIndex;
 
-    const columnsToMove: number[] = this.getSortedSelectedIndexToMove(rawDelta, this.getSelectedColumns());
+    const columnsToMove: number[] = this.getSortedSelectedIndexToMove(rawDelta, this.selectedColumns.getSelectedIndexes());
     const adjustedDelta: number = this.getAdjustedDeltaToBounds(rawDelta, columnsToMove, 0, this.getColumnsNumber());
 
     const indexesToUpdate: Pair<number, number>[] = [];
@@ -448,7 +429,7 @@ export class TableService {
    * @returns            An array of {@link Cell} objects from row 0 up to `limit - 1`,
    *                     or an empty array if the index or limit is invalid.
    */
-  getColumn(columnIndex: number, limit: number = this.getRowsNumber()): Cell[] {
+  getColumnCells(columnIndex: number, limit: number = this.getRowsNumber()): Cell[] {
     if (limit <= 0 || columnIndex < 0 || columnIndex >= this.getColumnsNumber())
       return [];
 
@@ -470,7 +451,7 @@ export class TableService {
    * @returns         An array of {@link Cell} objects from column 0 up to limit - 1,
    *                  or an empty array if the index or limit is invalid.
    */
-  getRow(rowIndex: number, limit: number = this.getColumnsNumber()): Cell[] {
+  getRowCells(rowIndex: number, limit: number = this.getColumnsNumber()): Cell[] {
     if (limit <= 0 || rowIndex < 0 || rowIndex >= this.getRowsNumber())
       return [];
 
@@ -479,62 +460,80 @@ export class TableService {
 
 
   selectRow(rowIndex: number): void {
-    this.selectedRows.add(rowIndex);
+    if (rowIndex < 0 || rowIndex >= this.getRowsNumber())
+      return;
+
+    this.selectedRows.selectOrUpdate(this.getRowId(rowIndex), rowIndex)
   }
 
 
   deselectRow(rowIndex: number): void {
-    this.selectedRows.delete(rowIndex);
+    if (rowIndex < 0 || rowIndex >= this.getRowsNumber())
+      return;
+
+    this.selectedRows.deselect(this.getRowId(rowIndex));
   }
 
 
   selectColumn(columnIndex: number): void {
-    this.selectedColumns.add(columnIndex);
+    if (columnIndex < 0 || columnIndex >= this.getColumnsNumber())
+      return;
+
+    this.selectedColumns.selectOrUpdate(this.getHeaderColumnId(columnIndex), columnIndex)
   }
 
 
   deselectColumn(columnIndex: number): void {
-    this.selectedColumns.delete(columnIndex);
+    if (columnIndex < 0 || columnIndex >= this.getColumnsNumber())
+      return;
+
+    this.selectedColumns.deselect(this.getHeaderColumnId(columnIndex));
   }
 
 
   isColumnSelected(columnIndex: number): boolean {
-    return this.selectedColumns.has(columnIndex);
+    if (columnIndex < 0 || columnIndex >= this.getColumnsNumber())
+      return false;
+
+    return this.selectedColumns.isSelected(this.getHeaderColumnId(columnIndex));
   }
 
 
   getSelectedColumnNumber(): number {
-    return this.selectedColumns.size;
+    return this.selectedColumns.getSelectionNumber();
   }
 
 
   isRowSelected(rowIndex: number): boolean {
-    return this.selectedRows.has(rowIndex);
+    if (rowIndex < 0 || rowIndex >= this.getRowsNumber())
+      return false;
+
+    return this.selectedRows.isSelected(this.getRowId(rowIndex));
   }
 
 
   getSelectedRowNumber(): number {
-    return this.selectedRows.size;
+    return this.selectedRows.getSelectionNumber();
   }
 
 
   hasRowsSelected(): boolean {
-    return this.selectedRows.size !== 0;
+    return this.selectedRows.getSelectionNumber() !== 0;
   }
 
 
   hasColumnsSelected(): boolean {
-    return this.selectedColumns.size !== 0;
+    return this.selectedColumns.getSelectionNumber() !== 0;
   }
 
 
-  doForEachRowSelected(fn: (rowIndex: number) => void): void {
-    this.selectedRows.forEach(fn);
+  doForEachRowSelected(fn: (rowId: number) => void): void {
+    this.selectedRows.doForEachIndexSelected(fn);
   }
 
 
-  doForEachColumnSelected(fn: (columnIndex: number) => void): void {
-    this.selectedColumns.forEach(fn);
+  doForEachColumnSelected(fn: (columnId: number) => void): void {
+    this.selectedColumns.doForEachIndexSelected(fn);
   }
 
 
@@ -609,8 +608,8 @@ export class TableService {
    * Selected rows are removed from the model in reverse index order
    * to avoid shifting issues, then a batch delete request is sent.
    */
-  deleteSelectedRow(): void {
-    const rowsIdsToDelete: string[] = this.getSelectedRows().map(this.getRowId.bind(this));
+  deleteSelectedRows(): void {
+    const rowsIdsToDelete: string[] = this.selectedRows.getSelectedIds();
 
     this.tableAPI.deleteRows(rowsIdsToDelete).subscribe(
       rowsDeleted => {
@@ -679,8 +678,8 @@ export class TableService {
    * Selected columns are removed from the model in reverse index order
    * to avoid shifting issues, then a batch delete request is sent.
    */
-  deleteSelectedColumn(): void {
-    const columnsIdsToDelete: string[] = this.getSelectedColumns().map(this.getHeaderColumnId.bind(this));
+  deleteSelectedColumns(): void {
+    const columnsIdsToDelete: string[] = this.selectedColumns.getSelectedIds();
 
     this.tableAPI.deleteColumns(columnsIdsToDelete).subscribe(
       columnDeleted => {
@@ -864,7 +863,7 @@ export class TableService {
    */
   private updateSelectedRows(typeConstructor: Function, value: any): void {
     this.doForEachRowSelected((i: number): void => {
-      this.getRow(i).forEach((cell: Cell, j: number): void => {
+      this.getRowCells(i).forEach((cell: Cell, j: number): void => {
         if (cell.cellDataType.constructor === typeConstructor) {
           this.updateSingleCell(i, j, value);
         }
@@ -884,7 +883,7 @@ export class TableService {
    */
   private updateSelectedColumns(value: any): void {
     this.doForEachColumnSelected((j: number): void => {
-      this.getColumn(j).forEach((_cell: Cell, i: number): void => {
+      this.getColumnCells(j).forEach((_cell: Cell, i: number): void => {
         this.updateSingleCell(i, j, value);
       });
     });
