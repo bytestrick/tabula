@@ -9,10 +9,7 @@ import {AuthService} from '../../auth/auth.service';
 
 @Component({
   selector: 'tbl-change-password',
-  imports: [
-    PasswordFieldComponent,
-    PasswordInputComponent
-  ],
+  imports: [PasswordFieldComponent, PasswordInputComponent],
   templateUrl: './change-password.component.html',
 })
 export class ChangePasswordComponent implements AfterViewInit {

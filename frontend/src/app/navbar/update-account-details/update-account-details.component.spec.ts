@@ -1,6 +1,7 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { UpdateAccountDetailsComponent } from './update-account-details.component';
+import {UpdateAccountDetailsComponent} from './update-account-details.component';
+import {provideHttpClient} from '@angular/common/http';
 
 describe('UpdateAccountDetailsComponent', () => {
   let component: UpdateAccountDetailsComponent;
@@ -8,9 +9,9 @@ describe('UpdateAccountDetailsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [UpdateAccountDetailsComponent]
-    })
-    .compileComponents();
+      imports: [UpdateAccountDetailsComponent],
+      providers: [provideHttpClient()]
+    }).compileComponents();
 
     fixture = TestBed.createComponent(UpdateAccountDetailsComponent);
     component = fixture.componentInstance;

@@ -38,10 +38,8 @@ export class AuthService {
   }
 
   set authentication(authentication: Authentication) {
-    if (this.auth) {
-      this.auth = authentication;
-      localStorage.setItem('authentication', JSON.stringify(this.auth));
-    }
+    this.auth = authentication;
+    localStorage.setItem('authentication', JSON.stringify(this.auth));
   }
 
   constructor() {
@@ -72,7 +70,7 @@ export class AuthService {
   }
 
   get isAuthenticated(): boolean {
-    return this.authentication !== null && !this.isExpired;
+    return this.authentication !== null && this.authentication.token !== undefined && !this.isExpired;
   }
 
   signIn(form: SignInRequest): Observable<AuthenticationResponse> {

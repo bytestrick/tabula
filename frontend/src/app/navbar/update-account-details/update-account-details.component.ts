@@ -82,16 +82,18 @@ export class UpdateAccountDetailsComponent implements AfterViewInit {
   }
 
   private fetchDetails() {
-    this.http.get<UserDetails>('/user', {params: {email: this.auth.authentication!.email}}).subscribe({
-      next: userDetails => this.form.setValue({
-        ...userDetails,
-        country: this.country().countries.findIndex(country => country.code === userDetails.country!.code)
-      }),
-      error: () => this.toast.show({ // quite unlikely
-        body: 'There was an error while fetching user details',
-        background: 'warning-subtle'
-      })
-    });
+    if (this.auth.authentication?.email !== undefined) {
+      this.http.get<UserDetails>('/user', {params: {email: this.auth.authentication!.email}}).subscribe({
+        next: userDetails => this.form.setValue({
+          ...userDetails,
+          country: this.country().countries.findIndex(country => country.code === userDetails.country!.code)
+        }),
+        error: () => this.toast.show({ // quite unlikely
+          body: 'There was an error while fetching user details',
+          background: 'warning-subtle'
+        })
+      });
+    }
   }
 
   protected onUpdateAccountDetails() {

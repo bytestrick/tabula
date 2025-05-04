@@ -91,7 +91,7 @@ describe('SignInComponent', () => {
 
     const req = httpTestingController.expectOne('/auth/send-otp');
     const otpData = {email: 'test@example.com', reason: Reason.ResetPassword};
-    expect(req.request.body).toEqual({...otpData, reason: otpData.reason.toLowerCase()});
+    expect(req.request.body).toEqual({...otpData, receiver: 'test@example.com', reason: otpData.reason.toLowerCase()});
     req.flush({});
     expect(localStorage.setItem).toHaveBeenCalledOnceWith('otpData', JSON.stringify(otpData));
     expect(router.navigate).toHaveBeenCalledOnceWith(['/otp']);
@@ -173,7 +173,7 @@ describe('SignInComponent', () => {
 
     const otpData = {email: emailInput.value, reason: Reason.VerifyEmail};
     const req = httpTestingController.expectOne('/auth/send-otp');
-    expect(req.request.body).toEqual(otpData);
+    expect(req.request.body).toEqual({...otpData, receiver: emailInput.value});
     req.flush({});
 
     expect(localStorage.setItem).toHaveBeenCalledOnceWith('otpData', JSON.stringify(otpData));

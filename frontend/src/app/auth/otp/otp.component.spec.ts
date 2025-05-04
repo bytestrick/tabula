@@ -15,7 +15,7 @@ describe('OtpComponent', () => {
   let router: jasmine.SpyObj<Router>;
   let toast: jasmine.SpyObj<ToastService>;
   let mockLocalStorage: Storage;
-  let otpData: { email: string, reason: Reason };
+  let otpData: { email: string, receiver: string, reason: Reason };
   let httpTestingController: HttpTestingController;
   let errorHandler: ErrorHandler;
 
@@ -23,7 +23,7 @@ describe('OtpComponent', () => {
     mockLocalStorage = jasmine.createSpyObj('localStorage', ['getItem', 'setItem', 'removeItem']);
     Object.defineProperty(window, 'localStorage', {value: mockLocalStorage});
 
-    otpData = {email: 'test@example.com', reason: Reason.VerifyEmail};
+    otpData = {email: 'test@example.com', receiver: 'test@example.com', reason: Reason.VerifyEmail};
 
     await TestBed.configureTestingModule({
       imports: [OtpComponent, PasswordInputComponent],
@@ -105,7 +105,7 @@ describe('OtpComponent', () => {
 
   it('should reset the user password trough an OTP', () => {
     // initialize
-    otpData = {email: 'damocle@example.com', reason: Reason.ResetPassword};
+    otpData = {email: 'damocle@example.com', receiver: 'damocle@example.com', reason: Reason.ResetPassword};
     (mockLocalStorage.getItem as jasmine.Spy).withArgs('otpData').and.returnValue(JSON.stringify(otpData));
     fixture.detectChanges();
     expect(fixture.debugElement.query(By.css('form h3')).nativeElement.textContent).toBe(otpData.reason);
@@ -161,7 +161,7 @@ describe('OtpComponent', () => {
   });
 
   it('should exhaustively check the reason value', async () => {
-    otpData = {email: 'test@example.com', reason: 'Driving cars' as Reason};
+    otpData = {email: 'test@example.com', receiver: 'test@example.com', reason: 'Driving cars' as Reason};
     (mockLocalStorage.getItem as jasmine.Spy).withArgs('otpData').and.returnValue(JSON.stringify(otpData));
     fixture.detectChanges();
 
