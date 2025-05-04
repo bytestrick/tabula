@@ -459,14 +459,24 @@ export class TableService {
   }
 
 
+  /**
+   * Selects or updates the selection of a row.
+   * If the row index is out of bounds, no action is taken.
+   * @param rowIndex - Index of the row to select.
+   */
   selectRow(rowIndex: number): void {
     if (rowIndex < 0 || rowIndex >= this.getRowsNumber())
       return;
 
-    this.selectedRows.selectOrUpdate(this.getRowId(rowIndex), rowIndex)
+    this.selectedRows.selectOrUpdate(this.getRowId(rowIndex), rowIndex);
   }
 
 
+  /**
+   * Deselects a row at the specified index.
+   * If the row index is out of bounds, no action is taken.
+   * @param rowIndex - Index of the row to deselect.
+   */
   deselectRow(rowIndex: number): void {
     if (rowIndex < 0 || rowIndex >= this.getRowsNumber())
       return;
@@ -475,14 +485,24 @@ export class TableService {
   }
 
 
+  /**
+   * Selects or updates the selection of a column.
+   * If the column index is out of bounds, no action is taken.
+   * @param columnIndex - Index of the column to select.
+   */
   selectColumn(columnIndex: number): void {
     if (columnIndex < 0 || columnIndex >= this.getColumnsNumber())
       return;
 
-    this.selectedColumns.selectOrUpdate(this.getHeaderColumnId(columnIndex), columnIndex)
+    this.selectedColumns.selectOrUpdate(this.getHeaderColumnId(columnIndex), columnIndex);
   }
 
 
+  /**
+   * Deselects a column at the specified index.
+   * If the column index is out of bounds, no action is taken.
+   * @param columnIndex - Index of the column to deselect.
+   */
   deselectColumn(columnIndex: number): void {
     if (columnIndex < 0 || columnIndex >= this.getColumnsNumber())
       return;
@@ -491,6 +511,11 @@ export class TableService {
   }
 
 
+  /**
+   * Checks whether a column is selected.
+   * @param columnIndex - Index of the column to check.
+   * @returns True if the column is selected, false otherwise or if out of bounds.
+   */
   isColumnSelected(columnIndex: number): boolean {
     if (columnIndex < 0 || columnIndex >= this.getColumnsNumber())
       return false;
@@ -499,11 +524,20 @@ export class TableService {
   }
 
 
+  /**
+   * Returns the number of selected columns.
+   * @returns The count of currently selected columns.
+   */
   getSelectedColumnNumber(): number {
     return this.selectedColumns.getSelectionNumber();
   }
 
 
+  /**
+   * Checks whether a row is selected.
+   * @param rowIndex - Index of the row to check.
+   * @returns True if the row is selected, false otherwise or if out of bounds.
+   */
   isRowSelected(rowIndex: number): boolean {
     if (rowIndex < 0 || rowIndex >= this.getRowsNumber())
       return false;
@@ -512,29 +546,50 @@ export class TableService {
   }
 
 
+  /**
+   * Returns the number of selected rows.
+   * @returns The count of currently selected rows.
+   */
   getSelectedRowNumber(): number {
     return this.selectedRows.getSelectionNumber();
   }
 
 
+  /**
+   * Checks if there are any rows selected.
+   * @returns True if at least one row is selected, false otherwise.
+   */
   hasRowsSelected(): boolean {
     return this.selectedRows.getSelectionNumber() !== 0;
   }
 
 
+  /**
+   * Checks if there are any columns selected.
+   * @returns True if at least one column is selected, false otherwise.
+   */
   hasColumnsSelected(): boolean {
     return this.selectedColumns.getSelectionNumber() !== 0;
   }
 
 
+  /**
+   * Executes a provided function for each selected row.
+   * @param fn - Function to execute, receiving the row ID of each selected row.
+   */
   doForEachRowSelected(fn: (rowId: number) => void): void {
     this.selectedRows.doForEachIndexSelected(fn);
   }
 
 
+  /**
+   * Executes a provided function for each selected column.
+   * @param fn - Function to execute, receiving the column ID of each selected column.
+   */
   doForEachColumnSelected(fn: (columnId: number) => void): void {
     this.selectedColumns.doForEachIndexSelected(fn);
   }
+
 
 
   /**
