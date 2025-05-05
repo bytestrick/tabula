@@ -8,16 +8,16 @@ import {
   RowCreateDTO,
   RowsDeletedDTO,
   RowsDeleteDTO,
-  UpdateRowIndexDTO
 } from '../model/dto/table/row-dto';
 import {
   ColumnCreatedDTO,
   ColumnCreateDTO,
   ColumnDTO,
-  ColumnPatchDTO, ColumnsDeletedDTO, ColumnsDeleteDTO,
+  ColumnPatchDTO, ColumnPatchedDTO, ColumnsDeletedDTO, ColumnsDeleteDTO,
   UpdateColumnIndexDTO
 } from '../model/dto/table/column-dto';
 import {CellDTO, CellPatchDTO, CellPatchedDTO} from '../model/dto/table/cell-dto';
+import {MovedRowsOrColumnsDTO, MoveRowOrColumnDTO} from '../model/dto/table/move-row-or-column-d-t-o';
 
 
 @Injectable({
@@ -161,14 +161,27 @@ export class TableApiService {
    */
   changeColumnDataType(columnId: string,
                        newDataTypeId: number,
-                       tableId: string = this.tableId): Observable<void> {
+                       tableId: string = this.tableId): Observable<ColumnPatchedDTO> {
 
     const column: ColumnPatchDTO = {
       dataTypeId: newDataTypeId,
     };
 
     const url: string = `${this.BASE_URL}/${tableId}/columns/${columnId}`;
-    return this.httpClient.patch<void>(url, column);
+    return this.httpClient.patch<ColumnPatchedDTO>(url, column);
+  }
+
+
+  changeColumnName(columnId: string,
+                   newName: string,
+                   tableId: string = this.tableId): Observable<ColumnPatchedDTO> {
+
+    const column: ColumnPatchDTO = {
+      columnName: newName,
+    };
+
+    const url: string = `${this.BASE_URL}/${tableId}/columns/${columnId}`;
+    return this.httpClient.patch<ColumnPatchedDTO>(url, column);
   }
 
 
@@ -264,30 +277,36 @@ export class TableApiService {
   }
 
 
-  updateRowsIndexes(rowsIndexes: Pair<number, number>[], tableId: string = this.tableId): void {
-    let rowsToUpdate: UpdateRowIndexDTO[] = [];
+  moveRowsIndexes(idsToMove: string[],
+                  fromIndex: number,
+                  toIndex: number,
+                  tableId: string = this.tableId): Observable<MovedRowsOrColumnsDTO> {
 
-    for (let p of rowsIndexes)
-      rowsToUpdate.push({
-        tableId: tableId,
-        currentRowIndex: p.first,
-        newRowIndex: p.second
-      });
+    let rowsToMove: MoveRowOrColumnDTO = {
+      idsToMove: idsToMove,
+      fromIndex: fromIndex,
+      toIndex: toIndex
+    };
 
-    this.httpClient.patch('/table/rows', rowsToUpdate).subscribe();
+    const url: string = `${this.BASE_URL}/${tableId}/rows`;
+
+    return this.httpClient.patch<MovedRowsOrColumnsDTO>(url, rowsToMove);
   }
 
 
-  updateColumnsIndexes(columnsIndexes: Pair<number, number>[], tableId: string = this.tableId): void {
-    let columnsToUpdate: UpdateColumnIndexDTO[] = [];
+  moveColumnsIndexes(idsToMove: string[],
+                     fromIndex: number,
+                     toIndex: number,
+                     tableId: string = this.tableId): Observable<MovedRowsOrColumnsDTO> {
 
-    for (let p of columnsIndexes)
-      columnsToUpdate.push({
-        tableId: tableId,
-        currentColumnIndex: p.first,
-        newColumnIndex: p.second
-      });
+    let ColumnsToMove: MoveRowOrColumnDTO = {
+      idsToMove: idsToMove,
+      fromIndex: fromIndex,
+      toIndex: toIndex
+    };
 
-    this.httpClient.patch('/table/columns', columnsToUpdate).subscribe();
+    const url: string = `${this.BASE_URL}/${tableId}/columns`;
+
+    return this.httpClient.patch<MovedRowsOrColumnsDTO>(url, ColumnsToMove);
   }
 }

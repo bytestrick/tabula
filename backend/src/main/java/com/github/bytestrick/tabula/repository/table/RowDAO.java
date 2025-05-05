@@ -208,6 +208,31 @@ public class RowDAO {
     }
 
 
+    public int getRowsNumber(UUID tableId) {
+        return jdbcClient.sql("""
+                SELECT COUNT(*)
+                FROM my_row
+                WHERE my_table = :tableId
+            """)
+                .param("tableId", tableId)
+                .query(Integer.class)
+                .single();
+    }
+
+
+    public List<Integer> findRowsIndexesFromIds(UUID tableId, List<UUID> rowIds) {
+        return jdbcClient.sql("""
+                SELECT row_index
+                FROM my_row
+                WHERE my_table = :tableId AND id IN (:rowIds)
+            """)
+                .param("tableId", tableId)
+                .param("rowIds", rowIds)
+                .query(Integer.class)
+                .list();
+    }
+
+
     private class MyRowMapper implements RowMapper<RowProxy> {
 
         @Override

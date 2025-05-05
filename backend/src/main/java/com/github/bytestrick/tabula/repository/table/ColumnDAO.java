@@ -1,6 +1,8 @@
 package com.github.bytestrick.tabula.repository.table;
 
 import com.github.bytestrick.tabula.repository.proxy.table.ColumnProxy;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -235,6 +237,57 @@ public class ColumnDAO {
                 .param("tableId", tableId)
                 .param("columnId", columnId)
                 .update();
+    }
+
+
+    public void changeColumnName(UUID tableId, UUID columnId, String newName) {
+        jdbcClient.sql("""
+                UPDATE my_column
+                SET column_name = :newName
+                WHERE id = :columnId AND my_table = :tableId;
+            """)
+                .param("tableId", tableId)
+                .param("columnId", columnId)
+                .param("newName", newName)
+                .update();
+    }
+
+
+    public int findColumnIndexById(UUID tableId, UUID columnId) {
+        return jdbcClient.sql("""
+                SELECT column_index
+                FROM my_column
+                WHERE my_table = :tableId AND id = :columnId
+            """)
+                .param("tableId", tableId)
+                .param("columnId", columnId)
+                .query(Integer.class)
+                .single();
+    }
+
+
+    public int getColumnNumber(UUID tableId) {
+        return jdbcClient.sql("""
+                SELECT COUNT(*)
+                FROM my_column
+                WHERE my_table = :tableId
+            """)
+                .param("tableId", tableId)
+                .query(Integer.class)
+                .single();
+    }
+
+
+    public List<Integer> findColumnsIndexesFromIds(UUID tableId, @NotNull @NotEmpty List<UUID> columnsIds) {
+        return jdbcClient.sql("""
+                SELECT column_index
+                FROM my_column
+                WHERE my_table = :tableId AND id IN (:columnsIds)
+            """)
+                .param("tableId", tableId)
+                .param("columnsIds", columnsIds)
+                .query(Integer.class)
+                .list();
     }
 
 

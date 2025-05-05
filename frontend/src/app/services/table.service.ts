@@ -12,6 +12,8 @@ import {HeaderColumn} from '../model/table/headerColumn';
 import {TableDTO} from '../model/dto/table/table-dto';
 import {CellPatchedDTO} from '../model/dto/table/cell-dto';
 import {Selection} from '../model/table/selection';
+import {ColumnPatchedDTO} from '../model/dto/table/column-dto';
+import {MovedRowsOrColumnsDTO} from '../model/dto/table/move-row-or-column-d-t-o';
 
 
 @Injectable()
@@ -29,6 +31,7 @@ export class TableService {
   private _isLoaded: boolean = false;
 
   private readonly HEADER_CELL_DEFAULT_NAME: string = 'New Column';
+  private readonly DEFAULT_DATA_TYPE_ID: number = 1;
 
   readonly INVALID_CELL_INDEX: number = -2; // Must be a negative number
 
@@ -176,158 +179,7 @@ export class TableService {
    * @param toIndex - The zero-based target index where the row should be placed.
    */
   private _moveRow(fromIndex: number, toIndex: number): void {
-    if (fromIndex < 0 || fromIndex >= this.getRowsNumber())
-      return;
-
-    if (toIndex < 0 || toIndex >= this.getRowsNumber())
-      return;
-
-    if (fromIndex === toIndex)
-      return;
-
     moveItemInArray(this.table, fromIndex, toIndex);
-
-    if (this.isRowSelected(fromIndex) && !this.isRowSelected(toIndex)) {
-      this.deselectRow(fromIndex);
-      this.selectRow(toIndex);
-    }
-    else if (!this.isRowSelected(fromIndex) && this.isRowSelected(toIndex)) {
-      this.deselectRow(toIndex);
-      this.selectRow(fromIndex);
-    }
-  }
-
-
-
-  /**
-   * Computes all index‐mapping operations required when a row/column is moved
-   * from one position to another, so that downstream consumers can update.
-   *
-   * @param fromIndex - The original index of the moved row.
-   * @param toIndex - The destination index of the moved row.
-   * @returns An array of Pair&lt;oldIndex, newIndex&gt; describing each shifted index.
-   */
-  private getMovedIndexes(fromIndex: number, toIndex: number): Pair<number, number>[] {
-    const indexesToUpdate: Pair<number, number>[] = [];
-
-    if (fromIndex > toIndex) {
-      for (let i: number = toIndex; i <= fromIndex - 1; ++i) {
-        indexesToUpdate.push(new Pair(i, i + 1));
-      }
-    }
-    else if (fromIndex < toIndex) {
-      for (let i: number = fromIndex + 1; i <= toIndex; ++i) {
-        indexesToUpdate.push(new Pair(i, i - 1));
-      }
-    }
-    else
-      return [];
-
-    indexesToUpdate.push(new Pair(fromIndex, toIndex));
-
-    return indexesToUpdate;
-  }
-
-
-  /**
-   * Move a single row and immediately notify
-   * the table API of which indexes have changed.
-   *
-   * @param fromIndex - The index of the row to move.
-   * @param toIndex - The index to which the row should be moved.
-   */
-  moveRow(fromIndex: number, toIndex: number): void {
-    this._moveRow(fromIndex, toIndex);
-    this.tableAPI.updateRowsIndexes(this.getMovedIndexes(fromIndex, toIndex));
-  }
-
-
-  /**
-   * Sorts a list of selected indexes in the correct order for
-   * multi-row movement, based on the direction of movement.
-   *
-   * @param rawDelta - The raw offset (positive or negative) indicating direction.
-   * @param selectedIndexes - Array of selected row or column indexes.
-   * @returns A new array sorted ascending when moving up (delta<0),
-   *          or descending when moving down (delta>0).
-   */
-  private getSortedSelectedIndexToMove(rawDelta: number, selectedIndexes: number[]): number[] {
-    if (selectedIndexes.length === 0)
-      return [];
-
-    if (rawDelta < 0) {
-      // sort selected indexes in ascending order
-      return selectedIndexes.sort((a, b) => a - b);
-    }
-    else if (rawDelta > 0) {
-      // sorts the selected indexes in descending order
-      return selectedIndexes.sort((a, b) => b - a);
-    }
-
-    return [];
-  }
-
-
-  /**
-   * Ensures the computed delta does not cause any moved index
-   * to go out of the valid bounds [minBounds, maxBounds).
-   *
-   * @param rawDelta - The initial desired delta.
-   * @param sortedIndexesToMove - The sorted list of indexes about to be moved.
-   * @param minBounds - The minimum valid index (inclusive).
-   * @param maxBounds - The maximum valid index (exclusive).
-   * @returns An adjusted delta that keeps all moves within bounds.
-   */
-  private getAdjustedDeltaToBounds(rawDelta: number, sortedIndexesToMove: number[], minBounds: number, maxBounds: number): number {
-    if (sortedIndexesToMove.length === 0)
-      return 0;
-
-    if (rawDelta < 0) {
-      while(sortedIndexesToMove[0] + rawDelta < minBounds)
-        ++rawDelta;
-    }
-    else if (rawDelta > 0) {
-      while(sortedIndexesToMove[0] + rawDelta >= maxBounds)
-        --rawDelta;
-    }
-
-    return rawDelta;
-  }
-
-
-  /**
-   * Merges a new batch of moved index mappings into the existing list,
-   * updating any overlapping oldIndex→newIndex pairs and adding new ones.
-   *
-   * @param indexesToUpdate - The accumulator array of existing mappings.
-   * @param currentMovedIndexes - The latest array of moved index pairs.
-   */
-  private reconstructIndexesToUpdate(indexesToUpdate: Pair<number, number>[], currentMovedIndexes: Pair<number, number>[]): void {
-    const newIndexesDiscovered: Pair<number, number>[] = [];
-    const indexesSnapshot: Pair<number, number>[] = [];
-
-    for (let p of indexesToUpdate)
-      indexesSnapshot.push(new Pair(p.first, p.second));
-
-    for (let p of currentMovedIndexes) {
-      let matchedSnapshotIndex: number = -1;
-
-      for (let k: number = 0; k < indexesSnapshot.length; ++k) {
-        if (indexesSnapshot[k].second === p.first) {
-          matchedSnapshotIndex = k;
-          break;
-        }
-      }
-
-      if (matchedSnapshotIndex >= 0) {
-        indexesToUpdate[matchedSnapshotIndex].second = p.second;
-      }
-      else
-        newIndexesDiscovered.push(p);
-    }
-
-    for (let p of newIndexesDiscovered)
-      indexesToUpdate.push(p);
   }
 
 
@@ -338,22 +190,52 @@ export class TableService {
    * @param fromIndex - The reference index from which movement is measured.
    * @param toIndex - The target index where the selection block should end up.
    */
-  moveSelectedRows(fromIndex: number, toIndex: number): void {
-    const rawDelta: number = toIndex - fromIndex;
+  moveRows(fromIndex: number, toIndex: number): void {
+    if (!this.canMoveRow(fromIndex, toIndex))
+      return;
 
-    const rowsToMove: number[] = this.getSortedSelectedIndexToMove(rawDelta, this.selectedRows.getSelectedIndexes());
-    const adjustedDelta: number = this.getAdjustedDeltaToBounds(rawDelta, rowsToMove, 0, this.getRowsNumber());
+    let rowsIdsToMove: string[];
+    let fromIndexId: string = this.getRowId(fromIndex);
 
-    const indexesToUpdate: Pair<number, number>[] = [];
+    if (!this.selectedRows.isSelected(fromIndexId))
+      rowsIdsToMove = [fromIndexId];
+    else
+      rowsIdsToMove = this.selectedRows.getSelectedIds();
 
-    for (let i of rowsToMove) {
-      this._moveRow(i, i + adjustedDelta);
+    this.tableAPI.moveRowsIndexes(rowsIdsToMove, fromIndex, toIndex).subscribe(
+      (moveIndexes: MovedRowsOrColumnsDTO): void => {
+        for (let i of moveIndexes.indexes)
+          this._moveRow(i, i + moveIndexes.delta);
+      }
+    );
+  }
 
-      const currentMovedIndexes: Pair<number, number>[] = this.getMovedIndexes(i, i + adjustedDelta);
-      this.reconstructIndexesToUpdate(indexesToUpdate, currentMovedIndexes);
-    }
 
-    this.tableAPI.updateRowsIndexes(indexesToUpdate);
+  private canMoveColumn(fromIndex: number, toIndex: number): boolean {
+    if (fromIndex < 0 || fromIndex >= this.getColumnsNumber())
+      return false;
+
+    if (toIndex < 0 || toIndex >= this.getColumnsNumber())
+      return false;
+
+    if (fromIndex === toIndex)
+      return false;
+
+    return true;
+  }
+
+
+  private canMoveRow(fromIndex: number, toIndex: number): boolean {
+    if (fromIndex < 0 || fromIndex >= this.getRowsNumber())
+      return false;
+
+    if (toIndex < 0 || toIndex >= this.getRowsNumber())
+      return false;
+
+    if (fromIndex === toIndex)
+      return false;
+
+    return true;
   }
 
 
@@ -365,14 +247,7 @@ export class TableService {
    * @param toIndex - The zero-based target index where the column should be placed.
    */
   private _moveColumn(fromIndex: number, toIndex: number): void {
-    if (fromIndex < 0 || fromIndex >= this.getColumnsNumber())
-      return;
-
-    if (toIndex < 0 || toIndex >= this.getColumnsNumber())
-      return;
-
-    if (fromIndex === toIndex)
-      return;
+    console.log(fromIndex, toIndex);
 
     for (let row of this.table)
       moveItemInArray(row.getCells(), fromIndex, toIndex);
@@ -388,35 +263,24 @@ export class TableService {
    * @param fromIndex - The index of the column to move.
    * @param toIndex - The index to which the column should be moved.
    */
-  moveColumn(fromIndex: number, toIndex: number): void {
-    this._moveColumn(fromIndex, toIndex);
-    this.tableAPI.updateColumnsIndexes(this.getMovedIndexes(fromIndex, toIndex));
-  }
+  moveColumns(fromIndex: number, toIndex: number): void {
+    if (!this.canMoveColumn(fromIndex, toIndex))
+      return;
 
+    let columnsIdsToMove: string[];
+    let fromIndexId: string = this.getHeaderColumnId(fromIndex);
 
-  /**
-   * Moves all currently selected columns from one index to another,
-   * adjusting for boundaries, preserving order, and batching update notifications.
-   *
-   * @param fromIndex - The reference index from which movement is measured.
-   * @param toIndex - The target index where the selection block should end up.
-   */
-  moveSelectedColumns(fromIndex: number, toIndex: number): void {
-    const rawDelta: number = toIndex - fromIndex;
+    if (!this.selectedColumns.isSelected(fromIndexId))
+      columnsIdsToMove = [fromIndexId];
+    else
+      columnsIdsToMove = this.selectedColumns.getSelectedIds();
 
-    const columnsToMove: number[] = this.getSortedSelectedIndexToMove(rawDelta, this.selectedColumns.getSelectedIndexes());
-    const adjustedDelta: number = this.getAdjustedDeltaToBounds(rawDelta, columnsToMove, 0, this.getColumnsNumber());
-
-    const indexesToUpdate: Pair<number, number>[] = [];
-
-    for (let j of columnsToMove) {
-      this._moveColumn(j, j + adjustedDelta);
-
-      const currentMovedIndexes: Pair<number, number>[] = this.getMovedIndexes(j, j + adjustedDelta);
-      this.reconstructIndexesToUpdate(indexesToUpdate, currentMovedIndexes);
-    }
-
-    this.tableAPI.updateColumnsIndexes(indexesToUpdate);
+    this.tableAPI.moveColumnsIndexes(columnsIdsToMove, fromIndex, toIndex).subscribe(
+      (moveIndexes: MovedRowsOrColumnsDTO): void => {
+        for (let i of moveIndexes.indexes)
+          this._moveColumn(i, i + moveIndexes.delta);
+      }
+    );
   }
 
 
@@ -468,7 +332,7 @@ export class TableService {
     if (rowIndex < 0 || rowIndex >= this.getRowsNumber())
       return;
 
-    this.selectedRows.selectOrUpdate(this.getRowId(rowIndex), rowIndex);
+    this.selectedRows.selectOrUpdate(this.getRowId(rowIndex));
   }
 
 
@@ -494,7 +358,7 @@ export class TableService {
     if (columnIndex < 0 || columnIndex >= this.getColumnsNumber())
       return;
 
-    this.selectedColumns.selectOrUpdate(this.getHeaderColumnId(columnIndex), columnIndex);
+    this.selectedColumns.selectOrUpdate(this.getHeaderColumnId(columnIndex));
   }
 
 
@@ -578,7 +442,7 @@ export class TableService {
    * @param fn - Function to execute, receiving the row ID of each selected row.
    */
   doForEachRowSelected(fn: (rowId: number) => void): void {
-    this.selectedRows.doForEachIndexSelected(fn);
+    // this.selectedRows.doForEachIndexSelected(fn);
   }
 
 
@@ -587,7 +451,7 @@ export class TableService {
    * @param fn - Function to execute, receiving the column ID of each selected column.
    */
   doForEachColumnSelected(fn: (columnId: number) => void): void {
-    this.selectedColumns.doForEachIndexSelected(fn);
+    // this.selectedColumns.doForEachIndexSelected(fn);
   }
 
 
@@ -784,7 +648,7 @@ export class TableService {
     //   )
   }
 
-
+// TODO: aggiornare la documentazione
   /**
    * Changes the data-type of an existing column at the specified index.
    *
@@ -814,13 +678,18 @@ export class TableService {
     const headerColumn: HeaderColumn = this.header[columnIndex];
 
     this.tableAPI.changeColumnDataType(headerColumn.id, dataType.getDataTypeId()).subscribe(
-      (): void => {
-        this.header[columnIndex] = new HeaderColumn(
-          headerColumn.id, new HeaderCell(headerColumn.getColumnName(), dataType.getNewDataType())
+      (columnPatched: ColumnPatchedDTO): void => {
+        const newDataType: IDataType = this.dataTypeService.convertIntoIDataType(
+          columnPatched.dataTypeId || this.DEFAULT_DATA_TYPE_ID
+        ).getNewDataType();
+        const newName: string = columnPatched.columnName || this.HEADER_CELL_DEFAULT_NAME;
+
+        this.header[columnPatched.columnIndex] = new HeaderColumn(
+          columnPatched.id, new HeaderCell(newName, newDataType)
         );
 
         for (let i: number = 0; i < this.getRowsNumber(); ++i) {
-          this.table[i].replaceCell(columnIndex, new Cell(dataType.getNewDataType(), null));
+          this.table[i].replaceCell(columnPatched.columnIndex, new Cell(newDataType, null));
         }
       }
     );
@@ -844,7 +713,7 @@ export class TableService {
     if (cord.j < 0 || cord.j >= this.getColumnsNumber())
       return null;
 
-    if (!cord.isHeaderCell && cord.i < 0 || cord.i >= this.getRowsNumber())
+    if (!cord.isHeaderCell && (cord.i < 0 || cord.i >= this.getRowsNumber()))
       return null;
 
     return cord.isHeaderCell ?
@@ -877,11 +746,16 @@ export class TableService {
     if (!clickedCell)
       return;
 
-    if (!this.isRowSelected(cord.i) && !this.isColumnSelected(cord.j)) {
-      this.updateSingleCell(cord.i, cord.j, value);
-    } else {
-      this.updateSelectedRows(clickedCell.cellDataType.constructor, value);
-      this.updateSelectedColumns(value);
+    if (!cord.isHeaderCell) {
+      if (!this.isRowSelected(cord.i) && !this.isColumnSelected(cord.j)) {
+        this.updateSingleCell(cord, value);
+      } else {
+        this.updateSelectedRows(clickedCell.cellDataType.constructor, value);
+        this.updateSelectedColumns(value);
+      }
+    }
+    else {
+      this.updateSingleCell(cord, value);
     }
   }
 
@@ -896,13 +770,23 @@ export class TableService {
    * @param columnIndex  The column index of the cell.
    * @param value        The new value to assign.
    */
-  private updateSingleCell(rowIndex: number, columnIndex: number, value: any): void {
-    this.tableAPI.updateCellValue(rowIndex, columnIndex, value).subscribe(
-      (cellPatched: CellPatchedDTO): void => {
-        const cell: Cell = this.getCellFromCoords(new CellCord(cellPatched.rowIndex, cellPatched.columnIndex))!;
-        cell.value = cellPatched.value;
-      }
-    );
+  private updateSingleCell(cord: CellCord, value: any): void {
+    if (cord.isHeaderCell) {
+      this.tableAPI.changeColumnName(this.getHeaderColumnId(cord.j), value).subscribe(
+        (columnPatched: ColumnPatchedDTO): void => {
+          const cell: Cell = this.getCellFromCoords(new CellCord(-1, columnPatched.columnIndex, true))!;
+          cell.value = columnPatched.columnName || this.HEADER_CELL_DEFAULT_NAME;
+        }
+      );
+    }
+    else {
+      this.tableAPI.updateCellValue(cord.i, cord.j, value).subscribe(
+        (cellPatched: CellPatchedDTO): void => {
+          const cell: Cell = this.getCellFromCoords(cord)!;
+          cell.value = cellPatched.value;
+        }
+      );
+    }
   }
 
 
@@ -920,7 +804,7 @@ export class TableService {
     this.doForEachRowSelected((i: number): void => {
       this.getRowCells(i).forEach((cell: Cell, j: number): void => {
         if (cell.cellDataType.constructor === typeConstructor) {
-          this.updateSingleCell(i, j, value);
+          this.updateSingleCell(new CellCord(i, j), value);
         }
       });
     });
@@ -939,7 +823,7 @@ export class TableService {
   private updateSelectedColumns(value: any): void {
     this.doForEachColumnSelected((j: number): void => {
       this.getColumnCells(j).forEach((_cell: Cell, i: number): void => {
-        this.updateSingleCell(i, j, value);
+        this.updateSingleCell(new CellCord(i, j), value);
       });
     });
   }
@@ -950,7 +834,7 @@ export class TableService {
    *
    * This method initializes the component’s `header` and `table` arrays.
    * If column name is missing uses `this.HEADER_CELL_DEFAULT_NAME` as default name.
-   * If column data-type is missing uses `1` (Textual data-type) as default data-type.
+   * If column data-type is missing uses `this.DEFAULT_DATA_TYPE_ID` (Textual data-type) as default data-type.
    *
    * @param tableDTO  The DTO containing header (header's columns) and content (rows) to load.
    */
@@ -958,7 +842,7 @@ export class TableService {
     for (let columnDTO of tableDTO.header) {
       const headerCell: HeaderCell = new HeaderCell(
         columnDTO.columnName || this.HEADER_CELL_DEFAULT_NAME,
-        this.dataTypeService.convertIntoIDataType(columnDTO.dataType || 1)
+        this.dataTypeService.convertIntoIDataType(columnDTO.dataType || this.DEFAULT_DATA_TYPE_ID)
       );
       const column: HeaderColumn = new HeaderColumn(columnDTO.id, headerCell);
 

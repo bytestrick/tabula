@@ -35,6 +35,14 @@ export interface ColumnPatchDTO {
 }
 
 
+export interface ColumnPatchedDTO {
+  id: string,
+  columnIndex: number,
+  columnName?: string
+  dataTypeId?: number
+}
+
+
 /**
  * Payload sent from the frontend to request creation of a new column.
  *

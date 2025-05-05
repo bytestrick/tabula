@@ -21,7 +21,8 @@ export class CellCord {
     if (isHeaderCell) {
       // For header cells, we use -1 for the row index
       this._cord = new Pair(-1, j);
-    } else {
+    }
+    else {
       this._cord = new Pair(i, j);
     }
   }
@@ -31,6 +32,9 @@ export class CellCord {
    * For header cells, this will be -1.
    */
   get i(): number {
+    if (this.isHeaderCell)
+      throw new Error('\'isHeaderCell\' is true but you are accessing the row index.');
+
     return this._cord.first;
   }
 

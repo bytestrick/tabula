@@ -104,7 +104,7 @@
     >
       <!-- righe per gli elementi della tabella -->
       <tr
-        *ngFor="let row of tableService.getRows(); let rowIndex = index"
+        *ngFor="let row of tableService.getRows(); trackBy: trackByRowId; let rowIndex = index"
       >
         <!-- celle per contenere i table-organizer delle righe -->
         <td class="remove-border center-td-content-v-h" (mouseenter)="onMouseEnteredCell(rowIndex, tableService.INVALID_CELL_INDEX)">
