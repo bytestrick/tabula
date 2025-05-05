@@ -13,6 +13,10 @@ on:
   pull_request:
     branches: [ "main" ]
 
+env:
+  JWT_SECRET: 495e7b63feedcd348dfcd1b0fe6a5351ca26dde2317ffddc1845bb8a66615e9b
+  DATASOURCE_URL: jdbc:postgresql://localhost:1234/foo
+
 jobs:
   build:
 
@@ -38,22 +42,3 @@ jobs:
 
     - name: Test
       run: backend/gradlew --project-dir backend test
-
-  dependency-submission:
-
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
-    steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK 21
-      uses: actions/setup-java@v4
-      with:
-        java-version: '21'
-        distribution: 'temurin'
-
-    # Generates and submits a dependency graph, enabling Dependabot Alerts for all project dependencies.
-    # See: https://github.com/gradle/actions/blob/main/dependency-submission/README.md
-    - name: Generate and submit dependency graph
-      uses: gradle/actions/dependency-submission@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
