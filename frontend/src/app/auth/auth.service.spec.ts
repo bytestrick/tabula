@@ -11,7 +11,7 @@ function prepareSignIn(
   httpTestingController:
   HttpTestingController,
   token: string
-) {
+): AuthService {
   service = TestBed.inject(AuthService);
   expect(service).toBeTruthy();
   router.navigate.and.returnValue(Promise.resolve(true));
@@ -19,6 +19,7 @@ function prepareSignIn(
   httpTestingController.expectOne(`/auth/sign-in`).flush(token);
   service.authentication = {email: 'test@test.com', token};
   service.signOut();
+  return service;
 }
 
 describe('AuthService', () => {
@@ -49,7 +50,10 @@ describe('AuthService', () => {
     router = TestBed.inject(Router) as jasmine.SpyObj<Router>;
   });
 
-  afterEach(() => httpTestingController.verify());
+  afterEach(() => {
+    httpTestingController.verify();
+    Object.defineProperty(window, 'localStorage', {value: window.localStorage});
+  });
 
   it('should be created', () => {
     service = TestBed.inject(AuthService);
@@ -113,19 +117,20 @@ describe('AuthService', () => {
   });
 
   it('should sign-out a user that is authenticated', () => {
-    prepareSignIn(service, router, httpTestingController, token);
+    service = prepareSignIn(service, router, httpTestingController, token);
 
     httpTestingController.expectOne(`/auth/sign-out`).flush({});
 
     expect(localStorage.removeItem).toHaveBeenCalledOnceWith('authentication');
     expect(toast.show).toHaveBeenCalledWith(jasmine.objectContaining({body: 'Sign-out successful'}));
     expect(router.navigate).toHaveBeenCalledOnceWith(['/sign-in']);
+    console.log(service, service.authentication);
     expect(service.authentication).toBeNull();
     expect(service.isAuthenticated).toBeFalse();
   });
 
   it('should sign-out the user anyway when the server returns an error', () => {
-    prepareSignIn(service, router, httpTestingController, token);
+    service = prepareSignIn(service, router, httpTestingController, token);
 
     const req = httpTestingController.expectOne(`/auth/sign-out`);
     req.flush({message: 'No token found'}, {status: 400, statusText: 'No token found'});
