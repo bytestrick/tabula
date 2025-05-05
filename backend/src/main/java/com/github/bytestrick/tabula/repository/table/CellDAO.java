@@ -72,6 +72,17 @@ public class CellDAO {
     }
 
 
+    public void resetColumnCellsValues(UUID columnId) {
+        jdbcClient.sql("""
+                UPDATE cell
+                SET value = null
+                WHERE my_column = :columnId
+            """)
+                .param("columnId", columnId)
+                .update();
+    }
+
+
     private static class CellMapper implements RowMapper<Cell> {
 
         @Override

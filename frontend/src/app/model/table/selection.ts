@@ -1,20 +1,20 @@
 export class Selection {
 
-  private idToIndex: Map<string, number> = new Map<string, number>();
+  private selectedIds: Set<string> = new Set<string>();
 
 
-  selectOrUpdate(id: string, index: number): void {
-    this.idToIndex.set(id, index);
+  selectOrUpdate(id: string): void {
+    this.selectedIds.add(id);
   }
 
 
   deselect(id: string): void {
-    this.idToIndex.delete(id);
+    this.selectedIds.delete(id);
   }
 
 
   isSelected(id: string): boolean {
-    if (this.idToIndex.get(id))
+    if (this.selectedIds.has(id))
       return true;
 
     return false;
@@ -22,22 +22,11 @@ export class Selection {
 
 
   getSelectionNumber(): number {
-    return this.idToIndex.size
-  }
-
-
-  getSelectedIndexes(): number[] {
-    return Array.from(this.idToIndex.values());
+    return this.selectedIds.size
   }
 
 
   getSelectedIds(): string[] {
-    return Array.from(this.idToIndex.keys());
-  }
-
-
-  doForEachIndexSelected(fn: (i: number) => void): void {
-    for (let i of this.idToIndex.values())
-      fn(i);
+    return Array.from(this.selectedIds.keys());
   }
 }

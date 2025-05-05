@@ -8,13 +8,6 @@ export interface RowDTO {
 }
 
 
-export interface UpdateRowIndexDTO {
-  tableId: string,
-  currentRowIndex: number,
-  newRowIndex: number
-}
-
-
 /**
  * Payload sent from the frontend to request creation of a new row in a table.
  *

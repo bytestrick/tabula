@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -92,11 +91,13 @@ public class TableController {
     }
 
 
-//    @PatchMapping("/rows")
-//    public ResponseEntity<Void> updateRowsIndexes(@RequestBody List<UpdateRowIndexDTO> rowDTOList) {
-//        tableService.updateRowsIndexes(rowDTOList);
-//        return ResponseEntity.ok().build();
-//    }
+    @PatchMapping("/{tableId}/rows")
+    public ResponseEntity<MovedRowsOrColumnsDTO> moveRowsIndexes(
+            @PathVariable UUID tableId, @Valid @RequestBody MovesRowsOrColumnsDTO moveRowsDTO) {
+
+        MovedRowsOrColumnsDTO movedRowsOrColumnsDTO = tableService.moveRowsIndexes(tableId, moveRowsDTO);
+        return ResponseEntity.ok(movedRowsOrColumnsDTO);
+    }
 
 
     /**
@@ -135,14 +136,6 @@ public class TableController {
     }
 
 
-//    @PatchMapping("columns")
-//    public ResponseEntity<Void> updateColumnsIndexes(@RequestBody List<UpdateColumnIndexDTO> columnDTOList) {
-//        tableService.updateColumnsIndexes(columnDTOList);
-//
-//        return ResponseEntity.ok().build();
-//    }
-
-
     /**
      * REST controller endpoint for deleting one or more columns from a specified table.
      *
@@ -170,14 +163,22 @@ public class TableController {
      * @return                 HTTP 204 No Content on success.
      */
     @PatchMapping("/{tableId}/columns/{columnId}")
-    public ResponseEntity<Void> patchColumn(
+    public ResponseEntity<ColumnPatchedDTO> patchColumn(
             @PathVariable UUID tableId, @PathVariable UUID columnId,
             @Valid @RequestBody ColumnPatchDTO columnPatchDTO) {
 
-        tableService.patchColumn(tableId, columnId, columnPatchDTO);
-        return ResponseEntity.noContent().build();
+        ColumnPatchedDTO columnPatchedDTO = tableService.patchHeaderColumn(tableId, columnId, columnPatchDTO);
+        return ResponseEntity.ok(columnPatchedDTO);
     }
 
+
+    @PatchMapping("/{tableId}/columns")
+    public ResponseEntity<MovedRowsOrColumnsDTO> moveColumnsIndexes(
+            @PathVariable UUID tableId, @Valid @RequestBody MovesRowsOrColumnsDTO moveColumnsDTO) {
+
+        MovedRowsOrColumnsDTO movedColumnsDTO = tableService.moveColumnsIndexes(tableId, moveColumnsDTO);
+        return ResponseEntity.ok(movedColumnsDTO);
+    }
 
 
     /**

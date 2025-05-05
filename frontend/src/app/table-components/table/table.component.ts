@@ -76,6 +76,8 @@ export class TableComponent implements OnInit, OnDestroy {
   private popUpManagerService: PopUpManagerService = inject(PopUpManagerService);
   private activatedRoute: ActivatedRoute = inject(ActivatedRoute);
 
+  trackByRowId: TrackByFunction<Row> = (_index: number, item: Row): string => item.id;
+
 
   ngOnDestroy(): void {
     this.popUpManagerService.deletePopUp(this.INPUT_METHOD_POP_UP);
@@ -187,13 +189,7 @@ export class TableComponent implements OnInit, OnDestroy {
     if (this.hoveredColIndex === null)
       return;
 
-    if (!this.tableService.hasColumnsSelected()) {
-      if (event.previousIndex !== this.hoveredColIndex)
-        this.tableService.moveColumn(event.previousIndex, this.hoveredColIndex);
-    }
-    else {
-      this.tableService.moveSelectedColumns(event.previousIndex, this.hoveredColIndex);
-    }
+    this.tableService.moveColumns(event.previousIndex, this.hoveredColIndex);
   }
 
 
@@ -201,13 +197,7 @@ export class TableComponent implements OnInit, OnDestroy {
     if (this.hoveredRowIndex === null)
       return;
 
-    if (!this.tableService.hasRowsSelected()) {
-      if (event.previousIndex !== this.hoveredRowIndex)
-        this.tableService.moveRow(event.previousIndex, this.hoveredRowIndex);
-    }
-    else {
-      this.tableService.moveSelectedRows(event.previousIndex, this.hoveredRowIndex);
-    }
+    this.tableService.moveRows(event.previousIndex, this.hoveredRowIndex);
   }
 
 

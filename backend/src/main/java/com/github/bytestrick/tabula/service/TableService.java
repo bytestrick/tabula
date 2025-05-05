@@ -7,6 +7,7 @@ import com.github.bytestrick.tabula.controller.dto.TableDto;
 import com.github.bytestrick.tabula.model.Table;
 import com.github.bytestrick.tabula.model.User;
 import com.github.bytestrick.tabula.controller.dto.table.*;
+import com.github.bytestrick.tabula.model.Pair;
 import com.github.bytestrick.tabula.model.table.Cell;
 import com.github.bytestrick.tabula.repository.TableDao;
 import com.github.bytestrick.tabula.repository.UserDao;
@@ -20,9 +21,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -228,9 +227,22 @@ public class TableService {
      * @param columnId   UUID of the column to update.
      * @param patchDTO   DTO carrying the new dataTypeId; if null, no change is applied.
      */
-    public void patchColumn(UUID tableId, UUID columnId, ColumnPatchDTO patchDTO) {
-        if (patchDTO.dataTypeId() != null)
+    @Transactional
+    public ColumnPatchedDTO patchHeaderColumn(UUID tableId, UUID columnId, ColumnPatchDTO patchDTO) {
+        if (patchDTO.dataTypeId() != null) {
             columnDAO.changeColumnDataType(tableId, columnId, patchDTO.dataTypeId());
+            cellDAO.resetColumnCellsValues(columnId);
+        }
+
+        if (patchDTO.columnName() != null)
+            columnDAO.changeColumnName(tableId, columnId, patchDTO.columnName());
+
+        return new ColumnPatchedDTO(
+                columnId,
+                columnDAO.findColumnIndexById(tableId, columnId),
+                patchDTO.columnName(),
+                patchDTO.dataTypeId()
+        );
     }
 
 
@@ -281,19 +293,6 @@ public class TableService {
     }
 
 
-//    @Transactional
-//    public void updateColumnsIndexes(List<UpdateColumnIndexDTO> columnDTOList) {
-//        List<Pair<UUID, Integer>> toUpdate = columnDTOList.stream().map(
-//                dto -> new Pair<>(columnDAO.findColumnIdByIndex(dto.tableId(), dto.currentColumnIndex()), dto.newColumnIndex())
-//        ).toList();
-//
-//
-//        for (int i = 0; i < columnDTOList.size(); ++i) {
-//            columnDAO.updateColumnIndex(toUpdate.get(i).getFirst(), toUpdate.get(i).getSecond(), columnDTOList.get(i).tableId());
-//        }
-//    }
-
-
     /**
      * Delete a list of rows from the specified table within a transaction.
      *
@@ -314,14 +313,185 @@ public class TableService {
     }
 
 
-//    @Transactional
-//    public void updateRowsIndexes(List<UpdateRowIndexDTO> rowDTOList) {
-//        List<Pair<UUID, Integer>> toUpdate = rowDTOList.stream().map(
-//                dto -> new Pair<>(rowDAO.findRowIdByIndex(dto.tableId(), dto.currentRowIndex()), dto.newRowIndex())
-//        ).toList();
-//
-//        for (int i = 0; i < rowDTOList.size(); ++i) {
-//            rowDAO.updateRowIndex(toUpdate.get(i).getFirst(), toUpdate.get(i).getSecond(), rowDTOList.get(i).tableId());
-//        }
-//    }
+
+    private List<Pair<Integer, Integer>> getMovedIndexes(int fromIndex, int toIndex) {
+        List<Pair<Integer, Integer>> indexesMoved = new ArrayList<>();
+
+        if (fromIndex > toIndex) {
+            for (int i = toIndex; i <= fromIndex - 1; ++i) {
+                indexesMoved.add(new Pair<>(i, i + 1));
+            }
+        } else if (fromIndex < toIndex) {
+            for (int i = fromIndex + 1; i <= toIndex; ++i) {
+                indexesMoved.add(new Pair<>(i, i - 1));
+            }
+        } else {
+            return indexesMoved;
+        }
+
+        indexesMoved.add(new Pair<>(fromIndex, toIndex));
+        return indexesMoved;
+    }
+
+
+    private List<Integer> getSortedIndexesToMove(int rawDelta, List<Integer> rowsToMove) {
+        if (rowsToMove.isEmpty()) {
+            return rowsToMove;
+        }
+
+        if (rawDelta < 0) {
+            // sort selected indexes in ascending order
+            Collections.sort(rowsToMove);
+            return rowsToMove;
+        }
+        else if (rawDelta > 0) {
+            // sorts the selected indexes in descending order
+            Collections.sort(rowsToMove, Collections.reverseOrder());
+            return rowsToMove;
+        }
+
+        return rowsToMove;
+    }
+
+
+    private int getAdjustedDeltaToBounds(int rawDelta,
+                                         List<Integer> sortRowsIndexesToMove,
+                                         int minBounds,
+                                         int maxBounds) {
+
+        if (sortRowsIndexesToMove.isEmpty()) {
+            return 0;
+        }
+
+        if (rawDelta < 0) {
+            while (sortRowsIndexesToMove.getFirst() + rawDelta < minBounds) {
+                ++rawDelta;
+            }
+        }
+        else if (rawDelta > 0) {
+            while(sortRowsIndexesToMove.getFirst() + rawDelta >= maxBounds)
+                --rawDelta;
+        }
+
+        return rawDelta;
+    }
+
+
+    private void reconstructIndexesToUpdate(List<Pair<Integer, Integer>> indexesToUpdate,
+                                            List<Pair<Integer, Integer>> currentMovedIndexes) {
+
+        List<Pair<Integer, Integer>> newIndexesDiscovered = new ArrayList<>();
+        List<Pair<Integer, Integer>> indexesSnapshot = new ArrayList<>();
+
+        // Facciamo uno snapshot della lista originale
+        for (Pair<Integer, Integer> p : indexesToUpdate) {
+            indexesSnapshot.add(new Pair<>(p.getFirst(), p.getSecond()));
+        }
+
+        // Per ogni coppia spostata, cerchiamo una corrispondenza nello snapshot
+        for (Pair<Integer, Integer> p : currentMovedIndexes) {
+            int matchedSnapshotIndex = -1;
+
+            for (int k = 0; k < indexesSnapshot.size(); ++k) {
+                if (indexesSnapshot.get(k).getSecond().equals(p.getFirst())) {
+                    matchedSnapshotIndex = k;
+                    break;
+                }
+            }
+
+            if (matchedSnapshotIndex >= 0) {
+                // Se esiste già, aggiorniamo l'indice di destinazione
+                indexesToUpdate.get(matchedSnapshotIndex).setSecond(p.getSecond());
+            } else {
+                // Altrimenti lo aggiungiamo come nuovo rilevamento
+                newIndexesDiscovered.add(p);
+            }
+        }
+
+        // Infine aggiungiamo tutti i nuovi indici scoperti
+        indexesToUpdate.addAll(newIndexesDiscovered);
+    }
+
+
+    private List<Pair<Integer, Integer>> getIndexToUpdate(List<Integer> indexToMove, int adjustedDelta) {
+        List<Pair<Integer, Integer>> indexesToUpdate = new ArrayList<>();
+
+        for (int i : indexToMove) {
+            List<Pair<Integer, Integer>> currentMovedIndexes = getMovedIndexes(i, i + adjustedDelta);
+            reconstructIndexesToUpdate(indexesToUpdate, currentMovedIndexes);
+        }
+
+        return indexesToUpdate;
+    }
+
+
+    private boolean canMoveRowOrColumn(int fromIndex, int toIndex, int rowOrColumnAmount) {
+        if (fromIndex < 0 || fromIndex >= rowOrColumnAmount)
+            return false;
+
+        if (toIndex < 0 || toIndex >= rowOrColumnAmount)
+            return false;
+
+        if (fromIndex == toIndex)
+            return false;
+
+        return true;
+    }
+
+
+    @Transactional
+    public MovedRowsOrColumnsDTO moveRowsIndexes(UUID tableId, MovesRowsOrColumnsDTO moveRowsDTO) {
+        int rowsAmount = rowDAO.getRowsNumber(tableId);
+
+        if (!canMoveRowOrColumn(moveRowsDTO.fromIndex(), moveRowsDTO.toIndex(), rowsAmount))
+            throw new RuntimeException();
+
+        int rawDelta = moveRowsDTO.toIndex() - moveRowsDTO.fromIndex();
+        List<Integer> rowsIndexesToMove = rowDAO.findRowsIndexesFromIds(tableId, moveRowsDTO.idsToMove());
+        List<Integer> sortedRowsIndexesToMove = getSortedIndexesToMove(rawDelta, rowsIndexesToMove);
+        int adjustedDelta = getAdjustedDeltaToBounds(rawDelta, sortedRowsIndexesToMove, 0, rowsAmount);
+
+        List<Pair<UUID, Integer>> convertedList = getIndexToUpdate(rowsIndexesToMove, adjustedDelta)
+                .stream()
+                .map(
+                        (Pair<Integer, Integer> p) ->
+                                new Pair<>(rowDAO.findRowIdByIndex(tableId, p.getFirst()), p.getSecond())
+                )
+                .toList();
+
+        for (Pair<UUID, Integer> p : convertedList) {
+            rowDAO.updateRowIndex(p.getFirst(), p.getSecond(), tableId);
+        }
+
+        return new MovedRowsOrColumnsDTO(rowsIndexesToMove, adjustedDelta);
+    }
+
+
+
+    @Transactional
+    public MovedRowsOrColumnsDTO moveColumnsIndexes(UUID tableId, MovesRowsOrColumnsDTO moveColumnsDTO) {
+        int columnsAmount = columnDAO.getColumnNumber(tableId);
+
+        if (!canMoveRowOrColumn(moveColumnsDTO.fromIndex(), moveColumnsDTO.toIndex(), columnsAmount))
+            throw new RuntimeException();
+
+        int rawDelta = moveColumnsDTO.toIndex() - moveColumnsDTO.fromIndex();
+        List<Integer> columnsIndexesToMove = columnDAO.findColumnsIndexesFromIds(tableId, moveColumnsDTO.idsToMove());
+        List<Integer> sortedColumnsIndexesToMove = getSortedIndexesToMove(rawDelta, columnsIndexesToMove);
+        int adjustedDelta = getAdjustedDeltaToBounds(rawDelta, sortedColumnsIndexesToMove, 0, columnsAmount);
+
+        List<Pair<UUID, Integer>> convertedList = getIndexToUpdate(columnsIndexesToMove, adjustedDelta)
+                .stream()
+                .map(
+                        (Pair<Integer, Integer> p) ->
+                                new Pair<>(columnDAO.findColumnIdByIndex(tableId, p.getFirst()), p.getSecond())
+                )
+                .toList();
+
+        for (Pair<UUID, Integer> p : convertedList) {
+            columnDAO.updateColumnIndex(p.getFirst(), p.getSecond(), tableId);
+        }
+
+        return new MovedRowsOrColumnsDTO(columnsIndexesToMove, adjustedDelta);
+    }
 }
