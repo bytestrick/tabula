@@ -1,0 +1,22 @@
+<div #modal class="modal fade" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5>{{ title }}</h5>
+        <button type="button" class="btn-close" (click)="onCancel()"></button>
+      </div>
+
+      <div class="modal-body">{{ description }}</div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn me-1" [ngClass]="cancelButton!.background"
+                (click)="onCancel()">{{ cancelButton!.text }}
+        </button>
+        <button type="submit" class="btn" [ngClass]="confirmButton!.background"
+                (click)="onConfirm()">{{ confirmButton!.text }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

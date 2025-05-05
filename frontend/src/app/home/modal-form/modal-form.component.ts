@@ -1,14 +1,13 @@
-import { Modal } from 'bootstrap';
-import { ElementRef } from '@angular/core';
+import {Modal} from 'bootstrap';
+import {ElementRef} from '@angular/core';
 
 export abstract class ModalFormComponent {
-
   protected modal!: Modal;
   protected form!: HTMLFormElement;
   private isInit: boolean = false;
 
-
   protected abstract doOnSubmit(): void;
+
   protected abstract doOnModalHide(): void;
 
   protected init(form: ElementRef, modal: ElementRef): void {
@@ -28,8 +27,7 @@ export abstract class ModalFormComponent {
     if (this.form.checkValidity()) {
       this.doOnSubmit();
       this.hide();
-    }
-    else {
+    } else {
       this.form.classList.add('was-validated');
     }
   }

@@ -1,8 +1,10 @@
 import {
   Component,
   ComponentRef,
-  createComponent, EnvironmentInjector,
-  EventEmitter, inject,
+  createComponent,
+  EnvironmentInjector,
+  EventEmitter,
+  inject,
   OnDestroy,
   Output,
   ViewContainerRef
@@ -10,24 +12,18 @@ import {
 import {HomeService} from '../home.service';
 import {TableCard} from './table-card.interface';
 import {Subscription} from 'rxjs';
-import {DatePipe, NgIf} from '@angular/common';
+import {DatePipe} from '@angular/common';
 import {PrettyDatePipe} from '../pretty-date.pipe';
 import {ToastService} from '../../toast/toast.service';
-import {ConfirmDeletionDialogService} from '../../confirm-deletion-dialog/confirm-deletion-dialog.service';
+import {ConfirmDialogService} from '../../confirm-dialog/confirm-dialog.service';
 
 
 @Component({
   selector: 'tbl-table-card',
-  standalone: true,
-  imports: [
-    DatePipe,
-    PrettyDatePipe
-  ],
+  imports: [DatePipe, PrettyDatePipe],
   templateUrl: './table-card.component.html',
-  styleUrl: './table-card.component.css'
 })
 export class TableCardComponent implements OnDestroy {
-
   @Output('editTableCard') editTableCard: EventEmitter<TableCardComponent> = new EventEmitter;
   private componentRef!: ComponentRef<TableCardComponent>;
 
@@ -40,12 +36,9 @@ export class TableCardComponent implements OnDestroy {
 
   private isInit: boolean = false;
   private subscription!: Subscription;
-  private toast: ToastService = inject(ToastService);
-  private confirmDialog: ConfirmDeletionDialogService = inject(ConfirmDeletionDialogService);
-
-
-  constructor(private homeService: HomeService) {}
-
+  private toast = inject(ToastService);
+  private confirmDialog = inject(ConfirmDialogService);
+  private homeService = inject(HomeService);
 
   init(tableCard: TableCard): TableCardComponent {
     if (this.isInit) return this;
@@ -98,24 +91,25 @@ export class TableCardComponent implements OnDestroy {
     return this.lastEditDate;
   }
 
-  ngOnDestroy(): void {
+  ngOnDestroy() {
     this.subscription?.unsubscribe();
   }
 
-  insert(parent: ViewContainerRef, index?: number): void {
+  insert(parent: ViewContainerRef, index?: number) {
     parent.insert(this.componentRef.hostView, index);
   }
 
-  onDelete(): void {
+  onDelete() {
     this.confirmDialog.show({
       title: 'Delete the table?',
-      description: 'You are about to delete ' + this.title + '.'
-    }).subscribe((confirm: boolean): void => {
+      description: 'You are about to delete ' + this.title + '.',
+      confirmButton: {text: 'Delete', background: 'btn-danger'}
+    }).subscribe((confirm: boolean) => {
       if (confirm) {
         if (!this.id) return;
 
         this.subscription = this.homeService.deleteTableCard(this.id).subscribe({
-          next: (data: string): void => {
+          next: () => {
             this.toast.show({
               title: 'Table Deleted',
               body: `The table has been successfully deleted.`,
@@ -124,7 +118,7 @@ export class TableCardComponent implements OnDestroy {
             });
             this.componentRef.destroy();
           },
-          error: (err: any): void => {
+          error: () => {
             this.toast.show({
               title: 'Table Not Deleted',
               body: 'An error occurred the table was not deleted.\nPlease try again later.',
@@ -137,11 +131,11 @@ export class TableCardComponent implements OnDestroy {
     });
   }
 
-  onEdit(): void {
+  onEdit() {
     this.editTableCard.emit(this);
   }
 
-  edit(tableCard: TableCard): void {
+  edit(tableCard: TableCard) {
     this.title = tableCard.title;
     this.description = tableCard.description;
     this.lastEditDate = tableCard.lastEditDate;

@@ -1,24 +1,28 @@
 import {AfterViewInit, Component, inject, OnInit, viewChild} from '@angular/core';
-import {AbstractControl, FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
+import {FormBuilder, ReactiveFormsModule} from '@angular/forms';
 import {Router, RouterLink} from '@angular/router';
-import {NgForOf} from '@angular/common';
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {enableTooltips} from '../../tooltips';
 import {AuthService} from '../auth.service';
 import {ToastService} from '../../toast/toast.service';
 import {Reason} from '../otp/otp.component';
 import {PasswordInputComponent} from '../password-input/password-input.component';
-
-interface Country {
-  name: string,
-  flag: string,
-  code: string,
-  dialCode: number
-}
+import {NameFieldComponent} from './name-field.component';
+import {SurnameFieldComponent} from './surname-field.component';
+import {CountrySelectComponent} from './country-select.component';
+import {EmailFieldComponent} from './email-field.component';
 
 @Component({
   selector: 'tbl-sign-up',
-  imports: [RouterLink, NgForOf, PasswordInputComponent, ReactiveFormsModule],
+  imports: [
+    RouterLink,
+    PasswordInputComponent,
+    ReactiveFormsModule,
+    NameFieldComponent,
+    SurnameFieldComponent,
+    CountrySelectComponent,
+    EmailFieldComponent
+  ],
   templateUrl: './sign-up.component.html'
 })
 export class SignUpComponent implements OnInit, AfterViewInit {
@@ -28,15 +32,18 @@ export class SignUpComponent implements OnInit, AfterViewInit {
   private toast = inject(ToastService);
   private formBuilder = inject(FormBuilder);
   private passwordComponent = viewChild.required(PasswordInputComponent);
-  protected countries: Country[] = [];
+  private nameFieldComponent = viewChild.required(NameFieldComponent);
+  private surnameFieldComponent = viewChild.required(SurnameFieldComponent);
+  private emailFieldComponent = viewChild.required(EmailFieldComponent);
+  private countrySelectComponent = viewChild.required(CountrySelectComponent);
 
   protected form = this.formBuilder.group({
-    email: ['', [Validators.required, Validators.email]],
-    name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
-    surname: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
+    email: ['',],
+    name: [''],
+    surname: [''],
     password: this.formBuilder.group({password: '', confirm: ''}),
     rememberMe: [false],
-    country: [-1, [(select: AbstractControl) => select.value === -1 ? {required: true} : null]]
+    country: [-1]
   });
 
   ngOnInit() {
@@ -44,17 +51,15 @@ export class SignUpComponent implements OnInit, AfterViewInit {
       this.router.navigate(['/']).finally(() => console.log('Already authenticated'));
       return;
     }
-
     enableTooltips();
-
-    this.http.get<Country[]>('countries.json').subscribe({
-      next: data => this.countries = data,
-      error: console.error,
-    });
   }
 
   ngAfterViewInit() {
     this.form.setControl('password', this.passwordComponent().form);
+    this.form.setControl('name', this.nameFieldComponent().name);
+    this.form.setControl('surname', this.surnameFieldComponent().surname);
+    this.form.setControl('country', this.countrySelectComponent().country);
+    this.form.setControl('email', this.emailFieldComponent().email);
   }
 
   protected onSubmit() {
@@ -63,7 +68,7 @@ export class SignUpComponent implements OnInit, AfterViewInit {
       this.http.post('/auth/sign-up', {
         ...this.form.value,
         password: this.form.controls.password.controls.password.value,
-        country: this.countries[this.form.controls.country.value!],
+        country: this.countrySelectComponent().countries[this.form.controls.country.value!],
       }).subscribe({
         next: () => {
           localStorage.setItem('otpData', JSON.stringify({
