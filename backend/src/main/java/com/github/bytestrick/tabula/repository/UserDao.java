@@ -71,6 +71,19 @@ public class UserDao {
         return Optional.empty();
     }
 
+    public Optional<String> findPasswordByEmail(String email) {
+        return jdbcClient.sql("SELECT encoded_password from users WHERE email = :email")
+                .param("email", email)
+                .query().optionalValue().map(value -> (String) value);
+    }
+
+    @Transactional
+    public void deleteByEmail(String email) {
+        jdbcClient.sql("DELETE FROM users WHERE email = :email")
+                .param("email", email)
+                .update();
+    }
+
     public void save(User user) {
         jdbcClient.sql("""
                         INSERT INTO users VALUES (:id, :email, :password, :roles, :name, :surname, :country_name,
@@ -111,10 +124,38 @@ public class UserDao {
     }
 
     @Transactional
-    public void updatePassword(@NotNull UUID id, String encodedPassword) {
+    public void resetPasswordWithOtp(@NotNull UUID id, String encodedPassword) {
         jdbcClient.sql("UPDATE users SET otp = NULL, otp_expiration = NULl, encoded_password = :pw WHERE id = :id")
                 .param("id", id)
                 .param("pw", encodedPassword)
+                .update();
+    }
+
+    @Transactional
+    public void updatePasswordByEmail(String email, String encodedPassword) {
+        jdbcClient.sql("UPDATE users SET encoded_password = :encoded_password WHERE email = :email")
+                .param("encoded_password", encodedPassword)
+                .param("email", email)
+                .update();
+    }
+
+    @Transactional
+    public void updateDetailsByEmail(String email, String name, String surname, Country country, String newEmail) {
+        jdbcClient.sql("""
+                        UPDATE users
+                        SET name = :name, surname = :surname, country_code = :country_code,
+                            country_dial_code = :country_dial_code, country_flag = :country_flag,
+                            country_name = :country_name, email = :new_email
+                        WHERE email = :email
+                        """)
+                .param("email", email)
+                .param("name", name)
+                .param("surname", surname)
+                .param("country_code", country.code())
+                .param("country_dial_code", country.dialCode())
+                .param("country_flag", country.flag())
+                .param("country_name", country.name())
+                .param("new_email", newEmail)
                 .update();
     }
 }

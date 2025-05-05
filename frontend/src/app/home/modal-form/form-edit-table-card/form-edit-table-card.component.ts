@@ -8,27 +8,21 @@ import {ToastService} from '../../../toast/toast.service';
 
 @Component({
   selector: 'tbl-form-edit-table-card',
-  standalone: true,
-  imports: [
-    FormsModule
-  ],
+  imports: [FormsModule],
   templateUrl: './form-edit-table-card.component.html',
-  styleUrl: './form-edit-table-card.component.css'
 })
 export class FormEditTableCardComponent extends ModalFormComponent implements AfterViewInit {
-
   @ViewChild('form') private formRef!: ElementRef;
   @ViewChild('modal') private modalRef!: ElementRef;
   private tableCardCmpToEdit: TableCardComponent | undefined;
   titleField: string = '';
   descriptionField: string = '';
   private toast: ToastService = inject(ToastService);
+  private homeService = inject(HomeService);
 
-
-  constructor(private homeService: HomeService) {
+  constructor() {
     super();
   }
-
 
   ngAfterViewInit(): void {
     this.init(this.formRef, this.modalRef);
@@ -57,7 +51,7 @@ export class FormEditTableCardComponent extends ModalFormComponent implements Af
     const toEdit: TableCardComponent | undefined = this.tableCardCmpToEdit;
 
     this.homeService.editTableCard(tableCard).subscribe({
-      next: (data: string): void => {
+      next: () => {
         this.toast.show({
           title: 'Table Edited',
           body: `The table has been successfully edited.`,
@@ -66,7 +60,7 @@ export class FormEditTableCardComponent extends ModalFormComponent implements Af
         });
         toEdit?.edit(tableCard);
       },
-      error: (err: any): void => {
+      error: () => {
         this.toast.show({
           title: 'Table Not Edited',
           body: 'An error occurred the table was not edited.\nPlease try again later.',

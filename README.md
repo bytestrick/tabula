@@ -3,7 +3,13 @@
 This repository contains two subprojects, one is the backend of the app which is a Java-SpringBoot-PostgreSQL-Gradle
 application, while the other is the frontend of the app which is a TypeScript-Angular-NPM app.
 
-TODO: add command to bootstrap-run the whole project.
+To run the project you will first need to [setup the `env` file](#secrets-and-the-env-file) with the database configuration. Then you can run it with
+
+```sh
+git clone https://github.com/bytestrick/tabula.git
+cd tabula
+./run.sh
+```
 
 ### How does authentication work?
 

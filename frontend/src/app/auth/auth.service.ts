@@ -37,13 +37,18 @@ export class AuthService {
     return this.auth;
   }
 
+  set authentication(authentication: Authentication) {
+    this.auth = authentication;
+    localStorage.setItem('authentication', JSON.stringify(this.auth));
+  }
+
   constructor() {
     const authenticationRaw = localStorage.getItem('authentication');
     this.auth = authenticationRaw ? JSON.parse(authenticationRaw) : null;
   }
 
   base64urlToBase64(base64url: string): string {
-    let base64: string = base64url
+    let base64 = base64url
       .replace("-", "+")
       .replace("_", "/");
 
@@ -65,7 +70,7 @@ export class AuthService {
   }
 
   get isAuthenticated(): boolean {
-    return this.authentication !== null && !this.isExpired;
+    return this.authentication !== null && this.authentication.token !== undefined && !this.isExpired;
   }
 
   signIn(form: SignInRequest): Observable<AuthenticationResponse> {
@@ -81,17 +86,27 @@ export class AuthService {
     );
   }
 
+  /**
+   * Makes a sign-out request to the server and signs out the client regardless of the response
+   */
   signOut() {
     if (this.isAuthenticated) {
       this.http.post('/auth/sign-out', {}).subscribe({
         next: () => this.toast.show({body: 'Sign-out successful', background: 'success'}),
         error: (error: HttpErrorResponse) => this.toast.serverError(error.error?.message)
       });
-      localStorage.removeItem('authentication');
-      this.auth = null;
-      this.router.navigate(['/sign-in']).then();
+      this.clientSignOut();
     } else {
       throw new Error(`Can't sign-out without being signed-in first`);
     }
+  }
+
+  /**
+   * Cleans up the authentication state without making any requests
+   */
+  clientSignOut() {
+    localStorage.removeItem('authentication');
+    this.auth = null;
+    this.router.navigate(['/sign-in']).then();
   }
 }

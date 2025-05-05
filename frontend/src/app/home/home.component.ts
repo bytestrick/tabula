@@ -1,4 +1,4 @@
-import {Component, EnvironmentInjector, ViewChild, ViewContainerRef,} from '@angular/core';
+import {Component, EnvironmentInjector, inject, ViewChild, ViewContainerRef,} from '@angular/core';
 import {CreateTableCardComponent} from './create-table-card/create-table-card.component';
 import {FormsModule} from '@angular/forms';
 import {FormCreateTableCardComponent} from './modal-form/form-create-table-card/form-create-table-card.component';
@@ -13,7 +13,6 @@ import {NavbarComponent} from '../navbar/navbar.component';
 
 @Component({
   selector: 'tbl-home',
-  standalone: true,
   imports: [
     CreateTableCardComponent,
     FormsModule,
@@ -23,19 +22,14 @@ import {NavbarComponent} from '../navbar/navbar.component';
     NavbarComponent,
   ],
   templateUrl: './home.component.html',
-  styleUrl: './home.component.css'
 })
 export class HomeComponent {
+  private injector = inject(EnvironmentInjector);
 
   @ViewChild('formCreateTableCard') private formCreateTableCard!: FormCreateTableCardComponent;
   @ViewChild('formEditTableCard') private formEditTableCard!: FormEditTableCardComponent;
   @ViewChild('tableCardContainer', {read: ViewContainerRef}) private tableCardContainerView!: ViewContainerRef;
   @ViewChild('tableCardInfiniteScroll') private tableCardInfiniteScroll!: TableCardInfiniteScrollComponent;
-
-
-  constructor(private injector: EnvironmentInjector) {
-  }
-
 
   createTableCard(): void {
     this.formCreateTableCard.show();

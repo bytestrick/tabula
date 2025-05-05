@@ -1,18 +1,13 @@
 import {Injectable} from '@angular/core';
 import {first, Observable, Subject} from 'rxjs';
-import {ConfirmDialogOption} from './confirm-deletion-dialog.component';
-
+import {ConfirmDialogOption} from './confirm-dialog.component';
 
 @Injectable({
   providedIn: 'root'
 })
-export class ConfirmDeletionDialogService {
+export class ConfirmDialogService {
   readonly subject: Subject<ConfirmDialogOption> = new Subject<ConfirmDialogOption>();
   readonly onConfirm: Subject<boolean> = new Subject();
-
-
-  constructor() { }
-
 
   show(data: ConfirmDialogOption): Observable<boolean> {
     const response: Observable<boolean> = this.onConfirm.pipe(first());

@@ -1,69 +1,60 @@
-import {Component, ElementRef, EventEmitter, OnInit, Output, ViewChild} from '@angular/core';
+import {Component, ElementRef, EventEmitter, inject, OnInit, Output, Signal, viewChild} from '@angular/core';
 import {FormsModule} from '@angular/forms';
-import {NavbarService, UserInfo} from './navbar.service';
+import {NavbarService, UserDetails} from './navbar.service';
 import {NgClass, NgIf, TitleCasePipe} from '@angular/common';
 import {TableCard} from '../home/table-card/table-card.interface';
 import {AuthService} from '../auth/auth.service';
-import {ThemeMode, ThemeService} from '../theme.service';
+import {ThemeService} from '../theme.service';
+import {ConfirmDialogService} from '../confirm-dialog/confirm-dialog.service';
+import {DeleteAccountComponent} from './delete-account/delete-account.component';
+import {ChangePasswordComponent} from './update-password/change-password.component';
+import {UpdateAccountDetailsComponent} from './update-account-details/update-account-details.component';
 
 @Component({
   selector: 'tbl-navbar',
-  standalone: true,
-  imports: [
-    FormsModule,
-    NgIf,
-    NgClass,
-    TitleCasePipe
-  ],
+  imports: [FormsModule, NgIf, NgClass, TitleCasePipe, DeleteAccountComponent, ChangePasswordComponent, UpdateAccountDetailsComponent],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css'
 })
 export class NavbarComponent implements OnInit {
+  private navbarService = inject(NavbarService);
+  private authService = inject(AuthService);
+  protected themeService = inject(ThemeService);
+  private confirmDialog = inject(ConfirmDialogService);
 
-  protected searchContent: string = '';
-  protected searchFieldOnFocus: boolean = false;
-  @ViewChild('searchField') private searchField!: ElementRef;
+  protected searchContent = '';
+  protected searchFieldOnFocus = false;
+  private searchField: Signal<ElementRef> = viewChild.required('searchField');
   private timer: any;
   @Output() onSearchedTableCard: EventEmitter<TableCard[] | "noSearchContent"> = new EventEmitter;
-  protected userInfo: UserInfo = {
-    name: '',
-    surname: '',
-    email: ''
-  }
-  private static searching: boolean = false;
+  protected _userDetails: UserDetails = {name: '', surname: '', email: ''};
+  private static searching = false;
 
-
-  constructor(private navbarService: NavbarService,
-              private authService: AuthService,
-              protected themeService: ThemeService) {}
-
-
-  ngOnInit(): void {
-    const email: string | undefined = this.authService.authentication?.email
-    if (!email) return;
-
-    this.navbarService.retrievesUserInformation(email).subscribe({
-      next: (data: UserInfo): void => {
-        this.userInfo = data;
-      },
+  ngOnInit() {
+    this.navbarService.retrievesUserInformation(this.authService.authentication!.email).subscribe({
+      next: (data: UserDetails) => this._userDetails = data,
       error: err => console.error(err)
     })
   }
 
-  protected onSearchSubmit(searchForm: HTMLFormElement): void {
+  protected set userDetails(details: UserDetails) {
+    this._userDetails = details;
+  }
+
+  protected onSearchSubmit(_: HTMLFormElement) {
     this.search(this.searchContent);
   }
 
-  protected clearSearch(): void {
+  protected clearSearch() {
     this.searchContent = '';
-    this.searchField.nativeElement.focus();
+    this.searchField().nativeElement.focus();
   }
 
-  protected onFocus(): void {
+  protected onFocus() {
     this.searchFieldOnFocus = true;
   }
 
-  protected onFocusOut($event: FocusEvent): void {
+  protected onFocusOut($event: FocusEvent) {
     const relatedTarget = $event.relatedTarget as HTMLElement | null;
     if (relatedTarget && relatedTarget.id === 'clear-search-field-button') {
       return;
@@ -71,16 +62,31 @@ export class NavbarComponent implements OnInit {
     this.searchFieldOnFocus = false;
   }
 
-  protected onKeyUp(event: KeyboardEvent): void {
+  protected onKeyUp(event: KeyboardEvent) {
     if (event.key === 'Enter') return;
 
     clearTimeout(this.timer);
-    this.timer = setTimeout((): void => {
+    this.timer = setTimeout(() => {
       this.search(this.searchContent);
     }, 500);
   }
 
-  public search(text: string): void {
+  static isSearching(): boolean {
+    return NavbarComponent.searching;
+  }
+
+  protected onSingOut() {
+    this.confirmDialog.show({
+      title: 'Sign out of your account?',
+      description: 'Are you sure?'
+    }).subscribe((response: boolean) => {
+      if (response) {
+        this.authService.signOut();
+      }
+    });
+  }
+
+  search(text: string) {
     if (text === "") {
       NavbarComponent.searching = false;
       this.onSearchedTableCard.emit("noSearchContent");
@@ -95,17 +101,5 @@ export class NavbarComponent implements OnInit {
       },
       error: (err: any): any => console.debug(err)
     });
-  }
-
-  static isSearching(): boolean {
-    return NavbarComponent.searching;
-  }
-
-  onSingOut(): void {
-    this.authService.signOut();
-  }
-
-  setTheme(theme: ThemeMode): void {
-    this.themeService.setTheme(theme);
   }
 }

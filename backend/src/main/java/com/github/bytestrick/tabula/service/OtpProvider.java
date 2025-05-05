@@ -29,14 +29,14 @@ public class OtpProvider {
      * @param user   the generated OTP is set on it
      * @param reason the reason for the OTP
      */
-    public void send(User user, String reason) {
+    public void send(User user, String receiver, String reason) {
         String otp = String.valueOf(RANDOM.nextInt(100000, 999999));
         int expirationMinutes = 30;
         user.setOtp(otp);
         user.setOtpExpiration(LocalDateTime.now().plusMinutes(expirationMinutes));
 
         SimpleMailMessage mail = new SimpleMailMessage();
-        mail.setTo(user.getEmail());
+        mail.setTo(receiver);
         mail.setSubject("Tabula: " + reason);
         mail.setText(String.format(
                 "Use this code to %s: %s\n\nIt will expire in %d minutes.", reason, otp, expirationMinutes));

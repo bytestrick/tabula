@@ -68,7 +68,7 @@ export class ToastComponent implements OnInit, OnDestroy {
     let iconColor = '';
     if (options.background) {
       el.classList.add(`bg-${options.background}`);
-      el.style.setProperty('--bs-bg-opacity', '0.7');
+      el.style.setProperty('--bs-bg-opacity', '0.95');
       if (options.icon) {
         iconColor = options.background.endsWith('-subtle') ? options.background.slice(0, -7) : options.background;
       }

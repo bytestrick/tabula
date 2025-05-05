@@ -2,7 +2,7 @@ import {Component, inject} from '@angular/core';
 import {ToastComponent} from './toast/toast.component';
 import {RouterOutlet} from '@angular/router';
 import {ThemeService} from './theme.service';
-import {ConfirmDialogComponent} from './confirm-deletion-dialog/confirm-deletion-dialog.component';
+import {ConfirmDialogComponent} from './confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'tbl-root',
@@ -11,5 +11,5 @@ import {ConfirmDialogComponent} from './confirm-deletion-dialog/confirm-deletion
   styleUrl: './app.component.css'
 })
 export class AppComponent {
-  private themeService: ThemeService = inject(ThemeService);
+  _ = inject(ThemeService);
 }

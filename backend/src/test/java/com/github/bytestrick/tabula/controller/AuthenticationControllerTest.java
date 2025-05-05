@@ -141,7 +141,7 @@ public class AuthenticationControllerTest {
                         .content(objectMapper.writeValueAsString(
                                 new SignUpRequest("test@example.com", "John", "Doe", "NefariousMeans9!", false,
                                         new Country("Italy", "🇮🇹", "IT", 39)))))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
 
         verify(userDao).save(ArgumentMatchers.argThat(user -> user.getEmail().equals("test@example.com")
                 && passwordEncoder.matches("NefariousMeans9!", user.getEncodedPassword())));
@@ -197,10 +197,10 @@ public class AuthenticationControllerTest {
         String reason = "Hello world";
         mockMvc.perform(post("/auth/send-otp")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new SendOtpRequest(email, reason))))
+                        .content(objectMapper.writeValueAsString(new SendOtpRequest(email, email, reason))))
                 .andExpect(status().isOk());
 
-        verify(otpProvider).send(user, reason);
+        verify(otpProvider).send(user, user.getEmail(), reason);
         userDao.updateOtp(user);
     }
 

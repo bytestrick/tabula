@@ -35,7 +35,7 @@ public class OtpProviderTest {
     @Test
     void createGeneratesSetsAndIssuesANewOtpForAUser() {
         User user = User.builder().email(EMAIL).build();
-        otpProvider.send(user, "this is a reason");
+        otpProvider.send(user, user.getEmail(), "this is a reason");
 
         assertThat(user.getOtp()).isNotNull().hasSize(6);
         assertThat(user.getOtpExpiration()).isNotNull();
