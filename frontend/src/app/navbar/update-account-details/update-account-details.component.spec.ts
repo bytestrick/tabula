@@ -19,6 +19,7 @@ describe('UpdateAccountDetailsComponent', () => {
   });
 
   it('should create', () => {
+    console.log(localStorage);
     expect(component).toBeTruthy();
   });
 });

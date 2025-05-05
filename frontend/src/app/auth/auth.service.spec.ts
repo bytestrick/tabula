@@ -31,6 +31,7 @@ describe('AuthService', () => {
   let router: jasmine.SpyObj<Router>;
   let toast: jasmine.SpyObj<ToastService>;
   let mockLocalStorage: Storage;
+  const realLocalStorage = window.localStorage;
 
   beforeEach(() => {
     mockLocalStorage = jasmine.createSpyObj('localStorage', ['getItem', 'setItem', 'removeItem']);
@@ -52,7 +53,7 @@ describe('AuthService', () => {
 
   afterEach(() => {
     httpTestingController.verify();
-    Object.defineProperty(window, 'localStorage', {value: window.localStorage});
+    Object.defineProperty(window, 'localStorage', {value: realLocalStorage});
   });
 
   it('should be created', () => {
@@ -124,7 +125,6 @@ describe('AuthService', () => {
     expect(localStorage.removeItem).toHaveBeenCalledOnceWith('authentication');
     expect(toast.show).toHaveBeenCalledWith(jasmine.objectContaining({body: 'Sign-out successful'}));
     expect(router.navigate).toHaveBeenCalledOnceWith(['/sign-in']);
-    console.log(service, service.authentication);
     expect(service.authentication).toBeNull();
     expect(service.isAuthenticated).toBeFalse();
   });
