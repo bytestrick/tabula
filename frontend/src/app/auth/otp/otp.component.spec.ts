@@ -18,6 +18,7 @@ describe('OtpComponent', () => {
   let otpData: { email: string, receiver: string, reason: Reason };
   let httpTestingController: HttpTestingController;
   let errorHandler: ErrorHandler;
+  const realLocalStorage = window.localStorage;
 
   beforeEach(async () => {
     mockLocalStorage = jasmine.createSpyObj('localStorage', ['getItem', 'setItem', 'removeItem']);
@@ -46,7 +47,10 @@ describe('OtpComponent', () => {
     errorHandler = TestBed.inject(ErrorHandler) as ErrorHandler;
   });
 
-  afterEach(() => httpTestingController.verify());
+  afterEach(() => {
+    httpTestingController.verify();
+    Object.defineProperty(window, 'localStorage', {value: realLocalStorage});
+  });
 
   it('should create', () => {
     expect(component).toBeTruthy();

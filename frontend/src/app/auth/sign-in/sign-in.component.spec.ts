@@ -20,6 +20,7 @@ describe('SignInComponent', () => {
   let authStateSpy: jasmine.Spy;
   let httpTestingController: HttpTestingController;
   let mockLocalStorage: Storage;
+  const realLocalStorage = window.localStorage;
 
   beforeEach(async () => {
     mockLocalStorage = jasmine.createSpyObj('localStorage', ['getItem', 'setItem', 'removeItem']);
@@ -64,6 +65,8 @@ describe('SignInComponent', () => {
     authStateSpy = jasmine.createSpy('isAuthenticated').and.returnValue(false);
     Object.defineProperty(auth, 'isAuthenticated', {get: authStateSpy});
   });
+
+  afterEach(() => Object.defineProperty(window, 'localStorage', {value: realLocalStorage}));
 
   it('should create', () => {
     fixture.detectChanges();
