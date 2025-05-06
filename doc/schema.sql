@@ -86,7 +86,7 @@ CREATE TABLE cell
     id              UUID PRIMARY KEY,
     my_row          UUID,
     my_column       UUID,
-    value           VARCHAR(1000),
+    value           VARCHAR(1000) NOT NULL DEFAULT '',
 
     FOREIGN KEY (my_column) REFERENCES my_column(id) ON DELETE CASCADE,
     FOREIGN KEY (my_row) REFERENCES my_row(id) ON DELETE CASCADE,
