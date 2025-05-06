@@ -34,7 +34,7 @@ BEGIN
         FROM my_column
         WHERE my_table = NEW.my_table
     LOOP
-        INSERT INTO cell (id, my_row, my_column, value) VALUES (uuid_generate_v4(), NEW.id, rec.id, NULL);
+        INSERT INTO cell (id, my_row, my_column, value) VALUES (uuid_generate_v4(), NEW.id, rec.id, '');
     END LOOP;
 
     RETURN NEW;
@@ -61,7 +61,7 @@ BEGIN
         FROM my_row
         WHERE my_table = NEW.my_table
     LOOP
-        INSERT INTO cell (id, my_row, my_column, value) VALUES (uuid_generate_v4(), rec.id, NEW.id, NULL);
+        INSERT INTO cell (id, my_row, my_column, value) VALUES (uuid_generate_v4(), rec.id, NEW.id, '');
     END LOOP;
 
     RETURN NEW;
