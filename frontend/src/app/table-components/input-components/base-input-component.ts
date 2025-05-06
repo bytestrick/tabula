@@ -9,6 +9,7 @@ import {PopUp} from '../pop-up-component/pop-up.component';
 export abstract class BaseInputComponent implements IPopUpContent {
 
   @Input() startingValue: any = null;
+  @Input() doAfterInputDataTypeConfirmation?: (value: any, dataTypeId: number) => void;
   @Input() doAfterInputConfirmation?: (value: any) => void;
 
   popUpRef?: PopUp;
@@ -20,6 +21,14 @@ export abstract class BaseInputComponent implements IPopUpContent {
   protected confirmInput(value: any): void {
     if (this.doAfterInputConfirmation)
       this.doAfterInputConfirmation(value);
+
+    this.popUpRef?.hide();
+  }
+
+
+  protected confirmInputDataType(value: any, dataTypeId: number): void {
+    if (this.doAfterInputDataTypeConfirmation)
+      this.doAfterInputDataTypeConfirmation(value, dataTypeId);
 
     this.popUpRef?.hide();
   }

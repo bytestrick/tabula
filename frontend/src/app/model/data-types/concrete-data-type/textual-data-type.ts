@@ -4,11 +4,12 @@ import {Type} from '@angular/core';
 import {TextualInputComponent} from '../../../table-components/input-components/textual-input/textual-input.component';
 import {BaseCellComponent} from '../../../table-components/table/cells/base-cell-component';
 import {TextualCellComponent} from '../../../table-components/table/cells/textual-cell/textual-cell.component';
+import {DataTypeRegistryService} from '../../../services/data-type-registry.service';
 
 export class TextualDataType implements IDataType {
 
   getDataTypeId(): number {
-    return 1;
+    return DataTypeRegistryService.TEXTUAL_ID;
   }
 
 

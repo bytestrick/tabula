@@ -1,6 +1,7 @@
 import {Component, ElementRef, ViewChild} from '@angular/core';
 import {BaseInputComponent} from '../base-input-component';
 import {InfoComponent} from '../info-component/info.component';
+import {DataTypeRegistryService} from '../../../services/data-type-registry.service';
 
 @Component({
   selector: 'tbl-text-input',
@@ -16,6 +17,8 @@ export class TextualInputComponent extends BaseInputComponent {
 
   private text: string = '';
 
+  private readonly TEXTUAL_ID: number = DataTypeRegistryService.TEXTUAL_ID;
+
 
   protected override beforeShowUp(): void {
     this.grabFocus();
@@ -27,7 +30,7 @@ export class TextualInputComponent extends BaseInputComponent {
 
   onKeyPressed(event: KeyboardEvent): void {
     if (event.key === 'Enter') {
-      this.confirmInput(this.text);
+      this.confirmInputDataType(this.text, this.TEXTUAL_ID);
     }
     else if (event.key === 'Delete') {
       this.abortInput();
@@ -46,7 +49,7 @@ export class TextualInputComponent extends BaseInputComponent {
 
 
   protected override onHiddenWithLeftClick(): void {
-    this.confirmInput(this.text);
+    this.confirmInputDataType(this.text, this.TEXTUAL_ID);
   }
 
 

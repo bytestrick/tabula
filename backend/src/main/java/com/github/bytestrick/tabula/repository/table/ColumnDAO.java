@@ -278,7 +278,7 @@ public class ColumnDAO {
     }
 
 
-    public List<Integer> findColumnsIndexesFromIds(UUID tableId, @NotNull @NotEmpty List<UUID> columnsIds) {
+    public List<Integer> findColumnsIndexesFromIds(UUID tableId, List<UUID> columnsIds) {
         return jdbcClient.sql("""
                 SELECT column_index
                 FROM my_column
@@ -288,6 +288,33 @@ public class ColumnDAO {
                 .param("columnsIds", columnsIds)
                 .query(Integer.class)
                 .list();
+    }
+
+
+    public Integer findColumnIndexFromId(UUID tableId, UUID columnId) {
+        return jdbcClient.sql("""
+                SELECT column_index
+                FROM my_column
+                WHERE my_table = :tableId AND id =:columnId
+            """)
+                .param("tableId", tableId)
+                .param("columnId", columnId)
+                .query(Integer.class)
+                .single();
+    }
+
+
+    public Boolean matchColumnDataType(UUID tableId, UUID columnId, int dataTypeId) {
+        return jdbcClient.sql("""
+                SELECT COALESCE(data_type = :dataTypeId, false)
+                FROM my_column
+                WHERE my_table = :tableId AND id = :columnId
+            """)
+                .param("tableId", tableId)
+                .param("columnId", columnId)
+                .param("dataTypeId", dataTypeId)
+                .query(Boolean.class)
+                .single();
     }
 
 

@@ -14,6 +14,10 @@ export class DataTypeRegistryService {
 
   private httpClient: HttpClient = inject(HttpClient);
 
+  public static readonly TEXTUAL_ID: number = 1;
+  public static readonly NUMERIC_ID: number = 2;
+  public static readonly MONETARY_ID: number = 3;
+
 
   getDataType(term: string = ''): Observable<IDataType[]> {
     const params: HttpParams = new HttpParams({ fromObject: {term} });
@@ -28,9 +32,9 @@ export class DataTypeRegistryService {
 
   convertIntoIDataType(dataTypeId: number): IDataType {
     switch (dataTypeId) {
-      case 1: return new TextualDataType();
-      case 2: return new NumericDataType();
-      case 3: return new MonetaryDataType();
+      case DataTypeRegistryService.TEXTUAL_ID: return new TextualDataType();
+      case DataTypeRegistryService.NUMERIC_ID: return new NumericDataType();
+      case DataTypeRegistryService.MONETARY_ID: return new MonetaryDataType();
       default: throw new Error(`${dataTypeId} does not match any data type`);
     }
   }

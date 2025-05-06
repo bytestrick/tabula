@@ -130,12 +130,12 @@ export class TableComponent implements OnInit, OnDestroy {
 
 
   onDoubleClickedCell(event: MouseEvent, cord: CellCord): void {
-    this.showInputMethod(new Pair(event.x, event.y), cord);
+    this.showCellInputMethod(new Pair(event.x, event.y), cord);
   }
 
 
 
-  showInputMethod(position: Pair<number, number>, cord: CellCord): void {
+  showCellInputMethod(position: Pair<number, number>, cord: CellCord): void {
     const cell: Cell | null = this.tableService.getCellFromCoords(cord);
 
     if (cell == null)
@@ -146,7 +146,7 @@ export class TableComponent implements OnInit, OnDestroy {
       { environmentInjector: this.envInj }
     );
     inputComponent.setInput('startingValue', cell.value);
-    inputComponent.setInput('doAfterInputConfirmation', (value: any): void => this.tableService.setCellValue(cord, value));
+    inputComponent.setInput('doAfterInputDataTypeConfirmation', (value: any, dataTypeId: number): void => this.tableService.setCellsValue(cord, value, dataTypeId));
 
     this.popUpManagerService.getOrCreatePopUp(this.INPUT_METHOD_POP_UP, inputComponent)?.instance.show(position);
   }
