@@ -13,7 +13,7 @@ import {TableDTO} from '../model/dto/table/table-dto';
 import {CellPatchedDTO} from '../model/dto/table/cell-dto';
 import {Selection} from '../model/table/selection';
 import {ColumnPatchedDTO} from '../model/dto/table/column-dto';
-import {MovedRowsOrColumnsDTO} from '../model/dto/table/move-row-or-column-d-t-o';
+import {MovedRowsOrColumnsDTO} from '../model/dto/table/move-row-or-column-dto';
 
 
 @Injectable()
@@ -39,10 +39,10 @@ export class TableService {
    * Appends a new column to the current table.
    *
    * Sends a request to the backend to create a new column with the given data-type.
-   * Once created, it adds the new header's column to the header and appends a new empty cell
+   * Once created, it adds the new header column to the header and appends a new empty cell
    * to each existing row to maintain consistency.
    *
-   * @param dataType The data-type to be assigned to the new column.
+   * @param dataType - The data-type to be assigned to the new column.
    */
   appendNewColumn(dataType: IDataType): void {
     this.tableAPI.addNewColumn(dataType.getDataTypeId(), null).subscribe(
@@ -114,13 +114,7 @@ export class TableService {
   /**
    * Inserts a new row at the specified index in the table.
    *
-   * If the given index is out of bounds (less than 0 or greater than or equal to the
-   * current number of rows), the method returns early without making a request.
-   * Otherwise, it sends a request to create a new row at that index. On success,
-   * the new row is spliced into the local `table` array at `rowIndex`, and
-   * a new empty cell is appended for each existing column, matching its data-type.
-   *
-   * @param rowIndex  Zero-based index at which to insert the new row.
+   * @param rowIndex - Zero-based index at which to insert the new row.
    */
   insertNewRowAt(rowIndex: number): void {
     if (rowIndex < 0 || rowIndex >= this.getRowsNumber())
@@ -128,10 +122,10 @@ export class TableService {
 
     this.tableAPI.addNewRow(rowIndex).subscribe(
       createdRow => {
-          this.table.splice(rowIndex, 0, new Row(createdRow.id));
+        this.table.splice(rowIndex, 0, new Row(createdRow.id));
 
-          for (let j: number = 0; j < this.getColumnsNumber(); ++j)
-            this.table[rowIndex].appendNewCell(this.getColumnDataType(j).getNewDataType());
+        for (let j: number = 0; j < this.getColumnsNumber(); ++j)
+          this.table[rowIndex].appendNewCell(this.getColumnDataType(j).getNewDataType());
       }
     );
   }
@@ -140,15 +134,8 @@ export class TableService {
   /**
    * Inserts a new column at the specified index in the table.
    *
-   * If the given index is out of bounds (less than 0 or greater than or equal to the
-   * current number of columns), the method returns early without making a request.
-   * Otherwise, it sends a request to create a new column with the specified data-type
-   * at that index. On success, the new column is spliced into the local `header` array
-   * at `columnIndex`, and each existing row is updated by inserting a new empty cell
-   * at that same index, matching the column’s data-type.
-   *
-   * @param columnIndex  Zero-based index at which to insert the new column.
-   * @param dataType     The data-type to be assigned to the new column.
+   * @param columnIndex - Zero-based index at which to insert the new column.
+   * @param dataType - The data-type to be assigned to the new column.
    */
   insertNewColumnAt(columnIndex: number, dataType: IDataType): void {
     if (columnIndex < 0 && columnIndex >= this.getColumnsNumber())
@@ -172,8 +159,7 @@ export class TableService {
 
 
   /**
-   * Moves a single row from one position to another within the table,
-   * and updates selection state if the moved row was selected.
+   * Moves a single row from one position to another within the table.
    *
    * @param fromIndex - The zero-based index of the row to move.
    * @param toIndex - The zero-based target index where the row should be placed.
@@ -184,11 +170,16 @@ export class TableService {
 
 
   /**
-   * Moves all currently selected rows from one index to another,
-   * adjusting for boundaries, preserving order, and batching update notifications.
+   * Moves one or more rows from one position to another.
    *
-   * @param fromIndex - The reference index from which movement is measured.
-   * @param toIndex - The target index where the selection block should end up.
+   * Sends a PATCH request via TableApiService to persist the new row order.
+   * Upon receiving the backend’s MovedRowsOrColumnsDTO, shifts each affected row
+   * in the local model by the returned delta.
+   *
+   * @param fromIndex
+   *   Zero-based index of the row used as the reference for movement.
+   * @param toIndex
+   *   Zero-based target index where the rows should end up.
    */
   moveRows(fromIndex: number, toIndex: number): void {
     if (!this.canMoveRow(fromIndex, toIndex))
@@ -240,8 +231,7 @@ export class TableService {
 
 
   /**
-   * Moves a single column from one position to another within the table,
-   * and updates selection state if the moved column was selected.
+   * Moves a single column from one position to another within the table.
    *
    * @param fromIndex - The zero-based index of the column to move.
    * @param toIndex - The zero-based target index where the column should be placed.
@@ -255,11 +245,16 @@ export class TableService {
 
 
   /**
-   * Moves a single column and immediately notifies the table API
-   * of which column indexes have changed.
+   * Moves one or more columns from one position to another.
    *
-   * @param fromIndex - The index of the column to move.
-   * @param toIndex - The index to which the column should be moved.
+   * Sends a PATCH request via TableApiService to persist the new column order.
+   * Upon receiving the backend’s MovedRowsOrColumnsDTO, shifts each affected column
+   * in the local model by the returned delta.
+   *
+   * @param fromIndex
+   *   Zero-based index of the column used as the reference for movement.
+   * @param toIndex
+   *   Zero-based target index where the columns should end up.
    */
   moveColumns(fromIndex: number, toIndex: number): void {
     if (!this.canMoveColumn(fromIndex, toIndex))
@@ -414,24 +409,6 @@ export class TableService {
    */
   getSelectedRowNumber(): number {
     return this.selectedRows.getSelectionNumber();
-  }
-
-
-  /**
-   * Checks if there are any rows selected.
-   * @returns True if at least one row is selected, false otherwise.
-   */
-  hasRowsSelected(): boolean {
-    return this.selectedRows.getSelectionNumber() !== 0;
-  }
-
-
-  /**
-   * Checks if there are any columns selected.
-   * @returns True if at least one column is selected, false otherwise.
-   */
-  hasColumnsSelected(): boolean {
-    return this.selectedColumns.getSelectionNumber() !== 0;
   }
 
 
@@ -627,23 +604,18 @@ export class TableService {
     //   )
   }
 
-// TODO: aggiornare la documentazione
+
   /**
-   * Changes the data-type of an existing column at the specified index.
+   * Changes the data type of an existing column at the given index.
    *
-   * <p>This method updates the local table representation by:
-   * 1. Verifying the index is within bounds.<br>
-   * 2. Skipping if the new data-type is identical to the current one.<br>
-   * 3. Replacing the header cell for that column with a new {@link HeaderCell}
-   *    using the new data-type.<br>
-   * 4. Iterating through all existing rows and replacing each cell in that column
-   *    with an empty cell of the new data-type.</p>
+   * Sends a PATCH request via TableApiService to update the column’s data type
+   * on the backend. When the backend responds, replaces the HeaderColumn
+   * and each cell in that column locally with instances matching the new data type.
    *
-   * After updating the local model, it sends a PATCH request to the backend to
-   * persist the change via {@link tableAPI.changeColumnDataType}.
-   *
-   * @param columnIndex  Zero-based index of the column whose data-type should be changed.
-   * @param dataType     The new data-type to apply to the column.
+   * @param columnIndex
+   *   Zero-based index of the column whose data type should be changed.
+   * @param dataType
+   *   The IDataType instance representing the new data type to apply.
    */
   changeColumnDataType(columnIndex: number, dataType: IDataType): void {
     if (columnIndex < 0 || columnIndex >= this.getColumnsNumber())
@@ -702,19 +674,19 @@ export class TableService {
 
 
   /**
-   * Sets the value of one or more cells based on the current selection state.
+   * Sets the value of one or more cells based on the current selection context.
    *
-   * Behavior:
-   * - If the clicked cell is not part of any active selection, only that cell is updated.
-   * - If the clicked cell belongs to a selected row or column, all selected cells
-   *   that match the clicked cell's data-type (for rows) or any cell (for columns)
-   *   will be updated.
+   * If the clicked cell is unselected, only that cell is updated.
+   * If it belongs to a selected row or column, all matching cells are updated.
+   * Issues one or more PATCH requests via TableApiService and applies
+   * the backend’s CellPatchedDTO responses to the local model.
    *
-   * Every change is persisted via the `TableAPI`, and backend responses are used
-   * to update the local cell values.
-   *
-   * @param cord   Coordinates of the clicked cell (`i` = row index, `j` = column index).
-   * @param value  The new value to assign. If `null`, the operation is skipped.
+   * @param cord
+   *   The {@link CellCord} identifying row/column indices and whether it’s a header cell.
+   * @param value
+   *   The new string value to assign; if null or undefined, no request is made.
+   * @param dataTypeId
+   *   Numeric code of the data type, used by the backend to parse the value.
    */
   setCellsValue(cord: CellCord, value: string, dataTypeId: number): void {
     if (value == null)
@@ -728,19 +700,15 @@ export class TableService {
     if (!cord.isHeaderCell) {
       if (!this.isRowSelected(cord.i) && !this.isColumnSelected(cord.j)) {
         this.updateSingleCell(cord, value, dataTypeId);
-      }
-      else if (this.isRowSelected(cord.i)) {
+      } else if (this.isRowSelected(cord.i)) {
         this.updateSelectedRows(value, dataTypeId);
-      }
-      else if (this.isColumnSelected(cord.j)) {
+      } else if (this.isColumnSelected(cord.j)) {
         this.updateSelectedColumns(value, dataTypeId);
-      }
-      else {
+      } else {
         this.updateSelectedRows(value, dataTypeId);
         this.updateSelectedColumns(value, dataTypeId);
       }
-    }
-    else {
+    } else {
       this.updateSingleCell(cord, value, dataTypeId);
     }
   }
@@ -755,14 +723,18 @@ export class TableService {
 
 
   /**
-   * Updates a single cell both locally and on the backend.
+   * Updates a single cell’s value both locally and on the backend.
    *
-   * Sends the update via the `TableAPI`, and upon response,
-   * updates the in-memory representation of the cell.
+   * If cord.isHeaderCell is true, sends a column-name change; otherwise,
+   * sends a cell-value update. Upon response, applies the returned DTO
+   * to update the corresponding Cell in the local model.
    *
-   * @param rowIndex     The row index of the cell.
-   * @param columnIndex  The column index of the cell.
-   * @param value        The new value to assign.
+   * @param cord
+   *   The {@link CellCord} identifying the target cell (row/column or header).
+   * @param value
+   *   The new string value to assign.
+   * @param dataTypeId
+   *   Numeric code of the data type, required for cell-value updates.
    */
   private updateSingleCell(cord: CellCord, value: string, dataTypeId: number): void {
     if (cord.isHeaderCell) {
@@ -772,8 +744,7 @@ export class TableService {
           cell.value = columnPatched.columnName || this.HEADER_CELL_DEFAULT_NAME;
         }
       );
-    }
-    else {
+    } else {
       const rowId: string = this.getRowId(cord.i);
       const columnId: string = this.getHeaderColumnId(cord.j);
       const idPair: Pair<string, string> = new Pair(rowId, columnId);
@@ -787,14 +758,17 @@ export class TableService {
 
 
   /**
-   * Updates all cells in selected rows that match the same data-type
+   * Updates all cells in the selected rows that share the same data type
    * as the originally clicked cell.
    *
-   * For each selected row, only cells with a matching data-type constructor
-   * are updated.
+   * Builds a batch of PATCH operations via TableApiService using each
+   * selected row ID and then applies the backend’s responses to update
+   * local cell values.
    *
-   * @param typeConstructor  The constructor function of the reference data-type.
-   * @param value            The new value to assign.
+   * @param value
+   *   The new string value to assign to each matching cell.
+   * @param dataTypeId
+   *   Numeric code of the data type, used by the backend to parse the values.
    */
   private updateSelectedRows(value: string, dataTypeId: number): void {
     const selectedRowsIds: string[] = this.selectedRows.getSelectedIds();
@@ -813,11 +787,14 @@ export class TableService {
   /**
    * Updates all cells in the selected columns.
    *
-   * Unlike row updates, this method applies the value to every cell in selected
-   * columns without checking for data-type compatibility. This is because along
-   * a column there is the same data-type.
+   * Builds a batch of PATCH operations via TableApiService using each
+   * selected column ID and then applies the backend’s responses to update
+   * local cell values.
    *
-   * @param value  The new value to assign to each affected cell.
+   * @param value
+   *   The new string value to assign to each cell in the selected columns.
+   * @param dataTypeId
+   *   Numeric code of the data type, used by the backend to parse the values.
    */
   private updateSelectedColumns(value: string, dataTypeId: number): void {
     const selectedColumnsIds: string[] = this.selectedColumns.getSelectedIds();
@@ -876,7 +853,10 @@ export class TableService {
     this.isLoaded = false;
     this.tableAPI.getTable(tableId).subscribe(
       {
-        next: tableDTO => { this.loadFromTableDTO(tableDTO); this.isLoaded = true; }
+        next: tableDTO => {
+          this.loadFromTableDTO(tableDTO);
+          this.isLoaded = true;
+        }
       }
     )
   }

@@ -21,13 +21,18 @@ export interface ColumnDTO {
 }
 
 
-export interface UpdateColumnIndexDTO {
-  tableId: string,
-  currentColumnIndex: number,
-  newColumnIndex: number
-}
-
-
+/**
+ * Payload sent from the frontend to update column properties.
+ *
+ * Only provide fields that need to be modified.
+ *
+ * @property columnName
+ *   New name for the column. If omitted, the name remains unchanged.
+ * @property columnIndex
+ *   New zero-based index for the column. If omitted, index remains unchanged.
+ * @property dataTypeId
+ *   New data type code for the column. If omitted, type remains unchanged.
+ */
 export interface ColumnPatchDTO {
   columnName?: string,
   columnIndex?: number,
@@ -35,6 +40,18 @@ export interface ColumnPatchDTO {
 }
 
 
+/**
+ * Response returned by the backend after a successful column update.
+ *
+ * @property id
+ *   UUID of the updated column.
+ * @property columnIndex
+ *   Updated zero-based index of the column.
+ * @property columnName
+ *   Updated name of the column, if changed.
+ * @property dataTypeId
+ *   Updated data type code of the column, if changed.
+ */
 export interface ColumnPatchedDTO {
   id: string,
   columnIndex: number,
@@ -47,10 +64,9 @@ export interface ColumnPatchedDTO {
  * Payload sent from the frontend to request creation of a new column.
  *
  * @property dataTypeId
- *   Numeric code identifying the column’s data type; must be ≥ 0.
+ *   Data type code for the new column; must be ≥ 0.
  * @property columnIndex
- *   Zero-based position at which to insert the new column.
- *   Set to `null` to append the column at the end of the table.
+ *   Zero-based position to insert the new column. Set to `null` to append at the end.
  */
 export interface ColumnCreateDTO {
   dataTypeId: number,
@@ -66,7 +82,7 @@ export interface ColumnCreateDTO {
  * @property tableId
  *   UUID of the table to which the new column belongs.
  * @property dataTypeId
- *   Numeric code identifying the column’s data type; same as requested.
+ *   Data-type id of the new column.
  * @property columnIndex
  *   Zero-based position where the new column was inserted.
  */
