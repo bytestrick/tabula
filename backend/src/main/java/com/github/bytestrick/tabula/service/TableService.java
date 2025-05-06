@@ -481,19 +481,21 @@ public class TableService {
             return 0;
         }
 
+        int minIndex = 0;
+        int maxIndex = 0;
+
         if (rawDelta < 0) {
             // sortedIndexesToMove: ascending order
-            while (sortedIndexesToMove.getFirst() + rawDelta < minBounds) {
-                ++rawDelta;
-            }
+            minIndex = sortedIndexesToMove.getFirst();
+            maxIndex = sortedIndexesToMove.getLast();
         }
         else if (rawDelta > 0) {
             // sortedIndexesToMove: descending order
-            while(sortedIndexesToMove.getFirst() + rawDelta >= maxBounds)
-                --rawDelta;
+            minIndex = sortedIndexesToMove.getLast();
+            maxIndex = sortedIndexesToMove.getFirst();
         }
 
-        return rawDelta;
+        return Math.clamp(rawDelta, minBounds - minIndex, maxBounds - 1 - maxIndex);
     }
 
 
