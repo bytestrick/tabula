@@ -1,8 +1,6 @@
 package com.github.bytestrick.tabula.repository.table;
 
 import com.github.bytestrick.tabula.repository.proxy.table.ColumnProxy;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -84,14 +82,6 @@ public class ColumnDAO {
                 .update();
 
         return deletedColumnIndex;
-    }
-
-
-    public void updateColumnCells(UUID columnId, String newValue) {
-        jdbcClient.sql("UPDATE cell SET value = :newValue WHERE my_row = :columnIndex")
-                .param("newValue", newValue)
-                .param("columnIndex", columnId)
-                .update();
     }
 
 
@@ -227,6 +217,16 @@ public class ColumnDAO {
     }
 
 
+    /**
+     * Updates the {@code column_index} of an existing column.
+     *
+     * @param columnId
+     *   UUID of the column to move.
+     * @param newColumnIndex
+     *   New zero-based index for the column.
+     * @param tableId
+     *   UUID of the table containing the column.
+     */
     public void updateColumnIndex(UUID columnId, int newColumnIndex, UUID tableId) {
         jdbcClient.sql("""
                 UPDATE my_column
@@ -240,6 +240,16 @@ public class ColumnDAO {
     }
 
 
+    /**
+     * Updates the name of a specific column.
+     *
+     * @param tableId
+     *   UUID of the table containing the column.
+     * @param columnId
+     *   UUID of the column to rename.
+     * @param newName
+     *   The new name to assign to the column.
+     */
     public void changeColumnName(UUID tableId, UUID columnId, String newName) {
         jdbcClient.sql("""
                 UPDATE my_column
@@ -253,6 +263,16 @@ public class ColumnDAO {
     }
 
 
+    /**
+     * Returns the zero-based index of the given column UUID.
+     *
+     * @param tableId
+     *   UUID of the table.
+     * @param columnId
+     *   UUID of the column.
+     * @return
+     *   Integer index of the column.
+     */
     public int findColumnIndexById(UUID tableId, UUID columnId) {
         return jdbcClient.sql("""
                 SELECT column_index
@@ -266,6 +286,14 @@ public class ColumnDAO {
     }
 
 
+    /**
+     * Counts the number of columns in the given table.
+     *
+     * @param tableId
+     *   UUID of the table.
+     * @return
+     *   Total count of columns.
+     */
     public int getColumnNumber(UUID tableId) {
         return jdbcClient.sql("""
                 SELECT COUNT(*)
@@ -278,6 +306,16 @@ public class ColumnDAO {
     }
 
 
+    /**
+     * Retrieves the indexes of multiple columns by their UUIDs.
+     *
+     * @param tableId
+     *   UUID of the table.
+     * @param columnsIds
+     *   List of column UUIDs whose indexes are needed.
+     * @return
+     *   List of zero-based column indexes matching the provided IDs.
+     */
     public List<Integer> findColumnsIndexesFromIds(UUID tableId, List<UUID> columnsIds) {
         return jdbcClient.sql("""
                 SELECT column_index
@@ -291,6 +329,16 @@ public class ColumnDAO {
     }
 
 
+    /**
+     * Retrieves the index of a single column by its UUID.
+     *
+     * @param tableId
+     *   UUID of the table.
+     * @param columnId
+     *   UUID of the column.
+     * @return
+     *   Zero-based index of the specified column.
+     */
     public Integer findColumnIndexFromId(UUID tableId, UUID columnId) {
         return jdbcClient.sql("""
                 SELECT column_index
@@ -304,6 +352,18 @@ public class ColumnDAO {
     }
 
 
+    /**
+     * Checks whether a column’s stored data type matches the given ID.
+     *
+     * @param tableId
+     *   UUID of the table.
+     * @param columnId
+     *   UUID of the column.
+     * @param dataTypeId
+     *   Data type ID to compare.
+     * @return
+     *   {@code true} if the column’s data type equals {@code dataTypeId}, {@code false} otherwise.
+     */
     public Boolean matchColumnDataType(UUID tableId, UUID columnId, int dataTypeId) {
         return jdbcClient.sql("""
                 SELECT COALESCE(data_type = :dataTypeId, false)
