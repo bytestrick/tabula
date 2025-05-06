@@ -11,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
+
 /**
  * Handles operations related to the 'my_row' table.
  * <p>
@@ -195,6 +196,16 @@ public class RowDAO {
     }
 
 
+    /**
+     * Updates the index of an existing row.
+     *
+     * @param rowId
+     *   UUID of the row to update.
+     * @param newRowIndex
+     *   The new zero-based index to assign.
+     * @param tableId
+     *   UUID of the table containing the row.
+     */
     public void updateRowIndex(UUID rowId, int newRowIndex, UUID tableId) {
         jdbcClient.sql("""
                 UPDATE my_row
@@ -208,6 +219,14 @@ public class RowDAO {
     }
 
 
+    /**
+     * Counts the number of rows in a table.
+     *
+     * @param tableId
+     *   UUID of the table to count rows for.
+     * @return
+     *   Total number of rows in the table.
+     */
     public int getRowsNumber(UUID tableId) {
         return jdbcClient.sql("""
                 SELECT COUNT(*)
@@ -220,6 +239,16 @@ public class RowDAO {
     }
 
 
+    /**
+     * Retrieves the indexes of multiple rows by their UUIDs.
+     *
+     * @param tableId
+     *   UUID of the table containing the rows.
+     * @param rowIds
+     *   List of row UUIDs whose indexes are to be fetched.
+     * @return
+     *   A list of zero-based row indexes matching the provided IDs.
+     */
     public List<Integer> findRowsIndexesFromIds(UUID tableId, List<UUID> rowIds) {
         return jdbcClient.sql("""
                 SELECT row_index
@@ -233,6 +262,16 @@ public class RowDAO {
     }
 
 
+    /**
+     * Retrieves the index of a single row by its UUID.
+     *
+     * @param tableId
+     *   UUID of the table containing the row.
+     * @param rowId
+     *   UUID of the row whose index is to be fetched.
+     * @return
+     *   The zero-based index of the specified row.
+     */
     public Integer findRowIndexFromId(UUID tableId, UUID rowId) {
         return jdbcClient.sql("""
                 SELECT row_index

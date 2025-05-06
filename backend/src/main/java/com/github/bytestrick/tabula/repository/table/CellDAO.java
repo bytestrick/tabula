@@ -38,6 +38,14 @@ public class CellDAO {
     }
 
 
+    /**
+     * Retrieves the IDs of all columns that have cells in the given row.
+     *
+     * @param rowId
+     *   UUID of the row whose column IDs are to be fetched.
+     * @return
+     *   List of UUIDs representing each column that has a cell in the specified row.
+     */
     public List<UUID> findRowCellsColumnsIds(UUID rowId) {
         return jdbcClient.sql("""
                 SELECT my_column
@@ -50,6 +58,14 @@ public class CellDAO {
     }
 
 
+    /**
+     * Retrieves the IDs of all rows that have cells in the given column.
+     *
+     * @param columnId
+     *   UUID of the column whose row IDs are to be fetched.
+     * @return
+     *   List of UUIDs representing each row that has a cell in the specified column.
+     */
     public List<UUID> findColumnCellsRowsIds(UUID columnId) {
         return jdbcClient.sql("""
                 SELECT my_row
@@ -101,10 +117,16 @@ public class CellDAO {
     }
 
 
+    /**
+     * Resets the value of all cells in a given column to the empty string.
+     *
+     * @param columnId
+     *   UUID of the column whose cells should be cleared.
+     */
     public void resetColumnCellsValues(UUID columnId) {
         jdbcClient.sql("""
                 UPDATE cell
-                SET value = null
+                SET value = ''
                 WHERE my_column = :columnId
             """)
                 .param("columnId", columnId)

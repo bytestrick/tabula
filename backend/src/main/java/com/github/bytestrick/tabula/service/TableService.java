@@ -82,12 +82,15 @@ public class TableService {
 
 
     /**
-     * Creates a new table.
+     * Creates a new, empty table with one row and one column.
+     * <ul>
+     *   <li>Generates a new table UUID.</li>
+     *   <li>Persists the table record.</li>
+     *   <li>Appends one row and one column of type "Textual".</li>
+     * </ul>
      *
-     * <p>The method generates a new UUID for the table, append one row and
-     * one column and persists it in the database.</p>
-     *
-     * @return the id (UUID) of the newly created table.
+     * @return
+     *   UUID of the newly created table.
      */
     @Transactional
     public UUID createNewTable() {
@@ -136,9 +139,14 @@ public class TableService {
     }
 
 
-
-    public String deleteTable(UUID tableCardId) {
-        tableDAO.deleteTable(tableCardId);
+    /**
+     * Deletes an entire table and all its associated rows and cells.
+     *
+     * @param tableId
+     *   UUID of the table to delete.
+     */
+    public String deleteTable(UUID tableId) {
+        tableDAO.deleteTable(tableId);
         return "Table deleted successfully";
     }
 
@@ -219,13 +227,23 @@ public class TableService {
 
 
     /**
-     * Applies partial updates to a column based on the provided patch DTO.
-     * Currently, only the data type can be updated; other fields in {@code patchDTO}
-     * are ignored if null.
+     * Applies partial updates to a column’s properties.
+     * <p>
+     *   Only non-null fields in {@code patchDTO} ({@link ColumnPatchDTO}) are applied:
+     *   <ul>
+     *     <li>Data type change: updates column type and resets all cell values in that column.</li>
+     *     <li>Name change: updates column header.</li>
+     *   </ul>
+     * </p>
      *
-     * @param tableId    UUID of the table containing the column to patch.
-     * @param columnId   UUID of the column to update.
-     * @param patchDTO   DTO carrying the new dataTypeId; if null, no change is applied.
+     * @param tableId
+     *   UUID of the parent table.
+     * @param columnId
+     *   UUID of the column to patch.
+     * @param patchDTO
+     *   DTO carrying optional new dataTypeId and/or columnName.
+     * @return
+     *   A {@link ColumnPatchedDTO} containing the updated column index, name, and type ID.
      */
     @Transactional
     public ColumnPatchedDTO patchHeaderColumn(UUID tableId, UUID columnId, ColumnPatchDTO patchDTO) {
@@ -247,17 +265,31 @@ public class TableService {
 
 
     /**
-     * Updates the value of a single cell, identified by its row and column indices.
+     * Updates one or more cell values in bulk.
+     * <p>
+     *   For each {@link CellPatchDTO}:
+     *   <ul>
+     *     <li>If both rowId and columnId are present, updates that single cell.</li>
+     *     <li>If only rowId is present, updates all cells in that row.</li>
+     *     <li>If only columnId is present, updates all cells in that column.</li>
+     *   </ul>
+     *   Skips any update whose dataTypeId does not match the column’s type.
+     * </p>
      *
-     * <p>This method looks up the internal row and column IDs, then delegates
-     * the update to the DAO.</p>
-     *
+     * @param tableId
+     *   UUID of the table containing the cells.
+     * @param cellsPatchDTO
+     *   List of {@link CellPatchDTO} carrying target IDs, dataTypeId, and newValue.
+     * @return
+     *   List of {@link CellPatchedDTO} describing each successfully updated cell’s
+     *   zero-based row & column indexes and new value.
      */
     @Transactional
     public List<CellPatchedDTO> updateCellValue(UUID tableId, List<CellPatchDTO> cellsPatchDTO) {
         List<CellPatchedDTO> cellsPatched = new ArrayList<>();
 
         for (CellPatchDTO cellPatchDTO : cellsPatchDTO) {
+            // single cell update
             if (cellPatchDTO.rowId() != null && cellPatchDTO.columnId() != null) {
                 if (!columnDAO.matchColumnDataType(tableId, cellPatchDTO.columnId(), cellPatchDTO.dataTypeId()))
                     continue;
@@ -271,6 +303,7 @@ public class TableService {
                         )
                 );
             }
+            // row-wide update
             else if (cellPatchDTO.rowId() != null) {
                 List<UUID> rowCellsColumnsIds = cellDAO.findRowCellsColumnsIds(cellPatchDTO.rowId());
 
@@ -288,6 +321,7 @@ public class TableService {
                     );
                 }
             }
+            // column-wide update
             else if (cellPatchDTO.columnId() != null) {
                 if (!columnDAO.matchColumnDataType(tableId, cellPatchDTO.columnId(), cellPatchDTO.dataTypeId()))
                     continue;
@@ -351,7 +385,23 @@ public class TableService {
     }
 
 
-
+    /**
+     * Computes the individual index shifts required to move a single item
+     * from one position to another.
+     * <p>
+     *   For each index between {@code fromIndex} and {@code toIndex}, generates a
+     *   Pair(originalIndex, shiftedIndex). Finally, includes the pair
+     *   (fromIndex, toIndex) itself.
+     * </p>
+     *
+     * @param fromIndex
+     *   The original zero-based position of the item.
+     * @param toIndex
+     *   The desired zero-based position of the item.
+     * @return
+     *   A list of {@code Pair<Integer, Integer>}; where each pair maps an original
+     *   index that must be shifted to its new index.
+     */
     private List<Pair<Integer, Integer>> getMovedIndexes(int fromIndex, int toIndex) {
         List<Pair<Integer, Integer>> indexesMoved = new ArrayList<>();
 
@@ -372,42 +422,74 @@ public class TableService {
     }
 
 
-    private List<Integer> getSortedIndexesToMove(int rawDelta, List<Integer> rowsToMove) {
-        if (rowsToMove.isEmpty()) {
-            return rowsToMove;
+    /**
+     * Sorts the list of indexes to move in the order in which they must be updated
+     * to avoid conflicts during batch shifts.
+     * <p>
+     *   If the shift delta is negative, sorts ascending; if positive, sorts descending;
+     *   if zero or the list is empty, returns an empty list.
+     * </p>
+     *
+     * @param rawDelta
+     *   The difference {@code toIndex - fromIndex} determining shift direction.
+     * @param indexesToMove
+     *   The list of zero-based indexes selected for movement.
+     * @return
+     *   The same list instance, sorted in-place according to the shift direction.
+     */
+    private List<Integer> getSortedIndexesToMove(int rawDelta, List<Integer> indexesToMove) {
+        if (indexesToMove.isEmpty()) {
+            return new ArrayList<>();
         }
 
         if (rawDelta < 0) {
             // sort selected indexes in ascending order
-            Collections.sort(rowsToMove);
-            return rowsToMove;
+            Collections.sort(indexesToMove);
+            return indexesToMove;
         }
         else if (rawDelta > 0) {
             // sorts the selected indexes in descending order
-            Collections.sort(rowsToMove, Collections.reverseOrder());
-            return rowsToMove;
+            Collections.sort(indexesToMove, Collections.reverseOrder());
+            return indexesToMove;
         }
 
-        return rowsToMove;
+        return new ArrayList<>();
     }
 
 
+    /**
+     * Adjusts the raw shift delta to ensure that no moved index overflows the valid
+     * bounds: {@code [minBounds, maxBounds)}.
+     *
+     * @param rawDelta
+     *   The initial shift distance (can be positive or negative).
+     * @param sortedIndexesToMove
+     *   A sorted list of the indexes to move (ascending if negative shift, descending if positive).
+     * @param minBounds
+     *   The minimum valid index (inclusive).
+     * @param maxBounds
+     *   The maximum valid index (exclusive).
+     * @return
+     *   The adjusted shift delta that keeps all moves within bounds.
+     */
     private int getAdjustedDeltaToBounds(int rawDelta,
-                                         List<Integer> sortRowsIndexesToMove,
+                                         List<Integer> sortedIndexesToMove,
                                          int minBounds,
                                          int maxBounds) {
 
-        if (sortRowsIndexesToMove.isEmpty()) {
+        if (sortedIndexesToMove.isEmpty()) {
             return 0;
         }
 
         if (rawDelta < 0) {
-            while (sortRowsIndexesToMove.getFirst() + rawDelta < minBounds) {
+            // sortedIndexesToMove: ascending order
+            while (sortedIndexesToMove.getFirst() + rawDelta < minBounds) {
                 ++rawDelta;
             }
         }
         else if (rawDelta > 0) {
-            while(sortRowsIndexesToMove.getFirst() + rawDelta >= maxBounds)
+            // sortedIndexesToMove: descending order
+            while(sortedIndexesToMove.getFirst() + rawDelta >= maxBounds)
                 --rawDelta;
         }
 
@@ -415,18 +497,32 @@ public class TableService {
     }
 
 
+    /**
+     * Merges a new batch of moved index pairs into the overall update plan,
+     * avoiding duplicate or conflicting entries.
+     * <p>
+     *   Compares each pair in {@code currentMovedIndexes} against a snapshot of
+     *   the existing {@code indexesToUpdate}. If a mapping for that original index
+     *   already exists, its target is updated; otherwise, the new pair is appended.
+     * </p>
+     *
+     * @param indexesToUpdate
+     *   The master list of original-to-new index mappings being built.
+     * @param currentMovedIndexes
+     *   The new batch of mappings to integrate.
+     */
     private void reconstructIndexesToUpdate(List<Pair<Integer, Integer>> indexesToUpdate,
                                             List<Pair<Integer, Integer>> currentMovedIndexes) {
 
         List<Pair<Integer, Integer>> newIndexesDiscovered = new ArrayList<>();
         List<Pair<Integer, Integer>> indexesSnapshot = new ArrayList<>();
 
-        // Facciamo uno snapshot della lista originale
+        // Snapshot of the original list
         for (Pair<Integer, Integer> p : indexesToUpdate) {
             indexesSnapshot.add(new Pair<>(p.getFirst(), p.getSecond()));
         }
 
-        // Per ogni coppia spostata, cerchiamo una corrispondenza nello snapshot
+        // For each shifted pair, a match is sought in the snapshot
         for (Pair<Integer, Integer> p : currentMovedIndexes) {
             int matchedSnapshotIndex = -1;
 
@@ -438,15 +534,12 @@ public class TableService {
             }
 
             if (matchedSnapshotIndex >= 0) {
-                // Se esiste già, aggiorniamo l'indice di destinazione
                 indexesToUpdate.get(matchedSnapshotIndex).setSecond(p.getSecond());
             } else {
-                // Altrimenti lo aggiungiamo come nuovo rilevamento
                 newIndexesDiscovered.add(p);
             }
         }
 
-        // Infine aggiungiamo tutti i nuovi indici scoperti
         indexesToUpdate.addAll(newIndexesDiscovered);
     }
 
@@ -463,11 +556,24 @@ public class TableService {
     }
 
 
-    private boolean canMoveRowOrColumn(int fromIndex, int toIndex, int rowOrColumnAmount) {
-        if (fromIndex < 0 || fromIndex >= rowOrColumnAmount)
+    /**
+     * Validates whether a move operation from {@code fromIndex} to {@code toIndex}
+     * is within the allowed range and not a no-op.
+     *
+     * @param fromIndex
+     *   The starting zero-based index.
+     * @param toIndex
+     *   The target zero-based index.
+     * @param totalAmount
+     *   The total number of elements (rows or columns) in the table.
+     * @return
+     *   {@code true} if both indices are within [0, totalAmount) and differ; {@code false} otherwise.
+     */
+    private boolean canMoveRowOrColumn(int fromIndex, int toIndex, int totalAmount) {
+        if (fromIndex < 0 || fromIndex >= totalAmount)
             return false;
 
-        if (toIndex < 0 || toIndex >= rowOrColumnAmount)
+        if (toIndex < 0 || toIndex >= totalAmount)
             return false;
 
         if (fromIndex == toIndex)
@@ -477,6 +583,30 @@ public class TableService {
     }
 
 
+    /**
+     * Moves rows within a table.
+     *
+     * <ul>
+     *   <li>
+     *      Computes raw shift: {@code rawDelta = toIndex - fromIndex} (does not take
+     *      into account the size of the table).
+     *   </li>
+     *   <li>Determines affected row indexes.</li>
+     *   <li>Adjusts the delta to avoid boundary overflows.</li>
+     *   <li>Updates each row’s index in the database.</li>
+     *   <li>Returns the moved indexes and the applied delta.</li>
+     * </ul>
+     *
+     * @param tableId
+     *   UUID of the table to modify.
+     * @param moveRowsDTO
+     *   DTO carrying list of row UUIDs to move and source/target indexes.
+     * @return
+     *   A {@link MovedRowsOrColumnsDTO} listing the original zero-based indexes
+     *   and the actual shift delta applied.
+     * @throws RuntimeException
+     *   if movement parameters are invalid or indexes out of bounds.
+     */
     @Transactional
     public MovedRowsOrColumnsDTO moveRowsIndexes(UUID tableId, MovesRowsOrColumnsDTO moveRowsDTO) {
         int rowsAmount = rowDAO.getRowsNumber(tableId);
@@ -505,7 +635,30 @@ public class TableService {
     }
 
 
-
+    /**
+     * Moves columns within a table.
+     *
+     * <ul>
+     *   <li>
+     *      Computes raw shift: {@code rawDelta = toIndex - fromIndex} (does not take
+     *      into account the size of the table).
+     *   </li>
+     *   <li>Determines affected column indexes.</li>
+     *   <li>Adjusts the delta to avoid boundary overflows.</li>
+     *   <li>Updates each column’s index in the database.</li>
+     *   <li>Returns the moved indexes and the applied delta.</li>
+     * </ul>
+     *
+     * @param tableId
+     *   UUID of the table to modify.
+     * @param moveColumnsDTO
+     *   DTO carrying list of columns UUIDs to move and source/target indexes.
+     * @return
+     *   A {@link MovedRowsOrColumnsDTO} listing the original zero-based indexes
+     *   and the actual shift delta applied.
+     * @throws RuntimeException
+     *   if movement parameters are invalid or indexes out of bounds.
+     */
     @Transactional
     public MovedRowsOrColumnsDTO moveColumnsIndexes(UUID tableId, MovesRowsOrColumnsDTO moveColumnsDTO) {
         int columnsAmount = columnDAO.getColumnNumber(tableId);

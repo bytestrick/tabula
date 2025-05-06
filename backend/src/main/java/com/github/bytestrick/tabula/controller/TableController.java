@@ -61,10 +61,10 @@ public class TableController {
 
 
     /**
-     * Retrieves a complete table.
+     * REST controller endpoint for retrieving a complete table.
      *
-     * @param tableId  UUID of the table to fetch.
-     * @return         HTTP 200 OK with a {@link TableDTO} containing the table’s metadata and content.
+     * @param tableId UUID of the table to fetch.
+     * @return HTTP 200 OK with a {@link TableDTO} containing the table’s metadata and content.
      */
     @GetMapping("/{tableId}")
     public ResponseEntity<TableDTO> getTable(@PathVariable UUID tableId) {
@@ -72,16 +72,15 @@ public class TableController {
     }
 
 
-
     /**
-     * Creates a new row in the specified table.
+     * REST controller endpoint for creating a new row in the specified table.
      *
      * <p>If {@code rowCreateDTO.rowIndex} is null, the new row is appended at the end;
      * otherwise it is inserted at the given zero-based index.</p>
      *
-     * @param tableId         UUID of the table in which to insert the row.
-     * @param rowCreateDTO    Payload containing the optional insertion index.
-     * @return                HTTP 201 Created with a {@link RowCreatedDTO} describing the new row.
+     * @param tableId      UUID of the table in which to insert the row.
+     * @param rowCreateDTO Payload containing the optional insertion index.
+     * @return HTTP 201 Created with a {@link RowCreatedDTO} describing the new row.
      */
     @PostMapping("/{tableId}/rows")
     public ResponseEntity<RowCreatedDTO> addNewRow(
@@ -92,6 +91,14 @@ public class TableController {
     }
 
 
+    /**
+     * REST controller endpoint for moving rows within a table.
+     *
+     * @param tableId     UUID of the table to modify.
+     * @param moveRowsDTO Payload containing the list of row UUIDs to move, plus source and target indices.
+     * @return HTTP 200 OK with a {@link MovedRowsOrColumnsDTO} listing the original indexes
+     * and the shift delta.
+     */
     @PatchMapping("/{tableId}/rows")
     public ResponseEntity<MovedRowsOrColumnsDTO> moveRowsIndexes(
             @PathVariable UUID tableId, @Valid @RequestBody MovesRowsOrColumnsDTO moveRowsDTO) {
@@ -104,10 +111,10 @@ public class TableController {
     /**
      * REST controller endpoint for deleting one or more rows from a specified table.
      *
-     * @param tableId        UUID of the table from which the rows will be deleted.
-     * @param rowsDeleteDTO  DTO containing a non-null, non-empty list of row UUIDs to delete.
-     * @return               {@code ResponseEntity<RowsDeletedDTO>} containing the indexes
-     *                       of the rows that were deleted; returns HTTP 200 OK.
+     * @param tableId       UUID of the table from which the rows will be deleted.
+     * @param rowsDeleteDTO DTO containing a non-null, non-empty list of row UUIDs to delete.
+     * @return {@code ResponseEntity<RowsDeletedDTO>} containing the indexes
+     * of the rows that were deleted; returns HTTP 200 OK.
      */
     @DeleteMapping("{tableId}/rows")
     public ResponseEntity<RowsDeletedDTO> deleteRows(
@@ -119,14 +126,14 @@ public class TableController {
 
 
     /**
-     * Creates a new column in the specified table.
+     * REST controller endpoint for creating a new column in the specified table.
      *
      * <p>If {@code columnDTO.columnIndex} is null, the new column is appended at the end;
      * otherwise it is inserted at the given zero-based index.</p>
      *
-     * @param tableId       UUID of the table in which to insert the column.
-     * @param columnDTO     Payload containing dataTypeId and optional columnIndex.
-     * @return              HTTP 201 Created with a {@link ColumnCreatedDTO} describing the new column.
+     * @param tableId   UUID of the table in which to insert the column.
+     * @param columnDTO Payload containing dataTypeId and optional columnIndex.
+     * @return HTTP 201 Created with a {@link ColumnCreatedDTO} describing the new column.
      */
     @PostMapping("/{tableId}/columns")
     public ResponseEntity<ColumnCreatedDTO> addNewColumn(
@@ -142,8 +149,8 @@ public class TableController {
      *
      * @param tableId          UUID of the table from which the columns will be deleted.
      * @param columnsDeleteDTO DTO containing a non-null, non-empty list of column UUIDs to delete.
-     * @return                 HTTP 200 Created with a {@link ColumnsDeletedDTO} containing the indexes
-     *                         of the columns that were deleted.
+     * @return HTTP 200 Created with a {@link ColumnsDeletedDTO} containing the indexes
+     * of the columns that were deleted.
      */
     @DeleteMapping("{tableId}/columns")
     public ResponseEntity<ColumnsDeletedDTO> deleteColumns(
@@ -155,13 +162,13 @@ public class TableController {
 
 
     /**
-     * Partially updates a column’s properties: name, position, and/or data type.
+     * REST controller endpoint for updating a column’s properties: name, position, and/or data type.
      * Only the non-null fields in the request body will be applied.
      *
-     * @param tableId          UUID of the parent table.
-     * @param columnId         UUID of the column to update.
-     * @param columnPatchDTO   Payload containing the fields to change. ( see {@link ColumnPatchDTO})
-     * @return                 HTTP 204 No Content on success.
+     * @param tableId        UUID of the parent table.
+     * @param columnId       UUID of the column to update.
+     * @param columnPatchDTO Payload containing the fields to change. ( see {@link ColumnPatchDTO})
+     * @return HTTP 204 No Content on success.
      */
     @PatchMapping("/{tableId}/columns/{columnId}")
     public ResponseEntity<ColumnPatchedDTO> patchColumn(
@@ -173,6 +180,15 @@ public class TableController {
     }
 
 
+    /**
+     * REST controller endpoint for moving columns within a table.
+     * The shift is computed as {@code toIndex - fromIndex} and applied to each moved column.
+     *
+     * @param tableId        UUID of the table to modify.
+     * @param moveColumnsDTO Payload containing the list of column UUIDs to move, plus source and target indices.
+     * @return HTTP 200 OK with a {@link MovedRowsOrColumnsDTO} listing the original indexes
+     * and the shift delta.
+     */
     @PatchMapping("/{tableId}/columns")
     public ResponseEntity<MovedRowsOrColumnsDTO> moveColumnsIndexes(
             @PathVariable UUID tableId, @Valid @RequestBody MovesRowsOrColumnsDTO moveColumnsDTO) {
@@ -183,19 +199,19 @@ public class TableController {
 
 
     /**
-     * Updates the value of a single cell, identified by its row and column indices.
+     * REST controller endpoint for updating one or more cell values in a single request.
+     * Each {@code CellPatchDTO} may target a single cell, entire row, or entire column
+     * depending on which UUIDs are provided. ( See {@link CellPatchDTO})
      *
-     * @param tableId       UUID of the table containing the cell.
-     * @param rowIndex      Zero-based index of the row containing the cell.
-     * @param columnIndex   Zero-based index of the column containing the cell.
-     * @param cellPatchDTO  {@link CellPatchDTO} carrying the new cell value.
-     * @return              {@link CellPatchedDTO} containing the updated cell's row
-     *                      index, column index, and new value. HTTP 200 OK on success.
+     * @param tableId       UUID of the table containing the cells.
+     * @param cellsPatchDTO List of {@link CellPatchDTO} objects carrying rowId, columnId, dataTypeId, and newValue.
+     * @return HTTP 200 OK with a list of {@link CellPatchedDTO}, each describing the updated cell’s
+     * zero-based row & column indexes and new value.
      */
     @PatchMapping("/{tableId}/cells")
     public ResponseEntity<List<CellPatchedDTO>> patchCellByCoords(
             @PathVariable UUID tableId,
-            @RequestBody List<CellPatchDTO> cellsPatchDTO) {
+            @Valid @RequestBody List<CellPatchDTO> cellsPatchDTO) {
 
         List<CellPatchedDTO> cellPatchedDTO = tableService.updateCellValue(tableId, cellsPatchDTO);
         return ResponseEntity.ok(cellPatchedDTO);
