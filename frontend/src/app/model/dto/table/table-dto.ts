@@ -7,9 +7,9 @@ import {RowDTO} from './row-dto';
  * @property id
  *   UUID of the table.
  * @property header
- *   Array of {@link ColumnDTO} describing each header's column (id, name, type, index).
+ *   Array of {@link ColumnDTO} describing each header column.
  * @property content
- *   Array of {@link RowDTO} containing the rows of the table and their cell values.
+ *   Array of {@link RowDTO} containing the table rows and their cell values.
  */
 export interface TableDTO {
   id: string,

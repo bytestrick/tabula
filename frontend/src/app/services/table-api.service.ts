@@ -1,29 +1,30 @@
 import {inject, Injectable} from '@angular/core';
-import {HttpClient, HttpParams} from '@angular/common/http';
+import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {Pair} from '../model/pair';
 import {TableDTO} from '../model/dto/table/table-dto';
-import {
-  RowCreatedDTO,
-  RowCreateDTO,
-  RowsDeletedDTO,
-  RowsDeleteDTO,
-} from '../model/dto/table/row-dto';
+import {RowCreatedDTO, RowCreateDTO, RowsDeletedDTO, RowsDeleteDTO,} from '../model/dto/table/row-dto';
 import {
   ColumnCreatedDTO,
   ColumnCreateDTO,
-  ColumnDTO,
-  ColumnPatchDTO, ColumnPatchedDTO, ColumnsDeletedDTO, ColumnsDeleteDTO,
-  UpdateColumnIndexDTO
+  ColumnPatchDTO,
+  ColumnPatchedDTO,
+  ColumnsDeletedDTO,
+  ColumnsDeleteDTO,
 } from '../model/dto/table/column-dto';
-import {CellDTO, CellPatchDTO, CellPatchedDTO} from '../model/dto/table/cell-dto';
-import {MovedRowsOrColumnsDTO, MoveRowOrColumnDTO} from '../model/dto/table/move-row-or-column-d-t-o';
-import {CellCord} from '../model/table/cell-cord';
+import {CellPatchDTO, CellPatchedDTO} from '../model/dto/table/cell-dto';
+import {MovedRowsOrColumnsDTO, MoveRowOrColumnDto} from '../model/dto/table/move-row-or-column-dto';
 
 
 @Injectable({
   providedIn: 'root'
 })
+/**
+ * Service for interacting with table-related REST endpoints.
+ *
+ * Provides CRUD operations for tables, rows, columns, and cells,
+ * communicating with a Spring Boot backend using DAO pattern.
+ */
 export class TableApiService {
 
   private readonly BASE_URL: string = "/tables";
@@ -32,6 +33,10 @@ export class TableApiService {
   private _tableId: string = '';
 
 
+  /**
+   * Current table UUID used by default in operations when tableId is omitted.
+   * @property tableId
+   */
   get tableId(): string {
     return this._tableId;
   }
@@ -39,25 +44,12 @@ export class TableApiService {
 
   /**
    * Retrieves the full table structure (columns and rows) from the backend.
-   * This method also stores the last-used tableId in the service for default use
-   * in subsequent row/column operations.
+   * Stores the last-used tableId for subsequent operations.
    *
-   * @param tableId   UUID of the table to fetch.
-   * @returns         An Observable that emits a {@link TableDTO} containing
-   *                   the table’s header (header columns) and content (rows).
-   *
-   * @remarks
-   * - The `tableId` is sent as a query parameter (`?table-id=<UUID>`) per backend contract.
-   * - Upon successful retrieval, the service’s internal `_tableId` field is updated,
-   *   allowing other methods to default to this table without needing to pass `tableId` again.
-   *
-   * @example
-   * // Fetch table and subscribe to its data
-   * tableService.getTable('f47ac10b-58cc-4372-a567-0e02b2c3d479')
-   *   .subscribe(table => {
-   *     console.log('Columns:', table.header);
-   *     console.log('Rows:', table.content);
-   *   });
+   * @param tableId
+   *   UUID of the table to fetch.
+   * @returns
+   *   Observable emitting a {@link TableDTO} with `header` and `content`.
    */
   getTable(tableId: string): Observable<TableDTO> {
     this._tableId = tableId;
@@ -68,29 +60,11 @@ export class TableApiService {
 
 
   /**
-   * Sends a POST request to `/tables/{tableId}/rows` to create
-   * a new row in the specified table
+   * Creates a new row in the specified table.
    *
-   * @param rowIndex   Zero-based position at which to insert the new row.
-   *                   Pass `null` to append the row at the end of the table.
-   * @param tableId    UUID of the table in which to create the row.
-   *                   Defaults to the service’s current `tableId` if not provided.
-   * @returns          An Observable that emits the created row’s details
-   *                   ({@link CreatedRowDTO}) once the backend responds
-   *                   with HTTP 201 Created.
-   *
-   * @example
-   * // Append a new row at the end:
-   * service.addNewRow(null).subscribe(created => {
-   *   console.log(`New row inserted at index ${created.rowIndex}`);
-   * });
-   *
-   * @example
-   * // Insert a new row at position 3 in a specific table:
-   * const targetTable = 'f47ac10b-58cc-4372-a567-0e02b2c3d479';
-   * service.addNewRow(3, targetTable).subscribe(created => {
-   *   console.log(`Created row ID: ${created.id}`);
-   * });
+   * @param rowIndex - Zero-based position to insert the new row; null appends at end.
+   * @param tableId - UUID of target table; defaults to current tableId.
+   * @returns Observable emitting {@link RowCreatedDTO}.
    */
   addNewRow(rowIndex: number | null,
             tableId: string = this.tableId): Observable<RowCreatedDTO> {
@@ -105,33 +79,12 @@ export class TableApiService {
 
 
   /**
-   * Sends a POST request to `/tables/{tableId}/columns` to create
-   * a new column in the specified table
+   * Creates a new column in the specified table.
    *
-   * @param dataTypeId    Numeric code identifying the column’s data type; must be ≥ 0.
-   * @param columnIndex   Zero-based position at which to insert the new column.
-   *                      Pass `null` to append the column at the end.
-   * @param tableId       UUID of the table in which to create the column.
-   *                      Defaults to the service’s current `tableId` if not provided.
-   * @returns             An Observable that emits the created column’s details
-   *                     ({@link ColumnCreatedDTO}) once the backend
-   *                     responds with HTTP 201 Created.
-   *
-   * @example
-   * // Append a new Textual column at the end:
-   * const dataTypeId: number = textualDataType.getDataTypeId();
-   *
-   * service.addNewColumn(dataTypeId, null).subscribe(created => {
-   *   console.log(`New column inserted at index ${created.columnIndex}`);
-   * });
-   *
-   * @example
-   * // Insert a new column at position 1 in a specific table:
-   * const targetTable = 'f47ac10b-58cc-4372-a567-0e02b2c3d479';
-   * const dataTypeId: number = textualDataType.getDataTypeId();
-   * service.addNewColumn(dataTypeId, 1, targetTable).subscribe(created => {
-   *   console.log(`Created column ID: ${created.id}`);
-   * });
+   * @param dataTypeId - Numeric code (≥ 0) for the new column's data type.
+   * @param columnIndex - Zero-based position to insert; null appends at end.
+   * @param tableId - UUID of target table; defaults to current tableId.
+   * @returns Observable emitting {@link ColumnCreatedDTO}.
    */
   addNewColumn(dataTypeId: number,
                columnIndex: number | null,
@@ -148,17 +101,12 @@ export class TableApiService {
 
 
   /**
-   * Updates the data-type of an existing column on the backend.
+   * Updates an existing column's data type.
    *
-   * Sends a PATCH request to `/tables/{tableId}/columns/{columnId}` with a payload
-   * containing only the `dataTypeId` field. Other column attributes remain unchanged.
-   *
-   * @param columnId      UUID of the column to update.
-   * @param newDataTypeId Numeric code identifying the new data type; must be ≥ 0.
-   * @param tableId       UUID of the table containing the column.
-   *                      Defaults to the service’s current `tableId` if not provided.
-   *
-   * @returns             Observable that completes when the operation is done.
+   * @param columnId - UUID of column to update.
+   * @param newDataTypeId - New data type code (≥ 0) for the column.
+   * @param tableId - UUID of parent table; defaults to current tableId.
+   * @returns Observable emitting {@link ColumnPatchedDTO}.
    */
   changeColumnDataType(columnId: string,
                        newDataTypeId: number,
@@ -173,6 +121,14 @@ export class TableApiService {
   }
 
 
+  /**
+   * Renames an existing column.
+   *
+   * @param columnId - UUID of the column to rename.
+   * @param newName - New name for the column.
+   * @param tableId - UUID of parent table; defaults to current tableId.
+   * @returns Observable emitting {@link ColumnPatchedDTO}.
+   */
   changeColumnName(columnId: string,
                    newName: string,
                    tableId: string = this.tableId): Observable<ColumnPatchedDTO> {
@@ -187,22 +143,12 @@ export class TableApiService {
 
 
   /**
-   * Updates the value of a specific cell in the current table.
+   * Updates multiple cell values.
    *
-   * Sends a PATCH request to `/tables/{tableId}/cells/{rowIndex}/{columnIndex}` with
-   * a payload containing the new cell value. Other cell properties remain unchanged.
-   *
-   * @param rowIndex    Zero-based index of the row containing the target cell.
-   * @param columnIndex Zero-based index of the column containing the target cell.
-   * @param value       New value to set for the cell; an empty string clears the cell.
-   * @param tableId     UUID of the table containing the cell.
-   *                    Defaults to the service’s current `tableId` if not provided.
-   *
-   * @returns           Observable that completes when the operation is done.
-   *
-   * @example
-   * // Update the cell at row 2, column 3 to "Hello":
-   * tableService.updateCellValue(2, 3, 'Hello');
+   * @param idsValues - Array of Pair<Pair<rowId, columnId>, newValue>.
+   * @param dataTypeId - Numeric code for the cell data type.
+   * @param tableId - UUID of target table; defaults to current tableId.
+   * @returns Observable emitting array of {@link CellPatchedDTO}.
    */
   updateCellsValue(idsValues: Pair<Pair<string | undefined, string | undefined>, string>[],
                    dataTypeId: number,
@@ -225,71 +171,48 @@ export class TableApiService {
 
 
   /**
-   * Deletes one or more rows from the specified table.
+   * Deletes rows from the specified table.
    *
-   * Sends a DELETE request to `/tables/{tableId}/rows` with a request body containing a JSON object of row UUIDs.
-   * On success, returns an Observable emitting a DTO with the array of deleted row indexes,
-   * allowing the client to update its view accordingly.
-   *
-   * @param rowsIds - Array of UUID strings identifying the rows to delete.
-   * @param tableId - UUID of the table from which to delete rows.
-   *                  Defaults to the service’s current `tableId` if not provided.
-   * @returns       Observable emitting a {@link RowsDeletedDTO} containing the list of deleted indexes.
-   *
-   * @example
-   * // Delete rows ['r1', 'r2', 'r3'] in the current table
-   * service.deleteRows(['r1', 'r2', 'r3']).subscribe(response => {
-   *   console.log(response.indexes); // e.g. [0, 2, 5]
-   * });
-   *
-   * @example
-   * // Delete a single row in a specific table
-   * service.deleteRows(['r4'], 'f47ac10b-58cc-4372-a567-0e02b2c3d479')
-   *        .subscribe(response => console.log(response.indexes));
+   * @param rowsIds - UUIDs of rows to delete.
+   * @param tableId - UUID of parent table; defaults to current tableId.
+   * @returns Observable emitting {@link RowsDeletedDTO}.
    */
   deleteRows(rowsIds: string[], tableId: string = this.tableId): Observable<RowsDeletedDTO> {
     const url = `${this.BASE_URL}/${tableId}/rows`;
-    const rowsDeleteDTO: RowsDeleteDTO = { ids: rowsIds };
-    return this.httpClient.delete<RowsDeletedDTO>(url, { body: rowsDeleteDTO });
+    const rowsDeleteDTO: RowsDeleteDTO = {ids: rowsIds};
+    return this.httpClient.delete<RowsDeletedDTO>(url, {body: rowsDeleteDTO});
   }
 
 
   /**
-   * Deletes one or more columns from the specified table.
+   * Deletes columns from the specified table.
    *
-   * Sends a DELETE request to `/tables/{tableId}/columns` with a request body containing a JSON object of column UUIDs.
-   * On success, returns an Observable emitting a DTO with the array of deleted column indexes,
-   * allowing the client to update its view accordingly.
-   *
-   * @param columnsIds - Array of UUID strings identifying the columns to delete.
-   * @param tableId    - UUID of the table from which to delete columns.
-   *                     Defaults to the service’s current `tableId` if not provided.
-   * @returns          Observable emitting a {@link ColumnsDeletedDTO} containing the list of deleted indexes.
-   *
-   * @example
-   * // Delete columns ['c1', 'c2'] in the current table
-   * service.deleteColumns(['c1', 'c2']).subscribe(response => {
-   *   console.log(response.indexes); // e.g. [1, 3]
-   * });
-   *
-   * @example
-   * // Delete a single column in a specific table
-   * service.deleteColumns(['c3'], '9f16b9c2-3e47-4d3a-8f0c-123456789abc')
-   *        .subscribe(response => console.log(response.indexes));
+   * @param columnsIds - UUIDs of columns to delete.
+   * @param tableId - UUID of parent table; defaults to current tableId.
+   * @returns Observable emitting {@link ColumnsDeletedDTO}.
    */
   deleteColumns(columnsIds: string[], tableId: string = this.tableId): Observable<ColumnsDeletedDTO> {
     const url = `${this.BASE_URL}/${tableId}/columns`;
-    const columnsDeleteDTO: ColumnsDeleteDTO = { ids: columnsIds };
-    return this.httpClient.delete<ColumnsDeletedDTO>(url, { body: columnsDeleteDTO });
+    const columnsDeleteDTO: ColumnsDeleteDTO = {ids: columnsIds};
+    return this.httpClient.delete<ColumnsDeletedDTO>(url, {body: columnsDeleteDTO});
   }
 
 
+  /**
+   * Moves rows within the specified table.
+   *
+   * @param idsToMove - UUIDs of rows to move.
+   * @param fromIndex - Starting zero-based index.
+   * @param toIndex - Destination zero-based index.
+   * @param tableId - UUID of parent table; defaults to current tableId.
+   * @returns Observable emitting {@link MovedRowsOrColumnsDTO}.
+   */
   moveRowsIndexes(idsToMove: string[],
                   fromIndex: number,
                   toIndex: number,
                   tableId: string = this.tableId): Observable<MovedRowsOrColumnsDTO> {
 
-    let rowsToMove: MoveRowOrColumnDTO = {
+    let rowsToMove: MoveRowOrColumnDto = {
       idsToMove: idsToMove,
       fromIndex: fromIndex,
       toIndex: toIndex
@@ -301,12 +224,21 @@ export class TableApiService {
   }
 
 
+  /**
+   * Moves columns within the specified table.
+   *
+   * @param idsToMove - UUIDs of columns to move.
+   * @param fromIndex - Starting zero-based index.
+   * @param toIndex - Destination zero-based index.
+   * @param tableId - UUID of parent table; defaults to current tableId.
+   * @returns Observable emitting {@link MovedRowsOrColumnsDTO}.
+   */
   moveColumnsIndexes(idsToMove: string[],
                      fromIndex: number,
                      toIndex: number,
                      tableId: string = this.tableId): Observable<MovedRowsOrColumnsDTO> {
 
-    let ColumnsToMove: MoveRowOrColumnDTO = {
+    let ColumnsToMove: MoveRowOrColumnDto = {
       idsToMove: idsToMove,
       fromIndex: fromIndex,
       toIndex: toIndex

@@ -1,6 +1,16 @@
 import {CellDTO} from './cell-dto';
 
 
+/**
+ * Represents a table row and its cells.
+ *
+ * @property id
+ *   UUID of the row.
+ * @property tableId
+ *   UUID of the table to which this row belongs.
+ * @property cells
+ *   Array of cells contained in this row. {@link CellDTO}
+ */
 export interface RowDTO {
   id: string,
   tableId: string,
@@ -9,11 +19,10 @@ export interface RowDTO {
 
 
 /**
- * Payload sent from the frontend to request creation of a new row in a table.
+ * Payload sent from the frontend to request creation of a new row.
  *
  * @property rowIndex
- *   Zero-based position at which to insert the new row.
- *   Set to `null` to append the row at the end of the table.
+ *   Zero-based position at which to insert the new row. Set to `null` to append at the end.
  */
 export interface RowCreateDTO {
   rowIndex: number | null;
@@ -38,9 +47,10 @@ export interface RowCreatedDTO {
 
 
 /**
- * Payload sent from the frontend to delete rows on the backend.
+ * Payload sent from the frontend to delete one or more rows.
  *
- * @property ids - Array of row UUIDs identifying which rows to delete.
+ * @property ids
+ *   Array of row UUIDs identifying which rows to delete.
  */
 export interface RowsDeleteDTO {
   ids: string[]
@@ -48,9 +58,10 @@ export interface RowsDeleteDTO {
 
 
 /**
- * Response returned by the backend containing the indexes of rows deleted.
+ * Response returned by the backend containing the zero-based indexes of deleted rows.
  *
- * @property indexes - Array of numeric positions corresponding to deleted rows.
+ * @property indexes
+ *   Positions of the rows that were deleted.
  */
 export interface RowsDeletedDTO {
   indexes: number[]
