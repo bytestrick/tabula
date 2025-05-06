@@ -1,7 +1,8 @@
-import {Component, ElementRef, ViewChild} from '@angular/core';
+import {Component, ElementRef, inject, ViewChild} from '@angular/core';
 import {BaseInputComponent} from '../base-input-component';
 import {NgForOf} from '@angular/common';
 import {InfoComponent} from '../info-component/info.component';
+import {DataTypeRegistryService} from '../../../services/data-type-registry.service';
 
 @Component({
   selector: 'tbl-monetary-input',
@@ -22,6 +23,8 @@ export class MonetaryInputComponent extends BaseInputComponent {
   protected readonly symbol: string[] = ['$', '€', '£'];
   protected currentSymbol: string = this.symbol[0];
 
+  private readonly MONETARY_ID: number = DataTypeRegistryService.MONETARY_ID;
+
 
   protected override beforeShowUp(): void {
     this.grabFocus();
@@ -36,7 +39,7 @@ export class MonetaryInputComponent extends BaseInputComponent {
 
   private setInput(value: string): void {
     if (value === '') {
-      this.confirmInput('');
+      this.confirmInputDataType('', this.MONETARY_ID);
       return;
     }
 
@@ -53,10 +56,10 @@ export class MonetaryInputComponent extends BaseInputComponent {
 
       value = this.currentSymbol + value;
 
-      this.confirmInput(value);
+      this.confirmInputDataType(value, this.MONETARY_ID);
     }
     else
-      this.confirmInput(this.startingValue || '');
+      this.confirmInputDataType(this.startingValue || '', this.MONETARY_ID);
   }
 
 

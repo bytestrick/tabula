@@ -247,8 +247,6 @@ export class TableService {
    * @param toIndex - The zero-based target index where the column should be placed.
    */
   private _moveColumn(fromIndex: number, toIndex: number): void {
-    console.log(fromIndex, toIndex);
-
     for (let row of this.table)
       moveItemInArray(row.getCells(), fromIndex, toIndex);
 
@@ -435,25 +433,6 @@ export class TableService {
   hasColumnsSelected(): boolean {
     return this.selectedColumns.getSelectionNumber() !== 0;
   }
-
-
-  /**
-   * Executes a provided function for each selected row.
-   * @param fn - Function to execute, receiving the row ID of each selected row.
-   */
-  doForEachRowSelected(fn: (rowId: number) => void): void {
-    // this.selectedRows.doForEachIndexSelected(fn);
-  }
-
-
-  /**
-   * Executes a provided function for each selected column.
-   * @param fn - Function to execute, receiving the column ID of each selected column.
-   */
-  doForEachColumnSelected(fn: (columnId: number) => void): void {
-    // this.selectedColumns.doForEachIndexSelected(fn);
-  }
-
 
 
   /**
@@ -737,7 +716,7 @@ export class TableService {
    * @param cord   Coordinates of the clicked cell (`i` = row index, `j` = column index).
    * @param value  The new value to assign. If `null`, the operation is skipped.
    */
-  setCellValue(cord: CellCord, value: any): void {
+  setCellsValue(cord: CellCord, value: string, dataTypeId: number): void {
     if (value == null)
       return;
 
@@ -748,14 +727,29 @@ export class TableService {
 
     if (!cord.isHeaderCell) {
       if (!this.isRowSelected(cord.i) && !this.isColumnSelected(cord.j)) {
-        this.updateSingleCell(cord, value);
-      } else {
-        this.updateSelectedRows(clickedCell.cellDataType.constructor, value);
-        this.updateSelectedColumns(value);
+        this.updateSingleCell(cord, value, dataTypeId);
+      }
+      else if (this.isRowSelected(cord.i)) {
+        this.updateSelectedRows(value, dataTypeId);
+      }
+      else if (this.isColumnSelected(cord.j)) {
+        this.updateSelectedColumns(value, dataTypeId);
+      }
+      else {
+        this.updateSelectedRows(value, dataTypeId);
+        this.updateSelectedColumns(value, dataTypeId);
       }
     }
     else {
-      this.updateSingleCell(cord, value);
+      this.updateSingleCell(cord, value, dataTypeId);
+    }
+  }
+
+
+  private setContentCellValueFromDTO(cellPatchedDTOList: CellPatchedDTO[]): void {
+    for (const cellPatchedDTO of cellPatchedDTOList) {
+      const cell: Cell = this.getCellFromCoords(new CellCord(cellPatchedDTO.rowIndex, cellPatchedDTO.columnIndex))!;
+      cell.value = cellPatchedDTO.value;
     }
   }
 
@@ -770,7 +764,7 @@ export class TableService {
    * @param columnIndex  The column index of the cell.
    * @param value        The new value to assign.
    */
-  private updateSingleCell(cord: CellCord, value: any): void {
+  private updateSingleCell(cord: CellCord, value: string, dataTypeId: number): void {
     if (cord.isHeaderCell) {
       this.tableAPI.changeColumnName(this.getHeaderColumnId(cord.j), value).subscribe(
         (columnPatched: ColumnPatchedDTO): void => {
@@ -780,11 +774,13 @@ export class TableService {
       );
     }
     else {
-      this.tableAPI.updateCellValue(cord.i, cord.j, value).subscribe(
-        (cellPatched: CellPatchedDTO): void => {
-          const cell: Cell = this.getCellFromCoords(cord)!;
-          cell.value = cellPatched.value;
-        }
+      const rowId: string = this.getRowId(cord.i);
+      const columnId: string = this.getHeaderColumnId(cord.j);
+      const idPair: Pair<string, string> = new Pair(rowId, columnId);
+      const data: Pair<Pair<string, string>, string> = new Pair<Pair<string, string>, string>(idPair, value);
+
+      this.tableAPI.updateCellsValue([data], dataTypeId).subscribe(
+        (cellsPatched: CellPatchedDTO[]): void => this.setContentCellValueFromDTO(cellsPatched)
       );
     }
   }
@@ -800,14 +796,17 @@ export class TableService {
    * @param typeConstructor  The constructor function of the reference data-type.
    * @param value            The new value to assign.
    */
-  private updateSelectedRows(typeConstructor: Function, value: any): void {
-    this.doForEachRowSelected((i: number): void => {
-      this.getRowCells(i).forEach((cell: Cell, j: number): void => {
-        if (cell.cellDataType.constructor === typeConstructor) {
-          this.updateSingleCell(new CellCord(i, j), value);
-        }
-      });
-    });
+  private updateSelectedRows(value: string, dataTypeId: number): void {
+    const selectedRowsIds: string[] = this.selectedRows.getSelectedIds();
+    const data: Pair<Pair<string, undefined>, string>[] = []
+
+    for (let id of selectedRowsIds) {
+      data.push(new Pair(new Pair(id, undefined), value));
+    }
+
+    this.tableAPI.updateCellsValue(data, dataTypeId).subscribe(
+      (cellsPatched: CellPatchedDTO[]): void => this.setContentCellValueFromDTO(cellsPatched)
+    );
   }
 
 
@@ -820,12 +819,17 @@ export class TableService {
    *
    * @param value  The new value to assign to each affected cell.
    */
-  private updateSelectedColumns(value: any): void {
-    this.doForEachColumnSelected((j: number): void => {
-      this.getColumnCells(j).forEach((_cell: Cell, i: number): void => {
-        this.updateSingleCell(new CellCord(i, j), value);
-      });
-    });
+  private updateSelectedColumns(value: string, dataTypeId: number): void {
+    const selectedColumnsIds: string[] = this.selectedColumns.getSelectedIds();
+    const data: Pair<Pair<undefined, string>, string>[] = []
+
+    for (let id of selectedColumnsIds) {
+      data.push(new Pair(new Pair(undefined, id), value));
+    }
+
+    this.tableAPI.updateCellsValue(data, dataTypeId).subscribe(
+      (cellsPatched: CellPatchedDTO[]): void => this.setContentCellValueFromDTO(cellsPatched)
+    );
   }
 
 

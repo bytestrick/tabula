@@ -26,8 +26,15 @@ export interface CellDTO {
  * @property value
  *   The new content for the cell. An empty string represents a blank cell.
  */
+// dto inteso per aggiornare solamente le celle chee rappresentano il contenuto della tabella. Per aggiornare
+// i nomi delle colonne dell'header vedi tableAPI.changeColumnName.
+// rowId, columnId se sono presenti entrambi aggiorna una singola cella, se è presente solo rowId aggiorna tutte le
+// le celle lungo rowId, se e presente solo columnId aggiorna tutte le celle lungo columnId
 export interface CellPatchDTO {
-  value: string
+  rowId?: string
+  columnId?: string
+  dataTypeId: number
+  newValue: string
 }
 
 

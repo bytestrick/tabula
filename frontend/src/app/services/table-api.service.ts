@@ -18,6 +18,7 @@ import {
 } from '../model/dto/table/column-dto';
 import {CellDTO, CellPatchDTO, CellPatchedDTO} from '../model/dto/table/cell-dto';
 import {MovedRowsOrColumnsDTO, MoveRowOrColumnDTO} from '../model/dto/table/move-row-or-column-d-t-o';
+import {CellCord} from '../model/table/cell-cord';
 
 
 @Injectable({
@@ -203,17 +204,23 @@ export class TableApiService {
    * // Update the cell at row 2, column 3 to "Hello":
    * tableService.updateCellValue(2, 3, 'Hello');
    */
-  updateCellValue(rowIndex: number,
-                  columnIndex: number,
-                  value: string,
-                  tableId: string = '' || this.tableId): Observable<CellPatchedDTO> {
+  updateCellsValue(idsValues: Pair<Pair<string | undefined, string | undefined>, string>[],
+                   dataTypeId: number,
+                   tableId: string = '' || this.tableId): Observable<CellPatchedDTO[]> {
 
-    const cell: CellPatchDTO = {
-      value: value
+    const cellsToUpdate: CellPatchDTO[] = [];
+
+    for (let p of idsValues) {
+      cellsToUpdate.push({
+        rowId: p.first.first,
+        columnId: p.first.second,
+        dataTypeId: dataTypeId,
+        newValue: p.second
+      });
     }
 
-    const url: string = `${this.BASE_URL}/${tableId}/cells/${rowIndex}/${columnIndex}`;
-    return this.httpClient.patch<CellPatchedDTO>(url, cell);
+    const url: string = `${this.BASE_URL}/${tableId}/cells`;
+    return this.httpClient.patch<CellPatchedDTO[]>(url, cellsToUpdate);
   }
 
 

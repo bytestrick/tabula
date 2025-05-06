@@ -1,6 +1,7 @@
 import {Component, ElementRef, ViewChild} from '@angular/core';
 import {BaseInputComponent} from '../base-input-component';
 import {InfoComponent} from '../info-component/info.component';
+import {DataTypeRegistryService} from '../../../services/data-type-registry.service';
 
 @Component({
   selector: 'tbl-numeric-input',
@@ -17,6 +18,8 @@ export class NumericInputComponent extends BaseInputComponent {
 
   private value: string = '';
 
+  private readonly NUMERIC_ID: number = DataTypeRegistryService.NUMERIC_ID;
+
 
   protected override beforeShowUp(): void {
     this.grabFocus();
@@ -28,9 +31,9 @@ export class NumericInputComponent extends BaseInputComponent {
 
   private setInput(value: string): void {
     if (!isNaN(Number(value)))
-      this.confirmInput(value);
+      this.confirmInputDataType(value, this.NUMERIC_ID);
     else
-      this.confirmInput(this.startingValue || '');
+      this.confirmInputDataType(this.startingValue || '', this.NUMERIC_ID);
   }
 
 

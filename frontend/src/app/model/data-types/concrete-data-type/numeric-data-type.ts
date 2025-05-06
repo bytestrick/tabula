@@ -4,11 +4,12 @@ import { BaseCellComponent } from '../../../table-components/table/cells/base-ce
 import {IDataType} from '../i-data-type';
 import {TextualCellComponent} from '../../../table-components/table/cells/textual-cell/textual-cell.component';
 import {NumericInputComponent} from '../../../table-components/input-components/numeric-input/numeric-input.component';
+import {DataTypeRegistryService} from '../../../services/data-type-registry.service';
 
 export class NumericDataType implements IDataType {
 
   getDataTypeId(): number {
-    return 2;
+    return DataTypeRegistryService.NUMERIC_ID;
   }
 
 

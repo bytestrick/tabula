@@ -252,24 +252,62 @@ public class TableService {
      * <p>This method looks up the internal row and column IDs, then delegates
      * the update to the DAO.</p>
      *
-     * @param tableId        UUID of the table containing the cell.
-     * @param rowIndex       Zero-based index of the row in which the cell resides.
-     * @param columnIndex    Zero-based index of the column in which the cell resides.
-     * @param cellPatchDTO   DTO carrying the new cell value.
-     *
-     * @return               {@link CellPatchedDTO} containing the updated cell's row
-     *                       index, column index, and new value.
      */
     @Transactional
-    public CellPatchedDTO updateCellValue(UUID tableId, int rowIndex, int columnIndex, CellPatchDTO cellPatchDTO) {
-        System.out.println(rowIndex + " " + columnIndex + " " + tableId);
-        cellDAO.updateCell(
-                rowDAO.findRowIdByIndex(tableId, rowIndex),
-                columnDAO.findColumnIdByIndex(tableId, columnIndex),
-                cellPatchDTO.value()
-        );
+    public List<CellPatchedDTO> updateCellValue(UUID tableId, List<CellPatchDTO> cellsPatchDTO) {
+        List<CellPatchedDTO> cellsPatched = new ArrayList<>();
 
-        return new CellPatchedDTO(rowIndex, columnIndex, cellPatchDTO.value());
+        for (CellPatchDTO cellPatchDTO : cellsPatchDTO) {
+            if (cellPatchDTO.rowId() != null && cellPatchDTO.columnId() != null) {
+                if (!columnDAO.matchColumnDataType(tableId, cellPatchDTO.columnId(), cellPatchDTO.dataTypeId()))
+                    continue;
+
+                cellDAO.updateCell(cellPatchDTO.rowId(), cellPatchDTO.columnId(), cellPatchDTO.newValue());
+                cellsPatched.add(
+                        new CellPatchedDTO(
+                            rowDAO.findRowIndexFromId(tableId, cellPatchDTO.rowId()),
+                            columnDAO.findColumnIndexFromId(tableId, cellPatchDTO.columnId()),
+                            cellPatchDTO.newValue()
+                        )
+                );
+            }
+            else if (cellPatchDTO.rowId() != null) {
+                List<UUID> rowCellsColumnsIds = cellDAO.findRowCellsColumnsIds(cellPatchDTO.rowId());
+
+                for (UUID rowCellsColumnId : rowCellsColumnsIds) {
+                    if (!columnDAO.matchColumnDataType(tableId, rowCellsColumnId, cellPatchDTO.dataTypeId()))
+                        continue;
+
+                    cellDAO.updateCell(cellPatchDTO.rowId(), rowCellsColumnId, cellPatchDTO.newValue());
+                    cellsPatched.add(
+                            new CellPatchedDTO(
+                                    rowDAO.findRowIndexFromId(tableId, cellPatchDTO.rowId()),
+                                    columnDAO.findColumnIndexFromId(tableId, rowCellsColumnId),
+                                    cellPatchDTO.newValue()
+                            )
+                    );
+                }
+            }
+            else if (cellPatchDTO.columnId() != null) {
+                if (!columnDAO.matchColumnDataType(tableId, cellPatchDTO.columnId(), cellPatchDTO.dataTypeId()))
+                    continue;
+
+                List<UUID> columnCellsRowsIds = cellDAO.findColumnCellsRowsIds(cellPatchDTO.columnId());
+
+                for (UUID columnCellsRowId : columnCellsRowsIds) {
+                    cellDAO.updateCell(columnCellsRowId, cellPatchDTO.columnId(), cellPatchDTO.newValue());
+                    cellsPatched.add(
+                            new CellPatchedDTO(
+                                    rowDAO.findRowIndexFromId(tableId, columnCellsRowId),
+                                    columnDAO.findColumnIndexFromId(tableId, cellPatchDTO.columnId()),
+                                    cellPatchDTO.newValue()
+                            )
+                    );
+                }
+            }
+        }
+
+        return cellsPatched;
     }
 
 

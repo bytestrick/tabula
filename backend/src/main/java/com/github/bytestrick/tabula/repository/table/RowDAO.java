@@ -233,6 +233,19 @@ public class RowDAO {
     }
 
 
+    public Integer findRowIndexFromId(UUID tableId, UUID rowId) {
+        return jdbcClient.sql("""
+                SELECT row_index
+                FROM my_row
+                WHERE my_table = :tableId AND id = :rowId
+            """)
+                .param("tableId", tableId)
+                .param("rowId", rowId)
+                .query(Integer.class)
+                .single();
+    }
+
+
     private class MyRowMapper implements RowMapper<RowProxy> {
 
         @Override

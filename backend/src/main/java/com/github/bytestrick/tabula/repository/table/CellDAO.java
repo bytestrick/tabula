@@ -26,12 +26,41 @@ public class CellDAO {
      * @param newValue  New string value to set in the cell.
      */
     public void updateCell(UUID rowId, UUID columnId, String newValue) {
-        jdbcClient.sql("UPDATE cell SET value = :newValue WHERE my_row = :rowId and my_column = :columnId")
+        jdbcClient.sql("""
+                UPDATE cell
+                SET value = :newValue
+                WHERE my_row = :rowId and my_column = :columnId
+            """)
                 .param("newValue", newValue)
                 .param("rowId", rowId)
                 .param("columnId", columnId)
                 .update();
     }
+
+
+    public List<UUID> findRowCellsColumnsIds(UUID rowId) {
+        return jdbcClient.sql("""
+                SELECT my_column
+                FROM cell
+                WHERE my_row = :rowId
+            """)
+                .param("rowId", rowId)
+                .query(UUID.class)
+                .list();
+    }
+
+
+    public List<UUID> findColumnCellsRowsIds(UUID columnId) {
+        return jdbcClient.sql("""
+                SELECT my_row
+                FROM cell
+                WHERE my_column = :columnId
+            """)
+                .param("columnId", columnId)
+                .query(UUID.class)
+                .list();
+    }
+
 
 
     /**

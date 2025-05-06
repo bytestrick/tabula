@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -191,14 +192,12 @@ public class TableController {
      * @return              {@link CellPatchedDTO} containing the updated cell's row
      *                      index, column index, and new value. HTTP 200 OK on success.
      */
-    @PatchMapping("/{tableId}/cells/{rowIndex}/{columnIndex}")
-    public ResponseEntity<CellPatchedDTO> patchCellByCoords(
+    @PatchMapping("/{tableId}/cells")
+    public ResponseEntity<List<CellPatchedDTO>> patchCellByCoords(
             @PathVariable UUID tableId,
-            @PathVariable int rowIndex,
-            @PathVariable int columnIndex,
-            @RequestBody CellPatchDTO cellPatchDTO) {
+            @RequestBody List<CellPatchDTO> cellsPatchDTO) {
 
-        CellPatchedDTO cellPatchedDTO = tableService.updateCellValue(tableId, rowIndex, columnIndex, cellPatchDTO);
+        List<CellPatchedDTO> cellPatchedDTO = tableService.updateCellValue(tableId, cellsPatchDTO);
         return ResponseEntity.ok(cellPatchedDTO);
     }
 }

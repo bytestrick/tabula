@@ -4,12 +4,13 @@ import { BaseCellComponent } from '../../../table-components/table/cells/base-ce
 import {IDataType} from '../i-data-type';
 import {MonetaryInputComponent} from '../../../table-components/input-components/monetary-input/monetary-input.component';
 import {TextualCellComponent} from '../../../table-components/table/cells/textual-cell/textual-cell.component';
+import {DataTypeRegistryService} from '../../../services/data-type-registry.service';
 
 
 export class MonetaryDataType implements IDataType {
 
   getDataTypeId(): number {
-    return 3;
+    return DataTypeRegistryService.MONETARY_ID;
   }
 
   getInputComponent(): Type<BaseInputComponent> {
