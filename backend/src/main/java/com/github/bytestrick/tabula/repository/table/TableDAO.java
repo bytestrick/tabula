@@ -45,7 +45,7 @@ public class TableDAO {
      */
     public void saveTable(UUID id) {
         jdbcClient.sql("""
-                INSERT INTO my_table (id)
+                INSERT INTO tbl_table (id)
                 VALUES (:id)
             """)
                 .param("id", id)
@@ -60,7 +60,7 @@ public class TableDAO {
      */
     public void deleteTable(UUID id) {
         jdbcClient.sql("""
-                DELETE FROM my_table
+                DELETE FROM tbl_table
                 WHERE id = :id
             """)
                 .param("id", id)
@@ -77,7 +77,7 @@ public class TableDAO {
     public TableProxy findTable(UUID id) {
         return jdbcClient.sql("""
                 SELECT *
-                FROM my_table
+                FROM tbl_table
                 WHERE id = :id
             """)
                 .param("id", id)
