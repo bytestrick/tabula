@@ -308,6 +308,28 @@ public class ColumnDAO implements IndexesSortedDAO {
 
 
     /**
+     * Check to see if the column exists within a table.
+     *
+     * @param tableId Id of the table.
+     * @param columnId Id to check.
+     * @return Returns {@code true} if the {@code columnId} is associated with the table {@code tableId}.
+     */
+    public boolean columnExists(UUID tableId, UUID columnId) {
+        return jdbcClient.sql("""
+                SELECT EXISTS(
+                    SELECT 1
+                    FROM tbl_column
+                    WHERE id = :columnId AND tbl_table = :tableId
+                )
+            """)
+                .param("tableId", tableId)
+                .param("columnId", columnId)
+                .query(Boolean.class)
+                .single();
+    }
+
+
+    /**
      * Retrieves the index of a single column by its UUID.
      *
      * @param tableId

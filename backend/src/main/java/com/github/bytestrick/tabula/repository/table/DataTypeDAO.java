@@ -56,4 +56,24 @@ public class DataTypeDAO {
                 .query(Integer.class)
                 .single();
     }
+
+
+    /**
+     * Check to see if a dataType exists.
+     *
+     * @param dataTypeId Id to check.
+     * @return {@code true} if the {@code dataTypeId} is associated with a data type.
+     */
+    public boolean dataTypeExists(int dataTypeId) {
+        return jdbcClient.sql("""
+                SELECT EXISTS(
+                    SELECT 1
+                    FROM data_type
+                    WHERE id = :dataTypeId
+                )
+            """)
+                .param("dataTypeId", dataTypeId)
+                .query(Boolean.class)
+                .single();
+    }
 }
