@@ -1,5 +1,6 @@
 package com.github.bytestrick.tabula.repository.table;
 
+import com.github.bytestrick.tabula.repository.interfaces.IndexesSortedDAO;
 import com.github.bytestrick.tabula.repository.proxy.table.ColumnProxy;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.RowMapper;
@@ -32,7 +33,7 @@ import java.util.UUID;
  */
 @RequiredArgsConstructor
 @Repository
-public class ColumnDAO {
+public class ColumnDAO implements IndexesSortedDAO {
 
     private final JdbcClient jdbcClient;
     private final CellDAO cellDAO;
@@ -307,29 +308,6 @@ public class ColumnDAO {
 
 
     /**
-     * Retrieves the indexes of multiple columns by their UUIDs.
-     *
-     * @param tableId
-     *   UUID of the table.
-     * @param columnsIds
-     *   List of column UUIDs whose indexes are needed.
-     * @return
-     *   List of zero-based column indexes matching the provided IDs.
-     */
-    public List<Integer> findColumnsIndexesFromIds(UUID tableId, List<UUID> columnsIds) {
-        return jdbcClient.sql("""
-                SELECT column_index
-                FROM my_column
-                WHERE my_table = :tableId AND id IN (:columnsIds)
-            """)
-                .param("tableId", tableId)
-                .param("columnsIds", columnsIds)
-                .query(Integer.class)
-                .list();
-    }
-
-
-    /**
      * Retrieves the index of a single column by its UUID.
      *
      * @param tableId
@@ -375,6 +353,58 @@ public class ColumnDAO {
                 .param("dataTypeId", dataTypeId)
                 .query(Boolean.class)
                 .single();
+    }
+
+
+    /**
+     * Implementation of the {@code findIndexesFromIdsSortedAscending} method of {@link IndexesSortedDAO}.
+     * <p>Retrieves the indexes (sorted in ascending order) of multiple rows by their UUIDs.</p>
+     *
+     * @param tableId
+     *   UUID of the table.
+     * @param ids
+     *   List of column UUIDs whose indexes are needed.
+     * @return
+     *   List of zero-based column indexes (sorted in ascending order) matching the provided IDs.
+     */
+    @Override
+    public List<Integer> findIndexesFromIdsSortedAscending(UUID tableId, List<UUID> ids) {
+        return jdbcClient.sql("""
+                SELECT column_index
+                FROM my_column
+                WHERE my_table = :tableId AND id IN (:columnsIds)
+                ORDER BY column_index
+            """)
+                .param("tableId", tableId)
+                .param("columnsIds", ids)
+                .query(Integer.class)
+                .list();
+    }
+
+
+    /**
+     * Implementation of the {@code findIndexesFromIdsSortedDescending} method of {@link IndexesSortedDAO}.
+     * <p>Retrieves the indexes (sorted in descending order) of multiple rows by their UUIDs.</p>
+     *
+     * @param tableId
+     *   UUID of the table.
+     * @param ids
+     *   List of column UUIDs whose indexes are needed.
+     * @return
+     *   List of zero-based column indexes (deorted in ascending order) matching the provided IDs.
+     */
+    @Override
+    public List<Integer> findIndexesFromIdsSortedDescending(UUID tableId, List<UUID> ids) {
+        return jdbcClient.sql("""
+                SELECT column_index
+                FROM my_column
+                WHERE my_table = :tableId AND id IN (:columnsIds)
+                ORDER BY column_index DESC
+            """)
+                .param("tableId", tableId)
+                .param("columnsIds", ids)
+                .query(Integer.class)
+                .list();
     }
 
 
