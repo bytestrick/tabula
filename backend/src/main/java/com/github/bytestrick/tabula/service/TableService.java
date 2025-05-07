@@ -11,6 +11,7 @@ import com.github.bytestrick.tabula.model.Pair;
 import com.github.bytestrick.tabula.model.table.Cell;
 import com.github.bytestrick.tabula.repository.TableDao;
 import com.github.bytestrick.tabula.repository.UserDao;
+import com.github.bytestrick.tabula.repository.interfaces.IndexesSortedDAO;
 import com.github.bytestrick.tabula.repository.proxy.table.ColumnProxy;
 import com.github.bytestrick.tabula.repository.proxy.table.RowProxy;
 import com.github.bytestrick.tabula.repository.proxy.table.TableProxy;
@@ -432,25 +433,25 @@ public class TableService {
      *
      * @param rawDelta
      *   The difference {@code toIndex - fromIndex} determining shift direction.
-     * @param indexesToMove
+     * @param tableId
+     *  Id of the table to which the indexes belong.
+     * @param ids
      *   The list of zero-based indexes selected for movement.
+     * @param dao
+     *  DAO implementing {@link IndexesSortedDAO} used to perform the sorting operation.
      * @return
-     *   The same list instance, sorted in-place according to the shift direction.
+     *   The sorted indexes according to the shift direction.
      */
-    private List<Integer> getSortedIndexesToMove(int rawDelta, List<Integer> indexesToMove) {
-        if (indexesToMove.isEmpty()) {
-            return new ArrayList<>();
-        }
+    private List<Integer> getSortedIndexesToMove(int rawDelta,
+                                                 UUID tableId,
+                                                 List<UUID> ids,
+                                                 IndexesSortedDAO dao) {
 
         if (rawDelta < 0) {
-            // sort selected indexes in ascending order
-            Collections.sort(indexesToMove);
-            return indexesToMove;
+            return dao.findIndexesFromIdsSortedAscending(tableId, ids);
         }
         else if (rawDelta > 0) {
-            // sorts the selected indexes in descending order
-            Collections.sort(indexesToMove, Collections.reverseOrder());
-            return indexesToMove;
+            return dao.findIndexesFromIdsSortedDescending(tableId, ids);
         }
 
         return new ArrayList<>();
@@ -617,11 +618,10 @@ public class TableService {
             throw new RuntimeException();
 
         int rawDelta = moveRowsDTO.toIndex() - moveRowsDTO.fromIndex();
-        List<Integer> rowsIndexesToMove = rowDAO.findRowsIndexesFromIds(tableId, moveRowsDTO.idsToMove());
-        List<Integer> sortedRowsIndexesToMove = getSortedIndexesToMove(rawDelta, rowsIndexesToMove);
+        List<Integer> sortedRowsIndexesToMove = getSortedIndexesToMove(rawDelta, tableId, moveRowsDTO.idsToMove(), rowDAO);
         int adjustedDelta = getAdjustedDeltaToBounds(rawDelta, sortedRowsIndexesToMove, 0, rowsAmount);
 
-        List<Pair<UUID, Integer>> convertedList = getIndexToUpdate(rowsIndexesToMove, adjustedDelta)
+        List<Pair<UUID, Integer>> convertedList = getIndexToUpdate(sortedRowsIndexesToMove, adjustedDelta)
                 .stream()
                 .map(
                         (Pair<Integer, Integer> p) ->
@@ -633,7 +633,7 @@ public class TableService {
             rowDAO.updateRowIndex(p.getFirst(), p.getSecond(), tableId);
         }
 
-        return new MovedRowsOrColumnsDTO(rowsIndexesToMove, adjustedDelta);
+        return new MovedRowsOrColumnsDTO(sortedRowsIndexesToMove, adjustedDelta);
     }
 
 
@@ -669,11 +669,10 @@ public class TableService {
             throw new RuntimeException();
 
         int rawDelta = moveColumnsDTO.toIndex() - moveColumnsDTO.fromIndex();
-        List<Integer> columnsIndexesToMove = columnDAO.findColumnsIndexesFromIds(tableId, moveColumnsDTO.idsToMove());
-        List<Integer> sortedColumnsIndexesToMove = getSortedIndexesToMove(rawDelta, columnsIndexesToMove);
+        List<Integer> sortedColumnsIndexesToMove = getSortedIndexesToMove(rawDelta, tableId, moveColumnsDTO.idsToMove(), columnDAO);
         int adjustedDelta = getAdjustedDeltaToBounds(rawDelta, sortedColumnsIndexesToMove, 0, columnsAmount);
 
-        List<Pair<UUID, Integer>> convertedList = getIndexToUpdate(columnsIndexesToMove, adjustedDelta)
+        List<Pair<UUID, Integer>> convertedList = getIndexToUpdate(sortedColumnsIndexesToMove, adjustedDelta)
                 .stream()
                 .map(
                         (Pair<Integer, Integer> p) ->
@@ -685,6 +684,6 @@ public class TableService {
             columnDAO.updateColumnIndex(p.getFirst(), p.getSecond(), tableId);
         }
 
-        return new MovedRowsOrColumnsDTO(columnsIndexesToMove, adjustedDelta);
+        return new MovedRowsOrColumnsDTO(sortedColumnsIndexesToMove, adjustedDelta);
     }
 }
