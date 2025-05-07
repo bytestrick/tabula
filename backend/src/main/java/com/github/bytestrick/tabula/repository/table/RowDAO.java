@@ -122,6 +122,28 @@ public class RowDAO implements IndexesSortedDAO {
 
 
     /**
+     * Check to see if the row exists within a table.
+     *
+     * @param tableId Id of the table.
+     * @param rowId Id to check.
+     * @return Returns {@code true} if the {@code rowId} is associated with the table {@code tableId}.
+     */
+    public boolean rowExists(UUID tableId, UUID rowId) {
+        return jdbcClient.sql("""
+                SELECT EXISTS(
+                    SELECT 1
+                    FROM tbl_row
+                    WHERE id = :rowId AND tbl_table = :tableId
+                )
+            """)
+                .param("tableId", tableId)
+                .param("rowId", rowId)
+                .query(Boolean.class)
+                .single();
+    }
+
+
+    /**
      * DAO method to insert a new row at a specific index within the specified table.
      * <p>
      *  Shifts existing rows with indexes greater than or equal to the provided index

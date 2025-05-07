@@ -69,6 +69,26 @@ public class TableDAO {
 
 
     /**
+     * Check to see if the table exists.
+     *
+     * @param tableId Id to check.
+     * @return Returns {@code true} if the {@code tableId} is associated with a table.
+     */
+    public boolean tableExists(UUID tableId) {
+        return jdbcClient.sql("""
+                SELECT EXISTS(
+                    SELECT 1
+                    FROM tbl_table
+                    WHERE id = :tableId
+                )
+            """)
+                .param("tableId", tableId)
+                .query(Boolean.class)
+                .single();
+    }
+
+
+    /**
      * Retrieves a full {@link TableProxy} object, including its rows and columns, for a given table UUID.
      *
      * @param id UUID of the table to fetch.
