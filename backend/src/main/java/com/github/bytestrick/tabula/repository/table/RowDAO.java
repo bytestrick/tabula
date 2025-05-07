@@ -58,7 +58,7 @@ public class RowDAO implements IndexesSortedDAO {
     public int deleteRow(UUID tableId, UUID id) {
         int deletedRowIndex = jdbcClient.sql("""
                 SELECT row_index
-                FROM my_row
+                FROM tbl_row
                 WHERE id = :id
             """)
                 .param("id", id)
@@ -66,17 +66,17 @@ public class RowDAO implements IndexesSortedDAO {
                 .single();
 
         jdbcClient.sql("""
-                DELETE FROM my_row
-                WHERE id = :id AND my_table = :tableId
+                DELETE FROM tbl_row
+                WHERE id = :id AND tbl_table = :tableId
             """)
                 .param("id", id)
                 .param("tableId", tableId)
                 .update();
 
         jdbcClient.sql("""
-                UPDATE my_row
+                UPDATE tbl_row
                 SET row_index = row_index - 1
-                WHERE my_table = :tableId AND row_index > :deletedRowIndex
+                WHERE tbl_table = :tableId AND row_index > :deletedRowIndex
             """)
                 .param("tableId", tableId)
                 .param("deletedRowIndex", deletedRowIndex)
@@ -101,15 +101,15 @@ public class RowDAO implements IndexesSortedDAO {
     public RowProxy appendNewRow(UUID tableId, UUID newRowId) {
         int rowIndex = jdbcClient.sql("""
                 SELECT COALESCE(MAX(row_index), -1) + 1
-                FROM my_row
-                WHERE my_table = :tableId
+                FROM tbl_row
+                WHERE tbl_table = :tableId
             """)
                 .param("tableId", tableId)
                 .query(Integer.class)
                 .single();
 
         jdbcClient.sql("""
-                INSERT INTO my_row (id, my_table, row_index)
+                INSERT INTO tbl_row (id, tbl_table, row_index)
                 VALUES (:id, :tableId, :rowIndex)
             """)
                 .param("id", newRowId)
@@ -135,16 +135,16 @@ public class RowDAO implements IndexesSortedDAO {
     @Transactional
     public RowProxy insertNewRowAt(UUID tableId, UUID newRowId, int rowIndex) {
         jdbcClient.sql("""
-                UPDATE my_row
+                UPDATE tbl_row
                 SET row_index = row_index + 1
-                WHERE my_table = :tableId AND row_index >= :rowIndex
+                WHERE tbl_table = :tableId AND row_index >= :rowIndex
             """)
                 .param("rowIndex", rowIndex)
                 .param("tableId", tableId)
                 .update();
 
         jdbcClient.sql("""
-                INSERT INTO my_row (id, my_table, row_index)
+                INSERT INTO tbl_row (id, tbl_table, row_index)
                 VALUES (:id, :tableId, :rowIndex)
             """)
                 .param("id", newRowId)
@@ -166,8 +166,8 @@ public class RowDAO implements IndexesSortedDAO {
     public List<RowProxy> findAllRows(UUID tableId) {
         return jdbcClient.sql("""
                 SELECT *
-                FROM my_row
-                WHERE my_table = :tableId
+                FROM tbl_row
+                WHERE tbl_table = :tableId
                 ORDER BY row_index
             """)
                 .param("tableId", tableId)
@@ -185,8 +185,8 @@ public class RowDAO implements IndexesSortedDAO {
     public UUID findRowIdByIndex(UUID tableId, int rowIndex) {
         return jdbcClient.sql("""
                 SELECT id
-                FROM my_row
-                WHERE my_table = :tableId AND row_index = :rowIndex
+                FROM tbl_row
+                WHERE tbl_table = :tableId AND row_index = :rowIndex
             """)
                 .param("tableId", tableId)
                 .param("rowIndex", rowIndex)
@@ -207,9 +207,9 @@ public class RowDAO implements IndexesSortedDAO {
      */
     public void updateRowIndex(UUID rowId, int newRowIndex, UUID tableId) {
         jdbcClient.sql("""
-                UPDATE my_row
+                UPDATE tbl_row
                 SET row_index = :newRowIndex
-                WHERE id = :rowId AND my_table = :tableId;
+                WHERE id = :rowId AND tbl_table = :tableId;
             """)
                 .param("newRowIndex", newRowIndex)
                 .param("tableId", tableId)
@@ -229,8 +229,8 @@ public class RowDAO implements IndexesSortedDAO {
     public int getRowsNumber(UUID tableId) {
         return jdbcClient.sql("""
                 SELECT COUNT(*)
-                FROM my_row
-                WHERE my_table = :tableId
+                FROM tbl_row
+                WHERE tbl_table = :tableId
             """)
                 .param("tableId", tableId)
                 .query(Integer.class)
@@ -253,8 +253,8 @@ public class RowDAO implements IndexesSortedDAO {
     public List<Integer> findIndexesFromIdsSortedAscending(UUID tableId, List<UUID> ids) {
         return jdbcClient.sql("""
                 SELECT row_index
-                FROM my_row
-                WHERE my_table = :tableId AND id IN (:rowIds)
+                FROM tbl_row
+                WHERE tbl_table = :tableId AND id IN (:rowIds)
                 ORDER BY row_index
             """)
                 .param("tableId", tableId)
@@ -279,8 +279,8 @@ public class RowDAO implements IndexesSortedDAO {
     public List<Integer> findIndexesFromIdsSortedDescending(UUID tableId, List<UUID> ids) {
         return jdbcClient.sql("""
                 SELECT row_index
-                FROM my_row
-                WHERE my_table = :tableId AND id IN (:rowIds)
+                FROM tbl_row
+                WHERE tbl_table = :tableId AND id IN (:rowIds)
                 ORDER BY row_index DESC
             """)
                 .param("tableId", tableId)
@@ -303,8 +303,8 @@ public class RowDAO implements IndexesSortedDAO {
     public Integer findRowIndexFromId(UUID tableId, UUID rowId) {
         return jdbcClient.sql("""
                 SELECT row_index
-                FROM my_row
-                WHERE my_table = :tableId AND id = :rowId
+                FROM tbl_row
+                WHERE tbl_table = :tableId AND id = :rowId
             """)
                 .param("tableId", tableId)
                 .param("rowId", rowId)
@@ -319,7 +319,7 @@ public class RowDAO implements IndexesSortedDAO {
         public RowProxy mapRow(ResultSet rs, int rowNum) throws SQLException {
             return new RowProxy(
                     UUID.fromString(rs.getString("id")),
-                    UUID.fromString(rs.getString("my_table")),
+                    UUID.fromString(rs.getString("tbl_table")),
                     rs.getInt("row_index"),
                     cellDAO
             );

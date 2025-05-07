@@ -29,7 +29,7 @@ public class CellDAO {
         jdbcClient.sql("""
                 UPDATE cell
                 SET value = :newValue
-                WHERE my_row = :rowId and my_column = :columnId
+                WHERE tbl_row = :rowId and tbl_column = :columnId
             """)
                 .param("newValue", newValue)
                 .param("rowId", rowId)
@@ -48,9 +48,9 @@ public class CellDAO {
      */
     public List<UUID> findRowCellsColumnsIds(UUID rowId) {
         return jdbcClient.sql("""
-                SELECT my_column
+                SELECT tbl_column
                 FROM cell
-                WHERE my_row = :rowId
+                WHERE tbl_row = :rowId
             """)
                 .param("rowId", rowId)
                 .query(UUID.class)
@@ -68,9 +68,9 @@ public class CellDAO {
      */
     public List<UUID> findColumnCellsRowsIds(UUID columnId) {
         return jdbcClient.sql("""
-                SELECT my_row
+                SELECT tbl_row
                 FROM cell
-                WHERE my_column = :columnId
+                WHERE tbl_column = :columnId
             """)
                 .param("columnId", columnId)
                 .query(UUID.class)
@@ -89,8 +89,8 @@ public class CellDAO {
         return jdbcClient.sql("""
                 SELECT c.*
                 FROM cell c
-                INNER JOIN my_column mc on mc.id = c.my_column
-                WHERE c.my_row = :rowId
+                INNER JOIN tbl_column mc on mc.id = c.tbl_column
+                WHERE c.tbl_row = :rowId
                 ORDER BY mc.column_index
             """)
                 .param("rowId", rowId)
@@ -108,8 +108,8 @@ public class CellDAO {
         return jdbcClient.sql("""
                 SELECT c.*
                 FROM cell c
-                INNER JOIN my_row mr on mr.id = c.my_row
-                WHERE c.my_column = :columnId
+                INNER JOIN tbl_row mr on mr.id = c.tbl_row
+                WHERE c.tbl_column = :columnId
                 ORDER BY mr.row_index
             """)
                 .param("columnId", columnId)
@@ -127,7 +127,7 @@ public class CellDAO {
         jdbcClient.sql("""
                 UPDATE cell
                 SET value = ''
-                WHERE my_column = :columnId
+                WHERE tbl_column = :columnId
             """)
                 .param("columnId", columnId)
                 .update();
@@ -140,8 +140,8 @@ public class CellDAO {
         public Cell mapRow(ResultSet rs, int rowNum) throws SQLException {
             return new Cell(
                     UUID.fromString(rs.getString("id")),
-                    UUID.fromString(rs.getString("my_column")),
-                    UUID.fromString(rs.getString("my_row")),
+                    UUID.fromString(rs.getString("tbl_column")),
+                    UUID.fromString(rs.getString("tbl_row")),
                     rs.getString("value")
             );
         }

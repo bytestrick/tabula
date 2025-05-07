@@ -50,47 +50,47 @@ VALUES
     ('Monetary');
 
 
-CREATE TABLE my_table 
+CREATE TABLE tbl_table
 (
     id              UUID PRIMARY KEY
 );
 
 
-CREATE TABLE my_column
+CREATE TABLE tbl_column
 (
     id              UUID PRIMARY KEY,
-    my_table        UUID,
-    data_type       SMALLSERIAL,
+    tbl_table       UUID,
+    data_type       SMALLINT,
     column_index    INT NOT NULL,
     column_name     VARCHAR(300),
 
-    FOREIGN KEY (my_table) REFERENCES my_table (id) ON DELETE CASCADE,
+    FOREIGN KEY (tbl_table) REFERENCES tbl_table (id) ON DELETE CASCADE,
     FOREIGN KEY (data_type) REFERENCES data_type (id),
-    UNIQUE(column_index, my_table) DEFERRABLE INITIALLY DEFERRED
+    UNIQUE(column_index, tbl_table) DEFERRABLE INITIALLY DEFERRED
 );
 
 
-CREATE TABLE my_row
+CREATE TABLE tbl_row
 (
     id UUID         PRIMARY KEY,
-    my_table        UUID,
+    tbl_table       UUID,
     row_index       INT NOT NULL,
 
-    FOREIGN KEY (my_table) REFERENCES my_table (id) ON DELETE CASCADE,
-    UNIQUE(row_index, my_table) DEFERRABLE INITIALLY DEFERRED
+    FOREIGN KEY (tbl_table) REFERENCES tbl_table (id) ON DELETE CASCADE,
+    UNIQUE(row_index, tbl_table) DEFERRABLE INITIALLY DEFERRED
 );
 
 
 CREATE TABLE cell
 (
     id              UUID PRIMARY KEY,
-    my_row          UUID,
-    my_column       UUID,
+    tbl_row         UUID,
+    tbl_column      UUID,
     value           VARCHAR(1000) NOT NULL DEFAULT '',
 
-    FOREIGN KEY (my_column) REFERENCES my_column(id) ON DELETE CASCADE,
-    FOREIGN KEY (my_row) REFERENCES my_row(id) ON DELETE CASCADE,
-    UNIQUE(my_row, my_column)
+    FOREIGN KEY (tbl_column) REFERENCES tbl_column(id) ON DELETE CASCADE,
+    FOREIGN KEY (tbl_row) REFERENCES tbl_row(id) ON DELETE CASCADE,
+    UNIQUE(tbl_row, tbl_column)
 );
 
 
@@ -106,7 +106,7 @@ create table table_card
         constraint table_card_users__fk
             references users,
     table_id       uuid
-        constraint table_card_my_table__fk
-            references my_table
+        constraint table_card_tbl_table__fk
+            references tbl_table
 );
 

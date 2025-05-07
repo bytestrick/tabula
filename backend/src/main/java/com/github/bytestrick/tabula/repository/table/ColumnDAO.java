@@ -58,7 +58,7 @@ public class ColumnDAO implements IndexesSortedDAO {
     public int deleteColumn(UUID id, UUID tableId) {
         int deletedColumnIndex = jdbcClient.sql("""
                 SELECT column_index
-                FROM my_column
+                FROM tbl_column
                 WHERE id = :id
             """)
                 .param("id", id)
@@ -66,17 +66,17 @@ public class ColumnDAO implements IndexesSortedDAO {
                 .single();
 
         jdbcClient.sql("""
-                DELETE FROM my_column
-                WHERE id = :id AND my_table = :tableId
+                DELETE FROM tbl_column
+                WHERE id = :id AND tbl_table = :tableId
             """)
                 .param("id", id)
                 .param("tableId", tableId)
                 .update();
 
         jdbcClient.sql("""
-                UPDATE my_column
+                UPDATE tbl_column
                 SET column_index = column_index - 1
-                WHERE my_table = :tableId AND column_index > :deletedColumnIndex
+                WHERE tbl_table = :tableId AND column_index > :deletedColumnIndex
             """)
                 .param("tableId", tableId)
                 .param("deletedColumnIndex", deletedColumnIndex)
@@ -101,15 +101,15 @@ public class ColumnDAO implements IndexesSortedDAO {
     public ColumnProxy appendColumn(UUID tableId, UUID newColumnId, int dataTypeId) {
         int columnIndex = jdbcClient.sql("""
                 SELECT COALESCE(MAX(column_index), -1) + 1
-                FROM my_column
-                WHERE my_table = :tableId
+                FROM tbl_column
+                WHERE tbl_table = :tableId
             """)
                 .param("tableId", tableId)
                 .query(Integer.class)
                 .single();
 
         jdbcClient.sql("""
-            INSERT INTO my_column (id, my_table, data_type, column_index)
+            INSERT INTO tbl_column (id, tbl_table, data_type, column_index)
             VALUES (:id, :tableId, :dataTypeId, :columnIndex)
             """)
                 .param("id", newColumnId)
@@ -137,16 +137,16 @@ public class ColumnDAO implements IndexesSortedDAO {
     @Transactional
     public ColumnProxy insertColumnAt(UUID tableId, UUID newColumnId, int dataTypeId, int columnIndex) {
         jdbcClient.sql("""
-                UPDATE my_column
+                UPDATE tbl_column
                 SET column_index = column_index + 1
-                WHERE my_table = :tableId AND column_index >= :columnIndex
+                WHERE tbl_table = :tableId AND column_index >= :columnIndex
             """)
                 .param("columnIndex", columnIndex)
                 .param("tableId", tableId)
                 .update();
 
         jdbcClient.sql("""
-                INSERT INTO my_column (id, my_table, data_type, column_index)
+                INSERT INTO tbl_column (id, tbl_table, data_type, column_index)
                 VALUES (:id, :tableId, :dataTypeId, :columnIndex)
             """)
                 .param("id", newColumnId)
@@ -169,8 +169,8 @@ public class ColumnDAO implements IndexesSortedDAO {
     public List<ColumnProxy> findAllColumn(UUID tableId) {
         return jdbcClient.sql("""
                 SELECT *
-                FROM my_column
-                WHERE my_table = :tableId
+                FROM tbl_column
+                WHERE tbl_table = :tableId
                 ORDER BY column_index
             """)
                 .param("tableId", tableId)
@@ -187,9 +187,9 @@ public class ColumnDAO implements IndexesSortedDAO {
      */
     public void changeColumnDataType(UUID tableId, UUID columnId, int dataTypeId) {
         jdbcClient.sql("""
-                UPDATE my_column
+                UPDATE tbl_column
                 SET data_type = :dataTypeId
-                WHERE id = :columnId AND my_table = :tableId
+                WHERE id = :columnId AND tbl_table = :tableId
             """)
                 .param("dataTypeId", dataTypeId)
                 .param("columnId", columnId)
@@ -208,8 +208,8 @@ public class ColumnDAO implements IndexesSortedDAO {
     public UUID findColumnIdByIndex(UUID tableId, int columnIndex) {
         return jdbcClient.sql("""
                 SELECT id
-                FROM my_column
-                WHERE my_table = :tableId AND column_index = :columnIndex
+                FROM tbl_column
+                WHERE tbl_table = :tableId AND column_index = :columnIndex
             """)
                 .param("tableId", tableId)
                 .param("columnIndex", columnIndex)
@@ -230,9 +230,9 @@ public class ColumnDAO implements IndexesSortedDAO {
      */
     public void updateColumnIndex(UUID columnId, int newColumnIndex, UUID tableId) {
         jdbcClient.sql("""
-                UPDATE my_column
+                UPDATE tbl_column
                 SET column_index = :newColumnIndex
-                WHERE id = :columnId AND my_table = :tableId;
+                WHERE id = :columnId AND tbl_table = :tableId;
             """)
                 .param("newColumnIndex", newColumnIndex)
                 .param("tableId", tableId)
@@ -253,9 +253,9 @@ public class ColumnDAO implements IndexesSortedDAO {
      */
     public void changeColumnName(UUID tableId, UUID columnId, String newName) {
         jdbcClient.sql("""
-                UPDATE my_column
+                UPDATE tbl_column
                 SET column_name = :newName
-                WHERE id = :columnId AND my_table = :tableId;
+                WHERE id = :columnId AND tbl_table = :tableId;
             """)
                 .param("tableId", tableId)
                 .param("columnId", columnId)
@@ -277,8 +277,8 @@ public class ColumnDAO implements IndexesSortedDAO {
     public int findColumnIndexById(UUID tableId, UUID columnId) {
         return jdbcClient.sql("""
                 SELECT column_index
-                FROM my_column
-                WHERE my_table = :tableId AND id = :columnId
+                FROM tbl_column
+                WHERE tbl_table = :tableId AND id = :columnId
             """)
                 .param("tableId", tableId)
                 .param("columnId", columnId)
@@ -298,8 +298,8 @@ public class ColumnDAO implements IndexesSortedDAO {
     public int getColumnNumber(UUID tableId) {
         return jdbcClient.sql("""
                 SELECT COUNT(*)
-                FROM my_column
-                WHERE my_table = :tableId
+                FROM tbl_column
+                WHERE tbl_table = :tableId
             """)
                 .param("tableId", tableId)
                 .query(Integer.class)
@@ -320,8 +320,8 @@ public class ColumnDAO implements IndexesSortedDAO {
     public Integer findColumnIndexFromId(UUID tableId, UUID columnId) {
         return jdbcClient.sql("""
                 SELECT column_index
-                FROM my_column
-                WHERE my_table = :tableId AND id =:columnId
+                FROM tbl_column
+                WHERE tbl_table = :tableId AND id =:columnId
             """)
                 .param("tableId", tableId)
                 .param("columnId", columnId)
@@ -345,8 +345,8 @@ public class ColumnDAO implements IndexesSortedDAO {
     public Boolean matchColumnDataType(UUID tableId, UUID columnId, int dataTypeId) {
         return jdbcClient.sql("""
                 SELECT COALESCE(data_type = :dataTypeId, false)
-                FROM my_column
-                WHERE my_table = :tableId AND id = :columnId
+                FROM tbl_column
+                WHERE tbl_table = :tableId AND id = :columnId
             """)
                 .param("tableId", tableId)
                 .param("columnId", columnId)
@@ -371,8 +371,8 @@ public class ColumnDAO implements IndexesSortedDAO {
     public List<Integer> findIndexesFromIdsSortedAscending(UUID tableId, List<UUID> ids) {
         return jdbcClient.sql("""
                 SELECT column_index
-                FROM my_column
-                WHERE my_table = :tableId AND id IN (:columnsIds)
+                FROM tbl_column
+                WHERE tbl_table = :tableId AND id IN (:columnsIds)
                 ORDER BY column_index
             """)
                 .param("tableId", tableId)
@@ -397,8 +397,8 @@ public class ColumnDAO implements IndexesSortedDAO {
     public List<Integer> findIndexesFromIdsSortedDescending(UUID tableId, List<UUID> ids) {
         return jdbcClient.sql("""
                 SELECT column_index
-                FROM my_column
-                WHERE my_table = :tableId AND id IN (:columnsIds)
+                FROM tbl_column
+                WHERE tbl_table = :tableId AND id IN (:columnsIds)
                 ORDER BY column_index DESC
             """)
                 .param("tableId", tableId)
@@ -414,7 +414,7 @@ public class ColumnDAO implements IndexesSortedDAO {
         public ColumnProxy mapRow(ResultSet rs, int rowNum) throws SQLException {
             return new ColumnProxy(
                     UUID.fromString(rs.getString("id")),
-                    UUID.fromString(rs.getString("my_table")),
+                    UUID.fromString(rs.getString("tbl_table")),
                     rs.getInt("data_type"),
                     rs.getString("column_name"),
                     rs.getInt("column_index"),
