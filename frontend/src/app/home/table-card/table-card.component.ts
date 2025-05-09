@@ -38,19 +38,16 @@ export class TableCardComponent implements OnDestroy {
   private confirmDialog = inject(ConfirmDialogService);
   private homeService = inject(HomeService);
   private router: Router = inject(Router);
-  private tableId: string | undefined;
 
 
   init(tableCard: TableCard): TableCardComponent {
     if (this.isInit) return this;
     this.isInit = true;
-
     this.id = tableCard.id;
     this.title = tableCard.title;
     this.description = tableCard.description;
     this.creationDate = tableCard.creationDate ? new Date(tableCard.creationDate + 'Z') : undefined;
     this.lastEditDate = tableCard.lastEditDate ? new Date(tableCard.lastEditDate + 'Z') : this.creationDate;
-    this.tableId = tableCard.tableId;
     return this;
   }
 
@@ -143,7 +140,7 @@ export class TableCardComponent implements OnDestroy {
   }
 
   onOpenCard(): void {
-    this.router.navigate(['/table', this.tableId])
+    this.router.navigate(['/tables', this.id])
       .catch(err => console.error(err));
   }
 }

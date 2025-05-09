@@ -18,7 +18,7 @@ export class NavbarService {
   private http = inject(HttpClient);
 
   fuzzySearch(pattern: string): Observable<TableCard[]> {
-    return this.http.get<TableCard[]>('/search', {params: {pattern}});
+    return this.http.get<TableCard[]>('/tables', {params: {pattern}});
   }
 
   retrievesUserInformation(email: string): Observable<UserDetails> {

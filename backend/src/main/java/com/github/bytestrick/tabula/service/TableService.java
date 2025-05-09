@@ -2,15 +2,14 @@ package com.github.bytestrick.tabula.service;
 
 import com.github.bytestrick.tabula.controller.dto.table.ColumnDTO;
 import com.github.bytestrick.tabula.controller.dto.table.RowDTO;
-import com.github.bytestrick.tabula.controller.dto.table.TableDTO;
-import com.github.bytestrick.tabula.controller.dto.TableDto;
-import com.github.bytestrick.tabula.model.Table;
+import com.github.bytestrick.tabula.controller.dto.table.TableContentDTO;
+import com.github.bytestrick.tabula.controller.dto.table.TableCreatedDTO;
 import com.github.bytestrick.tabula.model.User;
 import com.github.bytestrick.tabula.controller.dto.table.*;
 import com.github.bytestrick.tabula.exception.table.*;
 import com.github.bytestrick.tabula.model.Pair;
 import com.github.bytestrick.tabula.model.table.Cell;
-import com.github.bytestrick.tabula.repository.TableDao;
+import com.github.bytestrick.tabula.model.table.Table;
 import com.github.bytestrick.tabula.repository.UserDao;
 import com.github.bytestrick.tabula.repository.interfaces.IndexesSortedDAO;
 import com.github.bytestrick.tabula.repository.proxy.table.ColumnProxy;
@@ -33,7 +32,6 @@ public class TableService {
 
     private final UserDao userDao;
     private final TableDAO tableDAO;
-    private final TableDao tableDao;
     private final FuzzySearchTable fuzzySearchTable;
     private final ColumnDAO columnDAO;
     private final RowDAO rowDAO;
@@ -47,40 +45,92 @@ public class TableService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
     }
 
-    private TableDto toTableCardDto(Table table) {
-        return new TableDto(
+
+    private TableCreatedDTO tableToTableCreatedDTO(Table table) {
+        return new TableCreatedDTO(
                 table.getId(),
                 table.getTitle(),
                 table.getDescription(),
                 table.getCreationDate(),
-                table.getLastEditDate(),
-                table.getTableId()
+                table.getLastEditDate()
         );
     }
 
-    public List<TableDto> getNextTables(UUID id, int quantity) {
-        return tableDao.findByCreationDateAfter(id, quantity, getAuthUser().getId())
-                .stream().map(this::toTableCardDto).toList();
+
+    public List<TableCreatedDTO> getNextTables(UUID id, int quantity) {
+        return tableDAO.findByCreationDateAfter(id, quantity, getAuthUser().getId())
+                .stream().map(this::tableToTableCreatedDTO).toList();
     }
 
-    public List<TableDto> getLastTables(int quantity) {
-        return tableDao.findLast(quantity, getAuthUser().getId())
-                .stream().map(this::toTableCardDto).toList();
+
+    public List<TableCreatedDTO> getLastTables(int quantity) {
+        return tableDAO.findLast(quantity, getAuthUser().getId())
+                .stream().map(this::tableToTableCreatedDTO).toList();
     }
 
-    public TableDto createTable(Table table) {
-        return toTableCardDto(tableDao.save(table, getAuthUser().getId()));
+
+    private TableCreatedDTO convertTableToTableCreatedDTO(Table table) {
+        return new TableCreatedDTO(
+                table.getId(),
+                table.getTitle(),
+                table.getDescription(),
+                table.getCreationDate(),
+                table.getLastEditDate()
+        );
     }
 
-    public String updateTable(Table table) {
-        tableDao.update(table);
+
+    /**
+     * Creates a new, empty table with one row and one column.
+     * <ul>
+     *   <li>Generates a new table UUID.</li>
+     *   <li>Persists the table record.</li>
+     *   <li>Appends one row and one column of type "Textual".</li>
+     * </ul>
+     *
+     * @return UUID of the newly created table.
+     */
+    @Transactional
+    public TableCreatedDTO createNewTable(TableCreateDTO tableCreateDTO) {
+        UUID newTableId = UUID.randomUUID();
+
+        Table newTable = Table.builder()
+                .id(newTableId)
+                .title(tableCreateDTO.title())
+                .description(tableCreateDTO.description())
+                .creationDate(tableCreateDTO.creationDate())
+                .lastEditDate(tableCreateDTO.lastEditDate())
+                .userId(getAuthUser().getId())
+                .build();
+
+        Table createdTable = tableDAO.saveTable(newTable);
+        rowDAO.appendNewRow(newTableId, UUID.randomUUID());
+        columnDAO.appendColumn(newTableId, UUID.randomUUID(), dataTypeDAO.findDataTypeIdByName("Textual"));
+
+        return convertTableToTableCreatedDTO(createdTable);
+    }
+
+
+    @Transactional
+    public String updateTable(UUID tableId, TablePutDTO tablePutDTO) {
+        ensureTableExistsOrThrow(tableId);
+
+        Table table = Table.builder()
+                .id(tableId)
+                .title(tablePutDTO.title())
+                .description(tablePutDTO.description())
+                .lastEditDate(tablePutDTO.lastEditTime())
+                .build();
+
+        tableDAO.update(table);
+
         return "TableCard updated successfully";
     }
 
 
-    public List<TableDto> fuzzySearch(String pattern) {
+    public List<TableCreatedDTO> fuzzySearch(String pattern) {
         return fuzzySearchTable.fuzzySearch(pattern, getAuthUser().getId())
-                .stream().map(this::toTableCardDto).toList();
+                .stream().map(this::tableToTableCreatedDTO).toList();
     }
 
 
@@ -160,42 +210,20 @@ public class TableService {
 
 
     /**
-     * Creates a new, empty table with one row and one column.
-     * <ul>
-     *   <li>Generates a new table UUID.</li>
-     *   <li>Persists the table record.</li>
-     *   <li>Appends one row and one column of type "Textual".</li>
-     * </ul>
-     *
-     * @return UUID of the newly created table.
-     */
-    @Transactional
-    public UUID createNewTable() {
-        UUID newTableId = UUID.randomUUID();
-
-        tableDAO.saveTable(newTableId);
-        rowDAO.appendNewRow(newTableId, UUID.randomUUID());
-        columnDAO.appendColumn(newTableId, UUID.randomUUID(), dataTypeDAO.findDataTypeIdByName("Textual"));
-
-        return newTableId;
-    }
-
-
-    /**
      * Retrieves a complete table.
      *
      * <p>The method loads the table identified by the given {@code tableId}, extracts
-     * all its columns and rows, and converts them into a structured {@link TableDTO}.</p>
+     * all its columns and rows, and converts them into a structured {@link TableContentDTO}.</p>
      *
      * @param tableId the UUID of the table to retrieve.
-     * @return a {@link TableDTO} representing the full state of the table, including header's columns and content.
+     * @return a {@link TableContentDTO} representing the full state of the table, including header's columns and content.
      * @throws TableNotFoundException if no table exists for the given {@code tableId}.
      */
     @Transactional
-    public TableDTO getTable(UUID tableId) {
+    public TableContentDTO getTable(UUID tableId) {
         ensureTableExistsOrThrow(tableId);
 
-        TableProxy table = tableDAO.findTable(tableId);
+        TableProxy table = tableDAO.findTableById(tableId);
         List<RowDTO> content = new ArrayList<>();
         List<ColumnDTO> headers = new ArrayList<>();
 
@@ -215,7 +243,7 @@ public class TableService {
             );
         }
 
-        return new TableDTO(table.getId(), headers, content);
+        return new TableContentDTO(table.getId(), headers, content);
     }
 
 
@@ -656,7 +684,20 @@ public class TableService {
     }
 
 
-    private List<Pair<Integer, Integer>> getIndexToUpdate(List<Integer> indexToMove, int adjustedDelta) {
+    /**
+     * Builds a list of index‐pairs representing how each original index should be moved.
+     * <p>
+     * For each index in {@code indexToMove}, this method computes its new target index
+     * by adding the given {@code adjustedDelta}. It then merges the resulting pairs
+     * into a single list, ensuring any overlapping or duplicate ranges are handled
+     * by {@link #reconstructIndexesToUpdate(List, List)}.
+     * </p>
+     *
+     * @param indexToMove    A list of original indices that need to be relocated.
+     * @param adjustedDelta  The offset to apply to each original index to compute its new index.
+     * @return               {@code List<Pair<Integer, Integer>>} a combined list of {@code (oldIndex, newIndex)} pairs.
+     */
+    private List<Pair<Integer, Integer>> getUpdatedIndexes(List<Integer> indexToMove, int adjustedDelta) {
         List<Pair<Integer, Integer>> indexesToUpdate = new ArrayList<>();
 
         for (int i : indexToMove) {
@@ -728,7 +769,7 @@ public class TableService {
         List<Integer> sortedRowsIndexesToMove = getSortedIndexesToMove(rawDelta, tableId, moveRowsDTO.idsToMove(), rowDAO);
         int adjustedDelta = getAdjustedDeltaToBounds(rawDelta, sortedRowsIndexesToMove, 0, rowsAmount);
 
-        List<Pair<UUID, Integer>> convertedList = getIndexToUpdate(sortedRowsIndexesToMove, adjustedDelta)
+        List<Pair<UUID, Integer>> convertedList = getUpdatedIndexes(sortedRowsIndexesToMove, adjustedDelta)
                 .stream()
                 .map(
                         (Pair<Integer, Integer> p) ->
@@ -784,7 +825,7 @@ public class TableService {
         List<Integer> sortedColumnsIndexesToMove = getSortedIndexesToMove(rawDelta, tableId, moveColumnsDTO.idsToMove(), columnDAO);
         int adjustedDelta = getAdjustedDeltaToBounds(rawDelta, sortedColumnsIndexesToMove, 0, columnsAmount);
 
-        List<Pair<UUID, Integer>> convertedList = getIndexToUpdate(sortedColumnsIndexesToMove, adjustedDelta)
+        List<Pair<UUID, Integer>> convertedList = getUpdatedIndexes(sortedColumnsIndexesToMove, adjustedDelta)
                 .stream()
                 .map(
                         (Pair<Integer, Integer> p) ->

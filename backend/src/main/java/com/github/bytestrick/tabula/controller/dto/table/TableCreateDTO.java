@@ -1,17 +1,15 @@
-package com.github.bytestrick.tabula.controller.dto;
+package com.github.bytestrick.tabula.controller.dto.table;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
-public record TableDto(
-        @NotNull UUID id,
+public record TableCreateDTO(
         @NotNull @Size(min = 1, max = 50) String title,
         @Size(max = 500) String description,
         @NotNull @PastOrPresent LocalDateTime creationDate,
-        LocalDateTime lastEditDate,
-        UUID tableId
-) {}
+        LocalDateTime lastEditDate
+) {
+}

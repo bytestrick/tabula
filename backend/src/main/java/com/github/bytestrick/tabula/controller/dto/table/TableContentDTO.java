@@ -13,7 +13,7 @@ import java.util.UUID;
  * @param header   list of {@link ColumnDTO} defining each column of the header's table; must not be {@code null}
  * @param content  list of {@link RowDTO} representing each row of the table; must not be {@code null}
  */
-public record TableDTO(
+public record TableContentDTO(
         @NotNull UUID id,
         @NotNull List<ColumnDTO> header,
         @NotNull List<RowDTO> content
