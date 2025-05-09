@@ -1,7 +1,8 @@
 package com.github.bytestrick.tabula.service;
 
-import com.github.bytestrick.tabula.model.Table;
-import com.github.bytestrick.tabula.repository.TableDao;
+import com.github.bytestrick.tabula.model.table.Table;
+import com.github.bytestrick.tabula.repository.proxy.table.TableProxy;
+import com.github.bytestrick.tabula.repository.table.TableDAO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +14,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class FuzzySearchTable {
 
-    private final TableDao tableDao;
+    private final TableDAO tableDao;
 
 
     public List<Table> fuzzySearch(String pattern, UUID userId) {
@@ -21,7 +22,7 @@ public class FuzzySearchTable {
 
         int page = 0;
         int pageSize = 50;
-        List<Table> tables = tableDao.findPaginated(page, pageSize, userId);
+        List<TableProxy> tables = tableDao.findPaginated(page, pageSize, userId);
 
         while (!tables.isEmpty()) {
             for (Table table : tables) {

@@ -1,0 +1,8 @@
+.add-icon {
+  font-size: large;
+  cursor: pointer;
+}
+
+.drag-icon {
+  cursor: grab;
+}

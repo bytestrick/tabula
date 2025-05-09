@@ -1,0 +1,3 @@
+.card:hover {
+  border-color: var(--selected-text-color);
+}
