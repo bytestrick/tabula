@@ -1,14 +1,12 @@
 package com.github.bytestrick.tabula.controller;
 
 import com.github.bytestrick.tabula.controller.dto.InformativeResponse;
-import com.github.bytestrick.tabula.controller.dto.TableDto;
-import com.github.bytestrick.tabula.model.Table;
-import com.github.bytestrick.tabula.controller.dto.table.TableDTO;
+import com.github.bytestrick.tabula.controller.dto.table.TableContentDTO;
 import com.github.bytestrick.tabula.controller.dto.table.*;
 import com.github.bytestrick.tabula.service.TableService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,43 +18,47 @@ import java.util.UUID;
 @RequestMapping("/tables")
 @RequiredArgsConstructor
 public class TableController {
+
     private final TableService tableService;
 
-    @GetMapping("table/next")
-    public ResponseEntity<List<TableDto>> getNextTables(@RequestParam UUID id, @RequestParam int quantity) {
-        return ResponseEntity.ok().body(tableService.getNextTables(id, quantity));
+
+    @GetMapping("after/{tableId}")
+    public ResponseEntity<List<TableCreatedDTO>> getTablesAfter(@PathVariable UUID tableId,
+                                                                @RequestParam int quantity) {
+
+        return ResponseEntity.ok().body(tableService.getNextTables(tableId, quantity));
     }
 
-    @GetMapping("table")
-    public ResponseEntity<List<TableDto>> getLastTables(@RequestParam int quantity) {
+
+    @GetMapping("last")
+    public ResponseEntity<List<TableCreatedDTO>> getTablesFromEnd(@RequestParam int quantity) {
         return ResponseEntity.ok().body(tableService.getLastTables(quantity));
     }
 
-    @PostMapping(value = "table", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<TableDto> createTable(@RequestBody Table table) {
-        return ResponseEntity.ok().body(tableService.createTable(table));
+
+    @PostMapping
+    public ResponseEntity<TableCreatedDTO> createTable(@RequestBody TableCreateDTO tableCreateDTO) {
+        return ResponseEntity.ok().body(tableService.createNewTable(tableCreateDTO));
     }
 
-    @PutMapping(value = "table", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> updateTableCard(@RequestBody Table table) {
-        return ResponseEntity.ok().body(new InformativeResponse(tableService.updateTable(table)));
+
+    @PutMapping("/{tableId}")
+    public ResponseEntity<InformativeResponse> updateTableCard(@PathVariable UUID tableId,
+                                             @Valid @RequestBody TablePutDTO tablePutDTO) {
+
+        return ResponseEntity.ok().body(new InformativeResponse(tableService.updateTable(tableId, tablePutDTO)));
     }
 
-    @DeleteMapping("table")
-    public ResponseEntity<?> deleteTableCard(@RequestParam UUID id) {
-        return ResponseEntity.ok().body(new InformativeResponse(tableService.deleteTable(id)));
+
+    @DeleteMapping("/{tableId}")
+    public ResponseEntity<InformativeResponse> deleteTable(@PathVariable UUID tableId) {
+        return ResponseEntity.ok().body(new InformativeResponse(tableService.deleteTable(tableId)));
     }
 
-    @GetMapping("search")
-    public ResponseEntity<List<TableDto>> fuzzySearch(@RequestParam String pattern) {
+
+    @GetMapping
+    public ResponseEntity<List<TableCreatedDTO>> fuzzySearch(@RequestParam String pattern) {
         return ResponseEntity.ok(tableService.fuzzySearch(pattern));
-    }
-
-    
-    @PutMapping
-    public ResponseEntity<?> createTable() {
-        tableService.createNewTable();
-        return ResponseEntity.ok().build();
     }
 
 
@@ -64,10 +66,10 @@ public class TableController {
      * REST controller endpoint for retrieving a complete table.
      *
      * @param tableId UUID of the table to fetch.
-     * @return HTTP 200 OK with a {@link TableDTO} containing the table’s metadata and content.
+     * @return HTTP 200 OK with a {@link TableContentDTO} containing the table’s metadata and content.
      */
-    @GetMapping("/{tableId}")
-    public ResponseEntity<TableDTO> getTable(@PathVariable UUID tableId) {
+    @GetMapping("/{tableId}/content")
+    public ResponseEntity<TableContentDTO> getTableContent(@PathVariable UUID tableId) {
         return ResponseEntity.ok(tableService.getTable(tableId));
     }
 
@@ -82,7 +84,7 @@ public class TableController {
      * @param rowCreateDTO Payload containing the optional insertion index.
      * @return HTTP 201 Created with a {@link RowCreatedDTO} describing the new row.
      */
-    @PostMapping("/{tableId}/rows")
+    @PostMapping("/{tableId}/content/rows")
     public ResponseEntity<RowCreatedDTO> addNewRow(
             @PathVariable UUID tableId, @Valid @RequestBody RowCreateDTO rowCreateDTO) {
 
@@ -99,7 +101,7 @@ public class TableController {
      * @return HTTP 200 OK with a {@link MovedRowsOrColumnsDTO} listing the original indexes
      * and the shift delta.
      */
-    @PatchMapping("/{tableId}/rows")
+    @PatchMapping("/{tableId}/content/rows")
     public ResponseEntity<MovedRowsOrColumnsDTO> moveRowsIndexes(
             @PathVariable UUID tableId, @Valid @RequestBody MovesRowsOrColumnsDTO moveRowsDTO) {
 
@@ -116,7 +118,7 @@ public class TableController {
      * @return {@code ResponseEntity<RowsDeletedDTO>} containing the indexes
      * of the rows that were deleted; returns HTTP 200 OK.
      */
-    @DeleteMapping("{tableId}/rows")
+    @DeleteMapping("{tableId}/content/rows")
     public ResponseEntity<RowsDeletedDTO> deleteRows(
             @PathVariable UUID tableId, @Valid @RequestBody RowsDeleteDTO rowsDeleteDTO) {
 
@@ -135,7 +137,7 @@ public class TableController {
      * @param columnDTO Payload containing dataTypeId and optional columnIndex.
      * @return HTTP 201 Created with a {@link ColumnCreatedDTO} describing the new column.
      */
-    @PostMapping("/{tableId}/columns")
+    @PostMapping("/{tableId}/content/columns")
     public ResponseEntity<ColumnCreatedDTO> addNewColumn(
             @PathVariable UUID tableId, @Valid @RequestBody ColumnCreateDTO columnDTO) {
 
@@ -152,7 +154,7 @@ public class TableController {
      * @return HTTP 200 Created with a {@link ColumnsDeletedDTO} containing the indexes
      * of the columns that were deleted.
      */
-    @DeleteMapping("{tableId}/columns")
+    @DeleteMapping("{tableId}/content/columns")
     public ResponseEntity<ColumnsDeletedDTO> deleteColumns(
             @PathVariable UUID tableId, @Valid @RequestBody ColumnsDeleteDTO columnsDeleteDTO) {
 
@@ -170,7 +172,7 @@ public class TableController {
      * @param columnPatchDTO Payload containing the fields to change. ( see {@link ColumnPatchDTO})
      * @return HTTP 204 No Content on success.
      */
-    @PatchMapping("/{tableId}/columns/{columnId}")
+    @PatchMapping("/{tableId}/content/columns/{columnId}")
     public ResponseEntity<ColumnPatchedDTO> patchColumn(
             @PathVariable UUID tableId, @PathVariable UUID columnId,
             @Valid @RequestBody ColumnPatchDTO columnPatchDTO) {
@@ -189,7 +191,7 @@ public class TableController {
      * @return HTTP 200 OK with a {@link MovedRowsOrColumnsDTO} listing the original indexes
      * and the shift delta.
      */
-    @PatchMapping("/{tableId}/columns")
+    @PatchMapping("/{tableId}/content/columns")
     public ResponseEntity<MovedRowsOrColumnsDTO> moveColumnsIndexes(
             @PathVariable UUID tableId, @Valid @RequestBody MovesRowsOrColumnsDTO moveColumnsDTO) {
 
@@ -208,7 +210,7 @@ public class TableController {
      * @return HTTP 200 OK with a list of {@link CellPatchedDTO}, each describing the updated cell’s
      * zero-based row & column indexes and new value.
      */
-    @PatchMapping("/{tableId}/cells")
+    @PatchMapping("/{tableId}/content/cells")
     public ResponseEntity<List<CellPatchedDTO>> patchCellByCoords(
             @PathVariable UUID tableId,
             @Valid @RequestBody List<CellPatchDTO> cellsPatchDTO) {

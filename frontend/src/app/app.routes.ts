@@ -11,7 +11,7 @@ import {TablePageComponent} from './table-page/table-page.component';
 export const routes: Routes = [
   {path: '', redirectTo: 'home', pathMatch: 'full'},
   {path: 'home', component: HomeComponent, canActivate: [authGuard]},
-  {path: 'table/:table-id', component: TablePageComponent, canActivate: [authGuard, tableOwnerGuard]},
+  {path: 'tables/:table-id', component: TablePageComponent, canActivate: [authGuard, tableOwnerGuard]},
   {path: 'sign-in', component: SignInComponent},
   {path: 'sign-up', component: SignUpComponent},
   {path: 'otp', component: OtpComponent},

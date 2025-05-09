@@ -53,7 +53,7 @@ export class TableApiService {
    */
   getTable(tableId: string): Observable<TableDTO> {
     this._tableId = tableId;
-    const url: string = `${this.BASE_URL}/${tableId}`;
+    const url: string = `${this.BASE_URL}/${tableId}/content`;
 
     return this.httpClient.get<TableDTO>(url);
   }
@@ -73,7 +73,7 @@ export class TableApiService {
       rowIndex: rowIndex
     }
 
-    const url: string = `${this.BASE_URL}/${tableId}/rows`;
+    const url: string = `${this.BASE_URL}/${tableId}/content/rows`;
     return this.httpClient.post<RowCreatedDTO>(url, row);
   }
 
@@ -95,7 +95,7 @@ export class TableApiService {
       columnIndex: columnIndex
     };
 
-    const url = `${this.BASE_URL}/${tableId}/columns`;
+    const url = `${this.BASE_URL}/${tableId}/content/columns`;
     return this.httpClient.post<ColumnCreatedDTO>(url, newColumn);
   }
 
@@ -116,7 +116,7 @@ export class TableApiService {
       dataTypeId: newDataTypeId,
     };
 
-    const url: string = `${this.BASE_URL}/${tableId}/columns/${columnId}`;
+    const url: string = `${this.BASE_URL}/${tableId}/content/columns/${columnId}`;
     return this.httpClient.patch<ColumnPatchedDTO>(url, column);
   }
 
@@ -137,7 +137,7 @@ export class TableApiService {
       columnName: newName,
     };
 
-    const url: string = `${this.BASE_URL}/${tableId}/columns/${columnId}`;
+    const url: string = `${this.BASE_URL}/${tableId}/content/columns/${columnId}`;
     return this.httpClient.patch<ColumnPatchedDTO>(url, column);
   }
 
@@ -165,7 +165,7 @@ export class TableApiService {
       });
     }
 
-    const url: string = `${this.BASE_URL}/${tableId}/cells`;
+    const url: string = `${this.BASE_URL}/${tableId}/content/cells`;
     return this.httpClient.patch<CellPatchedDTO[]>(url, cellsToUpdate);
   }
 
@@ -178,7 +178,7 @@ export class TableApiService {
    * @returns Observable emitting {@link RowsDeletedDTO}.
    */
   deleteRows(rowsIds: string[], tableId: string = this.tableId): Observable<RowsDeletedDTO> {
-    const url = `${this.BASE_URL}/${tableId}/rows`;
+    const url = `${this.BASE_URL}/${tableId}/content/rows`;
     const rowsDeleteDTO: RowsDeleteDTO = {ids: rowsIds};
     return this.httpClient.delete<RowsDeletedDTO>(url, {body: rowsDeleteDTO});
   }
@@ -192,7 +192,7 @@ export class TableApiService {
    * @returns Observable emitting {@link ColumnsDeletedDTO}.
    */
   deleteColumns(columnsIds: string[], tableId: string = this.tableId): Observable<ColumnsDeletedDTO> {
-    const url = `${this.BASE_URL}/${tableId}/columns`;
+    const url = `${this.BASE_URL}/${tableId}/content/columns`;
     const columnsDeleteDTO: ColumnsDeleteDTO = {ids: columnsIds};
     return this.httpClient.delete<ColumnsDeletedDTO>(url, {body: columnsDeleteDTO});
   }
@@ -218,8 +218,7 @@ export class TableApiService {
       toIndex: toIndex
     };
 
-    const url: string = `${this.BASE_URL}/${tableId}/rows`;
-
+    const url: string = `${this.BASE_URL}/${tableId}/content/rows`;
     return this.httpClient.patch<MovedRowsOrColumnsDTO>(url, rowsToMove);
   }
 
@@ -244,8 +243,7 @@ export class TableApiService {
       toIndex: toIndex
     };
 
-    const url: string = `${this.BASE_URL}/${tableId}/columns`;
-
+    const url: string = `${this.BASE_URL}/${tableId}/content/columns`;
     return this.httpClient.patch<MovedRowsOrColumnsDTO>(url, ColumnsToMove);
   }
 }

@@ -4,6 +4,7 @@ import com.github.bytestrick.tabula.model.table.Table;
 import com.github.bytestrick.tabula.repository.table.ColumnDAO;
 import com.github.bytestrick.tabula.repository.table.RowDAO;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -13,8 +14,16 @@ public class TableProxy extends Table {
     private final ColumnDAO columnDAO;
 
 
-    public TableProxy(UUID id, RowDAO rowDAO, ColumnDAO columnDAO) {
-        super(id, null, null);
+    public TableProxy(UUID id,
+                      String title,
+                      String description,
+                      LocalDateTime creationDate,
+                      LocalDateTime lastEditDate,
+                      UUID userId,
+                      RowDAO rowDAO,
+                      ColumnDAO columnDAO) {
+
+        super(id, title, description, creationDate, lastEditDate, userId, null, null);
 
         this.rowDAO = rowDAO;
         this.columnDAO = columnDAO;
