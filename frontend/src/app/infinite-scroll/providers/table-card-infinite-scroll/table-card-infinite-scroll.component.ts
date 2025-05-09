@@ -40,7 +40,7 @@ export class TableCardInfiniteScrollComponent extends InfiniteScrollComponent<Co
   protected fetchElements(): void {
     let request: Observable<TableCard[]>;
     if (this.isEmpty()) {
-      request = this.homeService.fetchTableCards(this.nElementToFetch);
+      request = this.homeService.fetchTableCardsFromEnd(this.nElementToFetch);
     }
     else {
       const id: string | undefined = this.getLastElement()?.instance.getId();

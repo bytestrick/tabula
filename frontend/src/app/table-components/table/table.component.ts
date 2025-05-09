@@ -1,0 +1,272 @@
+import {
+  Component,
+  ComponentRef,
+  createComponent,
+  ElementRef,
+  EnvironmentInjector,
+  HostListener,
+  inject, NgIterable,
+  OnDestroy,
+  OnInit, TrackByFunction,
+} from '@angular/core';
+import {IDataType} from '../../model/data-types/i-data-type';
+import {NgForOf, NgIf} from '@angular/common';
+import {Pair} from '../../model/pair';
+import {BaseInputComponent} from '../input-components/base-input-component';
+import {CellWrapperComponent} from './cells/cell-wrapper/cell-wrapper.component';
+import {HighlightBordersDirective} from '../../directive/highlight-borders.directive';
+import {TableOrganizerComponent} from '../table-organizer/table-organizer.component';
+import {DataTypesChooserComponent} from '../input-components/data-types-chooser/data-types-chooser.component';
+import {
+  CdkDrag,
+  CdkDragDrop,
+  CdkDragPreview,
+  CdkDropList,
+} from '@angular/cdk/drag-drop';
+import {FormsModule} from '@angular/forms';
+import {Cell} from '../../model/table/cell';
+import {SelectDirective} from '../../directive/select.directive';
+import {ResizableTableColumnDirective} from '../../directive/resizable-table-column.directive';
+import {UpdateColumnsWidthDirective} from '../../directive/update-columns-width.directive';
+import {PopUpManagerService} from '../../services/pop-up-manager.service';
+import {TableContextualMenuComponent} from '../table-contextual-menu/table-contextual-menu.component';
+import {PopUp} from '../pop-up-component/pop-up.component';
+import {TableService} from '../../services/table.service';
+import {CellCord} from '../../model/table/cell-cord';
+import {ActivatedRoute} from '@angular/router';
+import {Row} from '../../model/table/row';
+
+@Component({
+  selector: 'tbl-table',
+  imports: [
+    NgForOf,
+    CellWrapperComponent,
+    HighlightBordersDirective,
+    TableOrganizerComponent,
+    CdkDropList,
+    CdkDrag,
+    CdkDragPreview,
+    FormsModule,
+    SelectDirective,
+    ResizableTableColumnDirective,
+    UpdateColumnsWidthDirective,
+    NgIf,
+  ],
+  templateUrl: './table.component.html',
+  styleUrl: './table.component.css',
+  providers: [TableService]
+})
+export class TableComponent implements OnInit, OnDestroy {
+
+  protected isAnElementDragged: boolean = false;
+
+  protected tableService: TableService = inject(TableService);
+
+  protected hoveredRowIndex: number = this.tableService.INVALID_CELL_INDEX;
+  protected hoveredColIndex: number = this.tableService.INVALID_CELL_INDEX;
+
+  protected readonly INPUT_METHOD_POP_UP: string = 'inputMethod';
+  protected readonly DATA_TYPE_CHOOSER_POP_UP: string = 'dataTypeChooser';
+  protected readonly TABLE_CONTEXTUAL_MENU: string = 'contextualMenu';
+
+  protected previewLimit: number = 5; // Preview che compare durante il drag di righe e colonne.
+
+  private tableRef: ElementRef = inject(ElementRef);
+  private envInj: EnvironmentInjector = inject(EnvironmentInjector);
+  private popUpManagerService: PopUpManagerService = inject(PopUpManagerService);
+  private activatedRoute: ActivatedRoute = inject(ActivatedRoute);
+
+  trackByRowId: TrackByFunction<Row> = (_index: number, item: Row): string => item.id;
+
+
+  ngOnDestroy(): void {
+    this.popUpManagerService.deletePopUp(this.INPUT_METHOD_POP_UP);
+    this.popUpManagerService.deletePopUp(this.DATA_TYPE_CHOOSER_POP_UP);
+    this.popUpManagerService.deletePopUp(this.TABLE_CONTEXTUAL_MENU);
+  }
+
+
+  ngOnInit(): void {
+    this.createTableContextualMenu(this.tableService);
+    this.createDataTypeChooser();
+
+    const tableId: string = this.activatedRoute.snapshot.paramMap.get('table-id') || '';
+    this.tableService.init(tableId);
+  }
+
+
+  private createTableContextualMenu(tableService: TableService): void {
+    const tableContextualMenu: ComponentRef<TableContextualMenuComponent> = createComponent<TableContextualMenuComponent>(
+      TableContextualMenuComponent,
+      { environmentInjector: this.envInj }
+    );
+    tableContextualMenu.setInput('tableService', tableService);
+
+    this.popUpManagerService.createPopUp(this.TABLE_CONTEXTUAL_MENU, tableContextualMenu);
+  }
+
+
+  private createDataTypeChooser(): void {
+    const dataTypeChooser: ComponentRef<BaseInputComponent> = createComponent<BaseInputComponent>(
+      DataTypesChooserComponent,
+      { environmentInjector: this.envInj }
+    );
+
+    this.popUpManagerService.createPopUp(this.DATA_TYPE_CHOOSER_POP_UP, dataTypeChooser);
+  }
+
+
+  onNewRowAdded(): void {
+    this.tableService.addNewRow();
+  }
+
+
+  onNewHeaderAdded(event: MouseEvent): void {
+    this.showDataTypeChooser(
+      new Pair(event.x, event.y),
+      (value: any): void => this.tableService.appendNewColumn(value as IDataType)
+    );
+  }
+
+
+  onDoubleClickedCell(event: MouseEvent, cord: CellCord): void {
+    this.showCellInputMethod(new Pair(event.x, event.y), cord);
+  }
+
+
+
+  showCellInputMethod(position: Pair<number, number>, cord: CellCord): void {
+    const cell: Cell | null = this.tableService.getCellFromCoords(cord);
+
+    if (cell == null)
+      return;
+
+    const inputComponent: ComponentRef<BaseInputComponent> = createComponent<BaseInputComponent>(
+      cell.cellDataType.getInputComponent(),
+      { environmentInjector: this.envInj }
+    );
+    inputComponent.setInput('startingValue', cell.value);
+    inputComponent.setInput('doAfterInputDataTypeConfirmation', (value: any, dataTypeId: number): void => this.tableService.setCellsValue(cord, value, dataTypeId));
+
+    this.popUpManagerService.getOrCreatePopUp(this.INPUT_METHOD_POP_UP, inputComponent)?.instance.show(position);
+  }
+
+
+  showDataTypeChooser(position: Pair<number, number>, doAfterInputConfirmation: (value: any) => void): void {
+    const dataTypeChooserPopUpRef: ComponentRef<PopUp> | undefined = this.popUpManagerService.getPopUp(this.DATA_TYPE_CHOOSER_POP_UP);
+    dataTypeChooserPopUpRef?.instance.getContent()?.setInput('doAfterInputConfirmation', doAfterInputConfirmation);
+
+    dataTypeChooserPopUpRef?.instance.show(position);
+  }
+
+
+  onMouseEnteredCell(rowIndex: number, colIndex: number): void {
+    this.hoveredRowIndex = rowIndex;
+    this.hoveredColIndex = colIndex;
+  }
+
+
+  onMouseLeaveTable(): void {
+    this.hoveredRowIndex = this.tableService.INVALID_CELL_INDEX;
+    this.hoveredColIndex = this.tableService.INVALID_CELL_INDEX;
+  }
+
+
+  onColumnAddedAt(event: MouseEvent, colIndex: number): void {
+    this.showDataTypeChooser(
+      new Pair(event.x, event.y),
+      (value: any): void => this.tableService.insertNewColumnAt(colIndex, value as IDataType)
+    );
+  }
+
+
+  onRowAddedAt(rowIndex: number): void {
+    this.tableService.insertNewRowAt(rowIndex);
+  }
+
+
+  onColumnDropped(event: CdkDragDrop<any, any>): void {
+    if (this.hoveredColIndex === null)
+      return;
+
+    this.tableService.moveColumns(event.previousIndex, this.hoveredColIndex);
+  }
+
+
+  onRowDropped(event: CdkDragDrop<any, any>): void {
+    if (this.hoveredRowIndex === null)
+      return;
+
+    this.tableService.moveRows(event.previousIndex, this.hoveredRowIndex);
+  }
+
+
+  onDragEnded(): void {
+    this.isAnElementDragged = false;
+  }
+
+
+  onDragStarted(): void {
+    this.isAnElementDragged = true;
+  }
+
+
+  onColumnSelectionToggled(value: boolean, columnIndex: number): void {
+    if (value)
+      this.tableService.selectColumn(columnIndex);
+    else
+      this.tableService.deselectColumn(columnIndex);
+  }
+
+
+  onRowSelectionToggled(value: boolean, rowIndex: number): void {
+    if (value)
+      this.tableService.selectRow(rowIndex);
+    else
+      this.tableService.deselectRow(rowIndex);
+  }
+
+
+  changeDataType(event: MouseEvent, columnIndex: number): void {
+    this.showDataTypeChooser(
+      new Pair(event.x, event.y),
+      (newDataType: any): void => this.tableService.changeColumnDataType(columnIndex, newDataType as IDataType)
+    );
+  }
+
+
+  isColumnSelected(columnIndex: number): boolean {
+    return this.tableService.isColumnSelected(columnIndex);
+  }
+
+
+  isRowSelected(rowIndex: number): boolean {
+    return this.tableService.isRowSelected(rowIndex)
+  }
+
+
+  protected canDisableCellHighlight(): boolean {
+    return (
+      !this.popUpManagerService.isPopUpShown(this.INPUT_METHOD_POP_UP) &&
+      !this.popUpManagerService.isPopUpShown(this.TABLE_CONTEXTUAL_MENU)
+    );
+  }
+
+
+  protected createCellCord(rowIndex: number, colIndex: number, isHeaderCell: boolean): CellCord {
+    return new CellCord(rowIndex, colIndex, isHeaderCell);
+  }
+
+
+  @HostListener('document:contextmenu', ['$event'])
+  onContextMenu(event: MouseEvent): void {
+    if (!this.tableRef.nativeElement.contains(event.target))
+      return;
+
+    event.preventDefault();
+
+    const contextualMenuRef: ComponentRef<PopUp> | undefined = this.popUpManagerService.getPopUp(this.TABLE_CONTEXTUAL_MENU);
+    contextualMenuRef?.instance.getContent()?.setInput('cellCord', new Pair(this.hoveredRowIndex, this.hoveredColIndex));
+    contextualMenuRef?.instance.show(new Pair(event.x, event.y));
+  }
+}

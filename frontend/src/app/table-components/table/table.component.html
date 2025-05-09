@@ -1,0 +1,191 @@
+<ng-template #tableLoad>
+  <div class="position-fixed top-50 start-50 translate-middle">
+    <div class="spinner-border" role="status">
+    </div>
+  </div>
+</ng-template>
+
+<div *ngIf="tableService.isLoaded; else tableLoad" class="table-responsive space-left-right">
+  <table class="table app-table-bordered" (mouseleave)="onMouseLeaveTable()">
+    <colgroup #colgroup tblUpdateColumnsWidth [colgroup]="colgroup">
+      <col class="first-column">
+      <col
+        *ngFor="let _ of this.tableService.getHeadersColumns(); let columnIndex = index"
+        [attr.data-index]="columnIndex"
+        class="column"
+      >
+      <col class="last-column">
+    </colgroup>
+    <thead>
+      <!-- riga per i table-organizer -->
+      <tr
+        cdkDropList
+        cdkDropListOrientation="horizontal"
+        (cdkDropListDropped)="onColumnDropped($event)"
+      >
+        <!-- serve per aggiungere la cella della colonna iniziale, quella per il table-organizer delle righe -->
+        <th (mouseenter)="onMouseEnteredCell(tableService.INVALID_CELL_INDEX, tableService.INVALID_CELL_INDEX)"></th>
+
+        <th
+          *ngFor="let _ of this.tableService.getHeadersColumns(); let colIndex = index"
+          class="center-td-content-v-h"
+          (mouseenter)="onMouseEnteredCell(tableService.INVALID_CELL_INDEX, colIndex)"
+        >
+          <tbl-table-organizer
+            cdkDrag
+            (cdkDragStarted)="onDragStarted()"
+            (cdkDragEnded)="onDragEnded()"
+
+            [showOrganizer]="hoveredColIndex === colIndex && !isAnElementDragged"
+            [rowIndicators]="false"
+            (addAt)="onColumnAddedAt($event, colIndex)"
+            (selectionToggle)="onColumnSelectionToggled($event, colIndex)"
+          >
+            <!-- Preview della colonna durante il drag and drop -->
+            <div *cdkDragPreview class="drag-preview-column card m-1 opacity-75">
+              <div class="card-body p-0 rounded-2 elevated-shadow d-flex flex-column align-items-center">
+                <i class="bi bi-arrow-left-right my-2"></i>
+
+                <ul class="list-group w-100">
+                  <li
+                    *ngFor="let cell of tableService.getColumnCells(colIndex, previewLimit)"
+                    class="list-group-item d-inline-flex align-items-center"
+                    style="min-height: var(--cell-table-min-height)"
+                  >
+                    <p class="d-inline-block overflow-hidden text-truncate m-0">
+                      {{ cell.value }}
+                    </p>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </tbl-table-organizer>
+        </th>
+
+        <!-- serve per aggiungere la cella della colonna finale, quella dove c'è il bottone per aggiungere le colonne -->
+        <th (mouseenter)="onMouseEnteredCell(tableService.INVALID_CELL_INDEX, tableService.INVALID_CELL_INDEX)"></th>
+      </tr>
+
+      <!-- riga per i data-type -->
+      <tr>
+        <!-- serve per aggiungere la cella della colonna iniziale, quella per il table-organizer delle righe -->
+        <th (mouseenter)="onMouseEnteredCell(tableService.INVALID_CELL_INDEX, tableService.INVALID_CELL_INDEX)"></th>
+        <th
+          *ngFor="let headerCell of this.tableService.getHeadersColumns(); let colIndex = index"
+          class="center-td-content-v-h"
+          (mouseenter)="onMouseEnteredCell(tableService.INVALID_CELL_INDEX, colIndex)"
+          style="padding: 0; position: relative;"
+          tblResizableTableColumn [colIndex]="colIndex" [colgroup]="colgroup"
+        >
+          <tbl-cell-wrapper
+            #cellWrapper
+            tblHighlightBorders [tblHighlightBordersOf]="cellWrapper.bordersToHighLight.nativeElement" [tblHighlightCanDisable]="canDisableCellHighlight()"
+            [headerCell]="headerCell.getHeaderCell()"
+            [cord]="createCellCord(-1, colIndex, true)"
+            [onChangeDataTypeCallback]="changeDataType.bind(this)"
+            (dblclick)="onDoubleClickedCell($event, createCellCord(-1, colIndex, true))"
+          >
+          </tbl-cell-wrapper>
+          <div class="resize-handle">
+            <div class="resize-handle-active-area"></div>
+          </div>
+        </th>
+        <!-- serve per aggiungere la cella della colonna finale, quella dove c'è il bottone per aggiungere le colonne -->
+        <th class="remove-border center-container" (mouseenter)="onMouseEnteredCell(tableService.INVALID_CELL_INDEX, tableService.INVALID_CELL_INDEX)">
+          <button class="btn btn-primary center" type="button" (click)="onNewHeaderAdded($event)" title="Append new column">
+            <i class="bi bi-plus-lg"></i>
+          </button>
+        </th>
+      </tr>
+    </thead>
+    <tbody
+      cdkDropList
+      (cdkDropListDropped)="onRowDropped($event)"
+    >
+      <!-- righe per gli elementi della tabella -->
+      <tr
+        *ngFor="let row of tableService.getRows(); trackBy: trackByRowId; let rowIndex = index"
+      >
+        <!-- celle per contenere i table-organizer delle righe -->
+        <td class="remove-border center-td-content-v-h" (mouseenter)="onMouseEnteredCell(rowIndex, tableService.INVALID_CELL_INDEX)">
+          <tbl-table-organizer
+            [showOrganizer]="hoveredRowIndex === rowIndex && !isAnElementDragged"
+            [rowIndicators]="true"
+            (addAt)="onRowAddedAt(rowIndex)"
+            (selectionToggle)="onRowSelectionToggled($event, rowIndex)"
+
+            cdkDrag
+            (cdkDragStarted)="onDragStarted()"
+            (cdkDragEnded)="onDragEnded()"
+          >
+            <!-- Preview della riga durante il drag and drop -->
+            <div *cdkDragPreview class="drag-preview-row card m-1 opacity-75">
+              <div class="card-body p-0 rounded-2 elevated-shadow d-flex align-items-center">
+                <i class="bi bi-arrow-down-up mx-2"></i>
+
+                <ul class="list-group list-group-horizontal">
+                  <li
+                    *ngFor="let cell of tableService.getRowCells(rowIndex, previewLimit)"
+                    class="list-group-item d-inline-flex align-items-center"
+                    style="min-width: var(--cell-table-min-width); max-width: var(--cell-table-min-width); min-height: var(--cell-table-min-height)"
+                  >
+                    <p class="d-inline-block overflow-hidden text-truncate m-0">
+                      {{ cell.value }}
+                    </p>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </tbl-table-organizer>
+        </td>
+
+        <!-- celle in cui inserire i dati -->
+        <td
+          #areaToSelect
+          *ngFor="let cell of row.getCells(); let colIndex = index"
+          (mouseenter)="onMouseEnteredCell(rowIndex, colIndex)"
+          style="padding: 0"
+        >
+          <tbl-cell-wrapper
+            #cellWrapper
+            tblHighlightBorders [tblHighlightBordersOf]="cellWrapper.bordersToHighLight.nativeElement" [tblHighlightCanDisable]="canDisableCellHighlight()"
+            tblSelection [tblIsSelected]="isRowSelected(rowIndex) || isColumnSelected(colIndex)" [tblTargetOfSelection]="areaToSelect"
+            [selectedNeighbors]="{
+              top: isRowSelected(rowIndex - 1) || (rowIndex - 1 >= 0 && isColumnSelected(colIndex)),
+              bottom: isRowSelected(rowIndex + 1) || (rowIndex + 1 < tableService.getRowsNumber() && isColumnSelected(colIndex)),
+              left: isColumnSelected(colIndex - 1) || (colIndex - 1 >= 0 && isRowSelected(rowIndex)),
+              right: isColumnSelected(colIndex + 1) || (colIndex + 1 < tableService.getColumnsNumber() && isRowSelected(rowIndex))
+            }"
+            [cell]="cell"
+            [cord]="createCellCord(rowIndex, colIndex, false)"
+            (dblclick)="onDoubleClickedCell($event, createCellCord(rowIndex, colIndex, false))"
+          >
+          </tbl-cell-wrapper>
+        </td>
+
+        <!--
+          serve per aggiungere la cella della colonna finale, quella dove c'è il bottone per aggiungere le colonne
+        -->
+        <td (mouseenter)="onMouseEnteredCell(tableService.INVALID_CELL_INDEX, tableService.INVALID_CELL_INDEX)"></td>
+      </tr>
+    </tbody>
+    <tbody>
+      <tr> <!-- riga dove sta il bottone di aggiunta righe -->
+        <!-- serve per aggiungere la la cella della colonna iniziale, quella per il table-organizer delle righe -->
+        <td (mouseenter)="onMouseEnteredCell(tableService.INVALID_CELL_INDEX, tableService.INVALID_CELL_INDEX)"></td>
+
+        <td style="border-right-color: transparent; border-left-color: transparent;" class="center-td-content-v" (mouseenter)="onMouseEnteredCell(tableService.INVALID_CELL_INDEX, tableService.INVALID_CELL_INDEX)">
+          <button class="btn btn-primary" type="button" (click)="onNewRowAdded()" title="Append new row">
+            <i class="bi bi-plus-lg"></i>
+          </button>
+        </td>
+
+        <!--
+          aggiunge le restanti celle. Non sfora perché ci sono due colonne in più. Una per il bottone di aggiunta
+          colonne e una per i table-organizer delle righe
+        -->
+        <td style="border-right-color: transparent; border-left-color: transparent;" *ngFor="let cell of tableService.getHeadersColumns()" (mouseenter)="onMouseEnteredCell(tableService.INVALID_CELL_INDEX, tableService.INVALID_CELL_INDEX)"></td>
+      </tr>
+    </tbody>
+  </table>
+</div>

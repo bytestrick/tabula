@@ -1,0 +1,20 @@
+<div class="d-flex flex-column">
+  <div class="d-flex">
+    <input #searchBar [formControl]="searchCtrl" class="mb-3 form-control px-2" type="search" placeholder="Search">
+    <button class="btn btn-primary my-button d-flex justify-content-center align-items-center" (click)="onSearch(searchBar.value)"><i class="bi bi-search p-0"></i></button>
+  </div>
+
+  <div class="list-group overflow-y-auto" style="max-height: max(100vh - 420px, 120px);">
+    <ng-container *ngIf="dataTypes.length > 0; else loadDataTypesFailed">
+      <button class="list-group-item list-group-item-action py-1 px-2"
+        *ngFor="let dataType of dataTypes"
+        (click)="onCreateDataType(dataType)"
+      >
+        {{ dataType.getDataTypeName() }}
+      </button>
+    </ng-container>
+    <ng-template #loadDataTypesFailed>
+      <p class="text-center m-1 mb-2">No data type available</p>
+    </ng-template>
+  </div>
+</div>

@@ -1,0 +1,129 @@
+.app-table-bordered {
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+  width: 100%
+}
+
+.app-table-bordered tr {
+  border-top: 1px solid var(--bs-border-color);;
+  border-bottom: 1px solid var(--bs-border-color);;
+  border-left: 1px solid transparent;
+  border-right: 1px solid transparent;
+}
+
+.app-table-bordered td:not(:last-child),
+.app-table-bordered th:not(:last-child) {
+  border-right: 1px solid var(--bs-border-color);;
+  border-bottom: 1px solid var(--bs-border-color);;
+}
+
+.app-table-bordered td,
+.app-table-bordered th {
+  border-top: 1px solid transparent;
+  border-left: 1px solid transparent;
+}
+
+
+.space-left-right {
+  margin-right: 20px;
+  margin-left: 20px;
+}
+
+
+.center-td-content-v-h {
+  text-align: center;
+  vertical-align: middle;
+}
+
+
+.center-td-content-v {
+  vertical-align: middle;
+}
+
+
+.center-container {
+  position: relative;
+}
+
+.center {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+
+.first-column {
+  --width: 94px;
+
+  min-width: var(--width) !important;;
+  width: var(--width);
+  max-width: var(--width) !important;;
+}
+
+
+.last-column {
+  min-width: var(--cell-table-min-width) !important;
+  width: auto;
+}
+
+
+.column {
+  width: var(--cell-table-min-width);
+  min-width: var(--cell-table-min-width);
+  min-height: var(--cell-table-min-height);
+}
+
+/*
+* Classi per la preview del drag di righe e colonne.
+*/
+
+.drag-preview-column {
+  min-width: var(--cell-table-min-width);
+  max-width: var(--cell-table-min-width);
+  border-top: 3px solid var(--bs-primary);
+}
+
+
+.drag-preview-column li {
+  border-left: none;
+  border-right: none;
+}
+
+.drag-preview-column li:last-child {
+  border-bottom: none;
+}
+
+
+.drag-preview-row {
+  min-height: var(--cell-table-min-height);
+  border-left: 3px solid var(--bs-primary);
+}
+
+.drag-preview-row li {
+  border-top: none;
+  border-bottom: none;
+}
+
+.drag-preview-row li:last-child {
+  border-right: none;
+}
+
+/**************************************/
+
+.resize-handle {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 7px;
+  height: 100%;
+  background-color: transparent;
+}
+
+.resize-handle-active-area {
+  margin: 0 auto;
+  width: 5px; /* mette 2px di dead zone resize-handle.width - resize-handle-active-area.width */
+  height: 100%;
+  cursor: var(--resize-column-cursor-style);
+  background-color: transparent;
+}

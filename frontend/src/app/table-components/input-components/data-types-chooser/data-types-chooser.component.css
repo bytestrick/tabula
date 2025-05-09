@@ -1,0 +1,22 @@
+:host {
+  --search-bar-height: 34px;
+  --search-bar-border-radius: 6px;
+}
+
+
+input {
+  height: var(--search-bar-height);
+  border-radius: var(--search-bar-border-radius);
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+
+.my-button {
+  height: var(--search-bar-height);
+  width: var(--search-bar-height);
+
+  border-radius: var(--search-bar-border-radius);
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}

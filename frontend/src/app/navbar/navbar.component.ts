@@ -1,4 +1,15 @@
-import {Component, ElementRef, EventEmitter, inject, OnInit, Output, Signal, viewChild} from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  inject,
+  Input,
+  OnInit,
+  Output,
+  Signal,
+  ViewChild,
+  viewChild
+} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {NavbarService, UserDetails} from './navbar.service';
 import {NgClass, NgIf, TitleCasePipe} from '@angular/common';
@@ -22,9 +33,12 @@ export class NavbarComponent implements OnInit {
   protected themeService = inject(ThemeService);
   private confirmDialog = inject(ConfirmDialogService);
 
-  protected searchContent = '';
-  protected searchFieldOnFocus = false;
-  private searchField: Signal<ElementRef> = viewChild.required('searchField');
+  @Input() showSearchBar: boolean = true;
+
+  protected searchContent: string = '';
+  protected searchFieldOnFocus: boolean = false;
+  @ViewChild('searchField') private searchField!: ElementRef;
+
   private timer: any;
   @Output() onSearchedTableCard: EventEmitter<TableCard[] | "noSearchContent"> = new EventEmitter;
   protected _userDetails: UserDetails = {name: '', surname: '', email: ''};
@@ -47,7 +61,7 @@ export class NavbarComponent implements OnInit {
 
   protected clearSearch() {
     this.searchContent = '';
-    this.searchField().nativeElement.focus();
+    this.searchField.nativeElement.focus();
   }
 
   protected onFocus() {
