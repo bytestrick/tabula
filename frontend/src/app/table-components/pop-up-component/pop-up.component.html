@@ -1,5 +1,14 @@
-<div #root class="popup-overlay" [hidden]="!isVisible" (click)="onHidePopUp(CLOSED_WITH_LEFT_CLICK)" (contextmenu)="onHidePopUp(CLOSED_WITH_RIGHT_CLICK); $event.preventDefault()">
-  <div #popUpContainer class="card d-inline-flex p-2 elevated-shadow" (click)="$event.stopPropagation()" (contextmenu)="$event.stopPropagation(); $event.preventDefault()">
+<div #root
+     class="popup-overlay"
+     [hidden]="!_isVisible"
+     (click)="onOutsidePopUpClick(closedWithLeftClick)"
+     (contextmenu)="onOutsidePopUpClick(closedWithRightClick); $event.preventDefault()"
+>
+  <div #popUpCard
+       class="card d-inline-flex p-2 elevated-shadow"
+       (click)="$event.stopPropagation()"
+       (contextmenu)="$event.stopPropagation(); $event.preventDefault()"
+  >
     <ng-container #contentContainer></ng-container>
   </div>
 </div>

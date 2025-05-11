@@ -26,7 +26,7 @@ export class MonetaryInputComponent extends BaseInputComponent {
   private readonly MONETARY_ID: number = DataTypeRegistryService.MONETARY_ID;
 
 
-  protected override beforeShowUp(): void {
+  protected override onPopUpShowUp(): void {
     this.grabFocus();
 
     this.currentSymbol = (this.startingValue || this.currentSymbol).charAt(0);
@@ -83,12 +83,12 @@ export class MonetaryInputComponent extends BaseInputComponent {
   }
 
 
-  protected override onHiddenWithLeftClick(): void {
+  protected override onPopUpHiddenWithLeftClick(): void {
     this.setInput(this.value);
   }
 
 
-  protected override onHiddenWithRightClick(): void {
+  protected override onPopUpHiddenWithRightClick(): void {
     this.abortInput();
   }
 
