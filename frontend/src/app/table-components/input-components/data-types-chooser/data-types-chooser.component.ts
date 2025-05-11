@@ -48,7 +48,7 @@ export class DataTypesChooserComponent extends BaseInputComponent implements OnI
   }
 
 
-  protected override beforeShowUp(): void {
+  protected override onPopUpShowUp(): void {
     this.grabFocus();
   }
 
@@ -69,8 +69,8 @@ export class DataTypesChooserComponent extends BaseInputComponent implements OnI
   }
 
 
-  protected override onHiddenWithLeftClick(): void {}
+  protected override onPopUpHiddenWithLeftClick(): void {}
 
 
-  protected override onHiddenWithRightClick(): void {}
+  protected override onPopUpHiddenWithRightClick(): void {}
 }

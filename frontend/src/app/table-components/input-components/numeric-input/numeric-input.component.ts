@@ -21,7 +21,7 @@ export class NumericInputComponent extends BaseInputComponent {
   private readonly NUMERIC_ID: number = DataTypeRegistryService.NUMERIC_ID;
 
 
-  protected override beforeShowUp(): void {
+  protected override onPopUpShowUp(): void {
     this.grabFocus();
 
     this.input.nativeElement.value = this.startingValue || '';
@@ -81,12 +81,12 @@ export class NumericInputComponent extends BaseInputComponent {
   }
 
 
-  protected override onHiddenWithLeftClick(): void {
+  protected override onPopUpHiddenWithLeftClick(): void {
     this.setInput(this.value);
   }
 
 
-  protected override onHiddenWithRightClick(): void {
+  protected override onPopUpHiddenWithRightClick(): void {
     this.abortInput();
   }
 }

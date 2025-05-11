@@ -9,7 +9,7 @@ import {DataTypeRegistryService} from './data-type-registry.service';
 import {Pair} from '../model/pair';
 import {Row} from '../model/table/row';
 import {HeaderColumn} from '../model/table/headerColumn';
-import {TableDTO} from '../model/dto/table/table-dto';
+import {TableContentDTO} from '../model/dto/table/table-content-dto';
 import {CellPatchedDTO} from '../model/dto/table/cell-dto';
 import {Selection} from '../model/table/selection';
 import {ColumnPatchedDTO} from '../model/dto/table/column-dto';
@@ -467,6 +467,9 @@ export class TableService {
    *                      If out of bounds, no action is taken.
    */
   deleteRow(rowIndex: number): void {
+    if (rowIndex < 0 || rowIndex >= this.getRowsNumber())
+      return;
+
     const rowId: string = this.getRowId(rowIndex);
 
     this.tableAPI.deleteRows([rowId]).subscribe(
@@ -515,6 +518,9 @@ export class TableService {
    *                      If out of bounds, no action is taken.
    */
   deleteColumn(columnIndex: number): void {
+    if (columnIndex < 0 || columnIndex >= this.getColumnsNumber())
+      return;
+
     const columnId: string = this.getHeaderColumnId(columnIndex);
 
     this.tableAPI.deleteColumns([columnId]).subscribe(
@@ -819,7 +825,7 @@ export class TableService {
    *
    * @param tableDTO  The DTO containing header (header's columns) and content (rows) to load.
    */
-  private loadFromTableDTO(tableDTO: TableDTO): void {
+  private loadFromTableDTO(tableDTO: TableContentDTO): void {
     for (let columnDTO of tableDTO.header) {
       const headerCell: HeaderCell = new HeaderCell(
         columnDTO.columnName || this.HEADER_CELL_DEFAULT_NAME,

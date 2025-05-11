@@ -4,7 +4,7 @@ import {
   ElementRef, inject, Input,
   Renderer2, ViewChild,
 } from '@angular/core';
-import {IPopUpContent} from '../../model/i-pop-up-content';
+import {PopUpContent} from '../../model/pop-up-content';
 import {PopUp} from '../pop-up-component/pop-up.component';
 import {Pair} from '../../model/pair';
 import {ToastService} from '../../toast/toast.service';
@@ -16,7 +16,7 @@ import {TableService} from '../../services/table.service';
   templateUrl: './table-contextual-menu.component.html',
   styleUrl: './table-contextual-menu.component.css'
 })
-export class TableContextualMenuComponent implements IPopUpContent, AfterViewInit {
+export class TableContextualMenuComponent implements PopUpContent, AfterViewInit {
 
   readonly TARGET_ROW: string = 'row';
   readonly TARGET_COLUMN: string = 'column';
@@ -42,7 +42,7 @@ export class TableContextualMenuComponent implements IPopUpContent, AfterViewIni
   }
 
 
-  beforeContentShowUp(): void {}
+  onShowUp(): void {}
 
 
   onDelete(): void {
