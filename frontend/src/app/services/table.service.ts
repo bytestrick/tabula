@@ -18,7 +18,6 @@ import {MovedRowsOrColumnsDTO} from '../model/dto/table/move-row-or-column-dto';
 
 @Injectable()
 export class TableService {
-
   private dataTypeService: DataTypeRegistryService = inject(DataTypeRegistryService);
   private tableAPI: TableApiService = inject(TableApiService);
 
@@ -63,7 +62,6 @@ export class TableService {
     );
   }
 
-
   /**
    * Retrieves the data-type of a column at the specified index.
    *
@@ -73,7 +71,6 @@ export class TableService {
   private getColumnDataType(columnIndex: number): IDataType {
     return this.header[columnIndex].getColumnDataType();
   }
-
 
   /**
    * Appends a new row to the current table.
@@ -95,21 +92,17 @@ export class TableService {
     );
   }
 
-
   getRowsNumber(): number {
     return this.table.length;
   }
-
 
   getColumnsNumber(): number {
     return this.header.length;
   }
 
-
   getHeadersColumns(): HeaderColumn[] {
     return this.header;
   }
-
 
   /**
    * Inserts a new row at the specified index in the table.
@@ -129,7 +122,6 @@ export class TableService {
       }
     );
   }
-
 
   /**
    * Inserts a new column at the specified index in the table.
@@ -157,7 +149,6 @@ export class TableService {
     return this.table;
   }
 
-
   /**
    * Moves a single row from one position to another within the table.
    *
@@ -167,7 +158,6 @@ export class TableService {
   private _moveRow(fromIndex: number, toIndex: number): void {
     moveItemInArray(this.table, fromIndex, toIndex);
   }
-
 
   /**
    * Moves one or more rows from one position to another.
@@ -201,7 +191,6 @@ export class TableService {
     );
   }
 
-
   private canMoveColumn(fromIndex: number, toIndex: number): boolean {
     if (fromIndex < 0 || fromIndex >= this.getColumnsNumber())
       return false;
@@ -209,12 +198,8 @@ export class TableService {
     if (toIndex < 0 || toIndex >= this.getColumnsNumber())
       return false;
 
-    if (fromIndex === toIndex)
-      return false;
-
-    return true;
+    return fromIndex !== toIndex;
   }
-
 
   private canMoveRow(fromIndex: number, toIndex: number): boolean {
     if (fromIndex < 0 || fromIndex >= this.getRowsNumber())
@@ -223,12 +208,8 @@ export class TableService {
     if (toIndex < 0 || toIndex >= this.getRowsNumber())
       return false;
 
-    if (fromIndex === toIndex)
-      return false;
-
-    return true;
+    return fromIndex !== toIndex;
   }
-
 
   /**
    * Moves a single column from one position to another within the table.
@@ -242,7 +223,6 @@ export class TableService {
 
     moveItemInArray(this.header, fromIndex, toIndex);
   }
-
 
   /**
    * Moves one or more columns from one position to another.
@@ -276,7 +256,6 @@ export class TableService {
     );
   }
 
-
   /**
    * Retrieves a single column of cells from the table.
    *
@@ -298,7 +277,6 @@ export class TableService {
     return column;
   }
 
-
   /**
    * Retrieves a single row of cells from the table.
    *
@@ -315,7 +293,6 @@ export class TableService {
     return this.table[rowIndex].getCells().slice(0, Math.min(this.getColumnsNumber(), limit));
   }
 
-
   /**
    * Selects or updates the selection of a row.
    * If the row index is out of bounds, no action is taken.
@@ -327,7 +304,6 @@ export class TableService {
 
     this.selectedRows.selectOrUpdate(this.getRowId(rowIndex));
   }
-
 
   /**
    * Deselects a row at the specified index.
@@ -341,7 +317,6 @@ export class TableService {
     this.selectedRows.deselect(this.getRowId(rowIndex));
   }
 
-
   /**
    * Selects or updates the selection of a column.
    * If the column index is out of bounds, no action is taken.
@@ -353,7 +328,6 @@ export class TableService {
 
     this.selectedColumns.selectOrUpdate(this.getHeaderColumnId(columnIndex));
   }
-
 
   /**
    * Deselects a column at the specified index.
@@ -367,7 +341,6 @@ export class TableService {
     this.selectedColumns.deselect(this.getHeaderColumnId(columnIndex));
   }
 
-
   /**
    * Checks whether a column is selected.
    * @param columnIndex - Index of the column to check.
@@ -380,7 +353,6 @@ export class TableService {
     return this.selectedColumns.isSelected(this.getHeaderColumnId(columnIndex));
   }
 
-
   /**
    * Returns the number of selected columns.
    * @returns The count of currently selected columns.
@@ -388,7 +360,6 @@ export class TableService {
   getSelectedColumnNumber(): number {
     return this.selectedColumns.getSelectionNumber();
   }
-
 
   /**
    * Checks whether a row is selected.
@@ -402,7 +373,6 @@ export class TableService {
     return this.selectedRows.isSelected(this.getRowId(rowIndex));
   }
 
-
   /**
    * Returns the number of selected rows.
    * @returns The count of currently selected rows.
@@ -410,7 +380,6 @@ export class TableService {
   getSelectedRowNumber(): number {
     return this.selectedRows.getSelectionNumber();
   }
-
 
   /**
    * Retrieves a cell from a specific row and column.
@@ -423,7 +392,6 @@ export class TableService {
     return this.table[rowIndex].getCell(columnIndex);
   }
 
-
   /**
    * Retrieves a header cell for the specified column.
    *
@@ -433,7 +401,6 @@ export class TableService {
   private getHeaderCell(columnIndex: number): HeaderCell {
     return this.header[columnIndex].getHeaderCell();
   }
-
 
   /**
    * Removes a row from the local table model by index.
@@ -448,7 +415,6 @@ export class TableService {
     this.table.splice(rowIndex, 1);
   }
 
-
   /**
    * Retrieves the UUID of a row by its index.
    *
@@ -458,7 +424,6 @@ export class TableService {
   private getRowId(rowIndex: number): string {
     return this.table[rowIndex].id;
   }
-
 
   /**
    * Deletes a single row both locally and on the backend.
@@ -479,7 +444,6 @@ export class TableService {
     );
   }
 
-
   /**
    * Deletes all currently selected rows both locally and on the backend.
    *
@@ -499,7 +463,6 @@ export class TableService {
     );
   }
 
-
   /**
    * Retrieves the UUID of a header column by its index.
    *
@@ -509,7 +472,6 @@ export class TableService {
   private getHeaderColumnId(columnIndex: number): string {
     return this.header[columnIndex].id;
   }
-
 
   /**
    * Deletes a single column both locally and on the backend.
@@ -552,7 +514,6 @@ export class TableService {
       this.deselectColumn(columnIndex);
   }
 
-
   /**
    * Deletes all currently selected columns both locally and on the backend.
    *
@@ -572,44 +533,62 @@ export class TableService {
     );
   }
 
-
-  // duplica la riga e la inserisce a sotto di rowIndex
+  /**
+   * Duplicates the row at the specified `rowIndex` and inserts
+   * the new row at `rowIndex`.
+   *
+   * @param rowIndex - Index of the row to duplicate.
+   * @returns void
+   */
   duplicateRow(rowIndex: number): void {
-    // if (rowIndex < 0 || rowIndex >= this.getRowsNumber())
-    //   return;
-    //
-    // const clonedRow: Row = new Row();
-    //
-    // for (let j: number = 0; j < this.getColumnsNumber(); ++j)
-    //   clonedRow.appendNewCell(this.getColumnDataType(j).getNewDataType(), this.table[rowIndex].getCellValue(j));
-    //
-    // this.table.splice(rowIndex + 1, 0, clonedRow);
+    if (rowIndex < 0 || rowIndex >= this.getRowsNumber())
+      return;
+
+    this.tableAPI.addNewRow(rowIndex, true).subscribe(
+      rowCreatedDTO => {
+        const newRow: Row = new Row(rowCreatedDTO.id);
+
+        for (let j: number = 0; j < this.getColumnsNumber(); ++j)
+          newRow.appendNewCell(this.getColumnDataType(j).getNewDataType(), rowCreatedDTO.cellsValues[j]);
+
+        this.table.splice(rowIndex, 0, newRow);
+      }
+    )
   }
 
-
-  // duplica la colonna e la inserisce a destra di columnIndex
+  /**
+   * Duplicates the column at the specified `columnIndex` and inserts
+   * the new column at `columnIndex`.
+   *
+   * @param columnIndex - Index of the column to duplicate.
+   * @returns void
+   */
   duplicateColumn(columnIndex: number): void {
-    // if (columnIndex < 0 || columnIndex >= this.getColumnsNumber())
-    //   return;
-    //
-    // const duplicateHeaderCell: HeaderCell = new HeaderCell(
-    //   this.getHeaderCell(columnIndex).cellDataType.getNewDataType(),
-    //   this.getHeaderCell(columnIndex).value,
-    //   this.getHeaderCell(columnIndex).columnDataType.getNewDataType()
-    // )
-    //
-    // this.header.splice(
-    //   columnIndex + 1,
-    //   0,
-    //   new Column(duplicateHeaderCell)
-    // );
-    //
-    // for (let i: number = 0; i < this.getRowsNumber(); ++i)
-    //   this.table[i].insertNewCellAt(
-    //     columnIndex + 1, this.getColumnDataType(columnIndex).getNewDataType(), this.table[i].getCellValue(columnIndex)
-    //   )
-  }
+    if (columnIndex < 0 || columnIndex >= this.getColumnsNumber())
+      return;
 
+    this.tableAPI.addNewColumn(this.getHeaderCell(columnIndex).cellDataType.getDataTypeId(), columnIndex, true).subscribe(
+      createdColumnDTO => {
+        const newHeaderCell: HeaderCell = new HeaderCell(
+          createdColumnDTO.columnName || this.HEADER_CELL_DEFAULT_NAME,
+          this.dataTypeService.convertIntoIDataType(createdColumnDTO.dataTypeId).getNewDataType()
+        )
+
+        this.header.splice(
+          createdColumnDTO.columnIndex,
+          0,
+          new HeaderColumn(createdColumnDTO.id, newHeaderCell)
+        );
+
+        for (let i: number = 0; i < this.getRowsNumber(); ++i)
+          this.table[i].insertNewCellAt(
+            createdColumnDTO.columnIndex,
+            this.dataTypeService.convertIntoIDataType(createdColumnDTO.dataTypeId).getNewDataType(),
+            createdColumnDTO.cellsValues[i]
+          )
+      }
+    )
+  }
 
   /**
    * Changes the data type of an existing column at the given index.
@@ -652,7 +631,6 @@ export class TableService {
     );
   }
 
-
   /**
    * Retrieves a cell (header or body) based on the provided coordinates.
    *
@@ -677,7 +655,6 @@ export class TableService {
       this.getHeaderCell(cord.j) :
       this.getCell(cord.i, cord.j);
   }
-
 
   /**
    * Sets the value of one or more cells based on the current selection context.
@@ -719,14 +696,12 @@ export class TableService {
     }
   }
 
-
   private setContentCellValueFromDTO(cellPatchedDTOList: CellPatchedDTO[]): void {
     for (const cellPatchedDTO of cellPatchedDTOList) {
       const cell: Cell = this.getCellFromCoords(new CellCord(cellPatchedDTO.rowIndex, cellPatchedDTO.columnIndex))!;
       cell.value = cellPatchedDTO.value;
     }
   }
-
 
   /**
    * Updates a single cell’s value both locally and on the backend.
@@ -762,7 +737,6 @@ export class TableService {
     }
   }
 
-
   /**
    * Updates all cells in the selected rows that share the same data type
    * as the originally clicked cell.
@@ -789,7 +763,6 @@ export class TableService {
     );
   }
 
-
   /**
    * Updates all cells in the selected columns.
    *
@@ -814,7 +787,6 @@ export class TableService {
       (cellsPatched: CellPatchedDTO[]): void => this.setContentCellValueFromDTO(cellsPatched)
     );
   }
-
 
   /**
    * Populates the local table model from a TableDTO received from the backend.
@@ -845,7 +817,6 @@ export class TableService {
     }
   }
 
-
   /**
    * Initializes the table view by fetching data from the backend.
    *
@@ -867,11 +838,9 @@ export class TableService {
     )
   }
 
-
   set isLoaded(value: boolean) {
     this._isLoaded = value;
   }
-
 
   get isLoaded(): boolean {
     return this._isLoaded;
