@@ -1,6 +1,5 @@
 import {CellDTO} from './cell-dto';
 
-
 /**
  * Represents a table row and its cells.
  *
@@ -17,17 +16,21 @@ export interface RowDTO {
   cells: CellDTO[]
 }
 
-
 /**
  * Payload sent from the frontend to request creation of a new row.
  *
  * @property rowIndex
- *   Zero-based position at which to insert the new row. Set to `null` to append at the end.
+ *   Zero-based position at which to insert or duplicate the new row.
+ *   Set to `null` to append at the end.
+ * @property duplicateFlag
+ *   When `true` and `rowIndex` is non-null, the new row
+ *   will be a duplicate of the existing row at that index.
+ *   Otherwise, an empty row is inserted there.
  */
 export interface RowCreateDTO {
-  rowIndex: number | null;
+  rowIndex: number | null,
+  duplicateFlag: boolean
 }
-
 
 /**
  * Response returned by the backend after successfully creating a new row.
@@ -38,13 +41,15 @@ export interface RowCreateDTO {
  *   UUID of the table to which the new row belongs.
  * @property rowIndex
  *   Zero-based position where the new row was inserted.
+ * @property cellsValues
+ *   List of cells' values for this row; empty if the row was created empty.
  */
 export interface RowCreatedDTO {
-  id: string;
-  tableId: string;
-  rowIndex: number;
+  id: string,
+  tableId: string,
+  rowIndex: number,
+  cellsValues: string[]
 }
-
 
 /**
  * Payload sent from the frontend to delete one or more rows.
@@ -55,7 +60,6 @@ export interface RowCreatedDTO {
 export interface RowsDeleteDTO {
   ids: string[]
 }
-
 
 /**
  * Response returned by the backend containing the zero-based indexes of deleted rows.

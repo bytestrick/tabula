@@ -26,12 +26,10 @@ import {MovedRowsOrColumnsDTO, MoveRowOrColumnDto} from '../model/dto/table/move
  * communicating with a Spring Boot backend using DAO pattern.
  */
 export class TableApiService {
-
   private readonly BASE_URL: string = "/tables";
 
   private httpClient: HttpClient = inject(HttpClient);
   private _tableId: string = '';
-
 
   /**
    * Current table UUID used by default in operations when tableId is omitted.
@@ -40,7 +38,6 @@ export class TableApiService {
   get tableId(): string {
     return this._tableId;
   }
-
 
   /**
    * Retrieves the full table structure (columns and rows) from the backend.
@@ -58,47 +55,54 @@ export class TableApiService {
     return this.httpClient.get<TableContentDTO>(url);
   }
 
-
   /**
    * Creates a new row in the specified table.
    *
    * @param rowIndex - Zero-based position to insert the new row; null appends at end.
+   * @param duplicate  When `true` and `rowIndex` is non-null, the new row
+   *                   will be a duplicate of the existing row at that index.
+   *                   Otherwise, an empty row is inserted.
    * @param tableId - UUID of target table; defaults to current tableId.
    * @returns Observable emitting {@link RowCreatedDTO}.
    */
   addNewRow(rowIndex: number | null,
+            duplicate: boolean = false,
             tableId: string = this.tableId): Observable<RowCreatedDTO> {
 
     const row: RowCreateDTO = {
-      rowIndex: rowIndex
+      rowIndex: rowIndex,
+      duplicateFlag: duplicate
     }
 
     const url: string = `${this.BASE_URL}/${tableId}/content/rows`;
     return this.httpClient.post<RowCreatedDTO>(url, row);
   }
 
-
   /**
    * Creates a new column in the specified table.
    *
    * @param dataTypeId - Numeric code (≥ 0) for the new column's data type.
    * @param columnIndex - Zero-based position to insert; null appends at end.
+   * @param duplicate   When `true` and `columnIndex` is non-null, the new column
+   *                    will be a duplicate of the existing column at that index.
+   *                    Otherwise, an empty column is inserted.
    * @param tableId - UUID of target table; defaults to current tableId.
    * @returns Observable emitting {@link ColumnCreatedDTO}.
    */
   addNewColumn(dataTypeId: number,
                columnIndex: number | null,
+               duplicate: boolean = false,
                tableId: string = this.tableId): Observable<ColumnCreatedDTO> {
 
     const newColumn: ColumnCreateDTO = {
       dataTypeId: dataTypeId,
-      columnIndex: columnIndex
+      columnIndex: columnIndex,
+      duplicateFlag: duplicate
     };
 
     const url = `${this.BASE_URL}/${tableId}/content/columns`;
     return this.httpClient.post<ColumnCreatedDTO>(url, newColumn);
   }
-
 
   /**
    * Updates an existing column's data type.
@@ -120,7 +124,6 @@ export class TableApiService {
     return this.httpClient.patch<ColumnPatchedDTO>(url, column);
   }
 
-
   /**
    * Renames an existing column.
    *
@@ -140,7 +143,6 @@ export class TableApiService {
     const url: string = `${this.BASE_URL}/${tableId}/content/columns/${columnId}`;
     return this.httpClient.patch<ColumnPatchedDTO>(url, column);
   }
-
 
   /**
    * Updates multiple cell values.
@@ -169,7 +171,6 @@ export class TableApiService {
     return this.httpClient.patch<CellPatchedDTO[]>(url, cellsToUpdate);
   }
 
-
   /**
    * Deletes rows from the specified table.
    *
@@ -183,7 +184,6 @@ export class TableApiService {
     return this.httpClient.delete<RowsDeletedDTO>(url, {body: rowsDeleteDTO});
   }
 
-
   /**
    * Deletes columns from the specified table.
    *
@@ -196,7 +196,6 @@ export class TableApiService {
     const columnsDeleteDTO: ColumnsDeleteDTO = {ids: columnsIds};
     return this.httpClient.delete<ColumnsDeletedDTO>(url, {body: columnsDeleteDTO});
   }
-
 
   /**
    * Moves rows within the specified table.
@@ -221,7 +220,6 @@ export class TableApiService {
     const url: string = `${this.BASE_URL}/${tableId}/content/rows`;
     return this.httpClient.patch<MovedRowsOrColumnsDTO>(url, rowsToMove);
   }
-
 
   /**
    * Moves columns within the specified table.
