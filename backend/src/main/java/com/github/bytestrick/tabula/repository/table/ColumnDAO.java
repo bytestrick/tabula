@@ -2,6 +2,7 @@ package com.github.bytestrick.tabula.repository.table;
 
 import com.github.bytestrick.tabula.repository.interfaces.IndexesSortedDAO;
 import com.github.bytestrick.tabula.repository.proxy.table.ColumnProxy;
+import com.github.bytestrick.tabula.repository.proxy.table.RowProxy;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -34,10 +35,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Repository
 public class ColumnDAO implements IndexesSortedDAO {
-
     private final JdbcClient jdbcClient;
     private final CellDAO cellDAO;
-
 
     /**
      * DAO method to remove a single column and reindex subsequent columns in the same table.
@@ -85,7 +84,6 @@ public class ColumnDAO implements IndexesSortedDAO {
         return deletedColumnIndex;
     }
 
-
     /**
      * DAO method to append a new column at the end of the specified table.
      * <p>
@@ -120,7 +118,6 @@ public class ColumnDAO implements IndexesSortedDAO {
 
         return new ColumnProxy(newColumnId, tableId, dataTypeId, "", columnIndex, cellDAO);
     }
-
 
     /**
      * DAO method to insert a new column at a specific index within the specified table.
@@ -158,7 +155,6 @@ public class ColumnDAO implements IndexesSortedDAO {
         return new ColumnProxy(newColumnId, tableId, dataTypeId, null, columnIndex, cellDAO);
     }
 
-
     /**
      * DAO method to retrieve all columns for a given table, ordered by their index.
      *
@@ -176,7 +172,6 @@ public class ColumnDAO implements IndexesSortedDAO {
                 .param("tableId", tableId)
                 .query(new ColumnMapper()).list();
     }
-
 
     /**
      * DAO method to update the data-type of a column within a table.
@@ -197,7 +192,6 @@ public class ColumnDAO implements IndexesSortedDAO {
                 .update();
     }
 
-
     /**
      * DAO method to find the UUID of a column by its index within a table.
      *
@@ -216,7 +210,6 @@ public class ColumnDAO implements IndexesSortedDAO {
                 .query(UUID.class)
                 .single();
     }
-
 
     /**
      * Updates the {@code column_index} of an existing column.
@@ -240,7 +233,6 @@ public class ColumnDAO implements IndexesSortedDAO {
                 .update();
     }
 
-
     /**
      * Updates the name of a specific column.
      *
@@ -262,7 +254,6 @@ public class ColumnDAO implements IndexesSortedDAO {
                 .param("newName", newName)
                 .update();
     }
-
 
     /**
      * Returns the zero-based index of the given column UUID.
@@ -286,7 +277,6 @@ public class ColumnDAO implements IndexesSortedDAO {
                 .single();
     }
 
-
     /**
      * Counts the number of columns in the given table.
      *
@@ -305,7 +295,6 @@ public class ColumnDAO implements IndexesSortedDAO {
                 .query(Integer.class)
                 .single();
     }
-
 
     /**
      * Check to see if the column exists within a table.
@@ -328,7 +317,6 @@ public class ColumnDAO implements IndexesSortedDAO {
                 .single();
     }
 
-
     /**
      * Retrieves the index of a single column by its UUID.
      *
@@ -350,7 +338,6 @@ public class ColumnDAO implements IndexesSortedDAO {
                 .query(Integer.class)
                 .single();
     }
-
 
     /**
      * Checks whether a column’s stored data type matches the given ID.
@@ -377,7 +364,6 @@ public class ColumnDAO implements IndexesSortedDAO {
                 .single();
     }
 
-
     /**
      * Implementation of the {@code findIndexesFromIdsSortedAscending} method of {@link IndexesSortedDAO}.
      * <p>Retrieves the indexes (sorted in ascending order) of multiple rows by their UUIDs.</p>
@@ -402,7 +388,6 @@ public class ColumnDAO implements IndexesSortedDAO {
                 .query(Integer.class)
                 .list();
     }
-
 
     /**
      * Implementation of the {@code findIndexesFromIdsSortedDescending} method of {@link IndexesSortedDAO}.
@@ -429,6 +414,24 @@ public class ColumnDAO implements IndexesSortedDAO {
                 .list();
     }
 
+    /**
+     * Retrieves a column proxy by its zero-based index within a table.
+     *
+     * @param tableId     UUID of the table containing the column.
+     * @param columnIndex Zero-based index of the column to retrieve.
+     * @return The {@link ColumnProxy} representing the found column.
+     */
+    public ColumnProxy findColumnByIndex(UUID tableId, int columnIndex) {
+        return jdbcClient.sql("""
+                SELECT *
+                FROM tbl_column
+                WHERE tbl_table = :tableId AND column_index = :columnIndex
+            """)
+                .param("tableId", tableId)
+                .param("columnIndex", columnIndex)
+                .query(new ColumnMapper())
+                .single();
+    }
 
     private class ColumnMapper implements RowMapper<ColumnProxy> {
 

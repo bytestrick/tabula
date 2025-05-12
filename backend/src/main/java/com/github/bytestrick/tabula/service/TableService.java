@@ -22,14 +22,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class TableService {
-
     private final UserDao userDao;
     private final TableDAO tableDAO;
     private final FuzzySearchTable fuzzySearchTable;
@@ -38,13 +35,11 @@ public class TableService {
     private final CellDAO cellDAO;
     private final DataTypeDAO dataTypeDAO;
 
-
     public User getAuthUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return userDao.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
     }
-
 
     private TableCreatedDTO tableToTableCreatedDTO(Table table) {
         return new TableCreatedDTO(
@@ -56,18 +51,15 @@ public class TableService {
         );
     }
 
-
     public List<TableCreatedDTO> getNextTables(UUID id, int quantity) {
         return tableDAO.findByCreationDateAfter(id, quantity, getAuthUser().getId())
                 .stream().map(this::tableToTableCreatedDTO).toList();
     }
 
-
     public List<TableCreatedDTO> getLastTables(int quantity) {
         return tableDAO.findLast(quantity, getAuthUser().getId())
                 .stream().map(this::tableToTableCreatedDTO).toList();
     }
-
 
     private TableCreatedDTO convertTableToTableCreatedDTO(Table table) {
         return new TableCreatedDTO(
@@ -78,7 +70,6 @@ public class TableService {
                 table.getLastEditDate()
         );
     }
-
 
     /**
      * Creates a new, empty table with one row and one column.
@@ -110,7 +101,6 @@ public class TableService {
         return convertTableToTableCreatedDTO(createdTable);
     }
 
-
     @Transactional
     public String updateTable(UUID tableId, TablePutDTO tablePutDTO) {
         ensureTableExistsOrThrow(tableId);
@@ -127,12 +117,10 @@ public class TableService {
         return "TableCard updated successfully";
     }
 
-
     public List<TableCreatedDTO> fuzzySearch(String pattern) {
         return fuzzySearchTable.fuzzySearch(pattern, getAuthUser().getId())
                 .stream().map(this::tableToTableCreatedDTO).toList();
     }
-
 
 
     /**
@@ -150,7 +138,6 @@ public class TableService {
         }
     }
 
-
     /**
      * Verifies that a table with the given UUID exists; otherwise throws.
      *
@@ -162,7 +149,6 @@ public class TableService {
             throw new TableNotFoundException(tableId);
         }
     }
-
 
     /**
      * Verifies that a row with the given UUID exists within the specified table; otherwise throws.
@@ -177,7 +163,6 @@ public class TableService {
         }
     }
 
-
     /**
      * Verifies that a column with the given UUID exists within the specified table; otherwise throws.
      *
@@ -190,7 +175,6 @@ public class TableService {
             throw new ColumnNotFound(columnId, tableId);
         }
     }
-
 
     /**
      * Verifies that a specified index is within a valid range [{@code minBounds}, {@code maxBounds}).
@@ -207,7 +191,6 @@ public class TableService {
                     "index: " + index + ", minBounds: " + minBounds + ", maxBounds: " + maxBounds
             );
     }
-
 
     /**
      * Retrieves a complete table.
@@ -246,7 +229,6 @@ public class TableService {
         return new TableContentDTO(table.getId(), headers, content);
     }
 
-
     /**
      * Deletes an entire table and all its associated rows and cells.
      *
@@ -260,73 +242,118 @@ public class TableService {
         return "Table deleted successfully";
     }
 
-
+    /** append a new empty row */
     private RowProxy appendNewRow(UUID tableId) {
         return rowDAO.appendNewRow(tableId, UUID.randomUUID());
     }
 
-
-    private RowProxy insertNewRowAt(UUID tableID, int rowIndex) {
-        return rowDAO.insertNewRowAt(tableID, UUID.randomUUID(), rowIndex);
+    /** insert a new empty row */
+    private RowProxy insertNewRowAt(UUID tableId, int rowIndex) {
+        return rowDAO.insertNewRowAt(tableId, UUID.randomUUID(), rowIndex);
     }
 
+    @Transactional
+    protected RowProxy duplicateRow(UUID tableId, int rowIndex) {
+        final RowProxy duplicatedRow = rowDAO.findRowByIndex(tableId, rowIndex);
+        final RowProxy insertedRow = insertNewRowAt(tableId, rowIndex);
+        final List<Cell> duplicatedRowCells = duplicatedRow.getCells();
+
+        for (int i = 0; i < duplicatedRowCells.size(); ++i) {
+            String duplicatedCellValue = duplicatedRowCells.get(i).getValue();
+            cellDAO.setRowCellValue(insertedRow.getId(), i, duplicatedCellValue);
+        }
+
+        return rowDAO.findRowByIndex(tableId, rowIndex);
+    }
 
     /**
      * Creates a new row in the specified table.
      *
-     * <p>If the provided {@code rowIndex} in {@link RowCreateDTO} is {@code null},
-     * the new row is appended at the end of the table. Otherwise, it is inserted
-     * at the specified index.</p>
+     * <p>If {@code rowIndex} in {@link RowCreateDTO} is {@code null},
+     * the new row is appended at the end of the table. Otherwise, it is
+     * inserted at the specified index. If {@code rowIndex} is non-null
+     * and {@code duplicateFlag} is {@code true}, the new row is instead
+     * a duplicate of the row currently at that index.</p>
      *
      * @param tableId      The UUID of the table in which the new row should be added.
-     * @param rowCreateDTO DTO containing the optional row index.
+     * @param rowCreateDTO DTO containing the optional insertion index and duplication flag.
      * @return A {@link RowCreatedDTO} containing metadata of the newly created row.
      * @throws TableNotFoundException if no table exists for the given {@code tableId}.
+     * @throws IndexOutOfBoundsException if {@code RowCreateDTO.getRowIndex()} is out of bounds.
      */
     @Transactional
     public RowCreatedDTO addNewRow(UUID tableId, RowCreateDTO rowCreateDTO) {
         ensureTableExistsOrThrow(tableId);
 
-        RowProxy createRow;
+        RowProxy createdRow;
+        List<String> cellsValues = new ArrayList<>();
 
         if (rowCreateDTO.rowIndex() == null)
-            createRow = appendNewRow(tableId);
+            createdRow = appendNewRow(tableId);
         else {
             ensureIndexIsWithinTheBoundsOrThrow(
                     rowCreateDTO.rowIndex(), 0, rowDAO.getRowsNumber(tableId)
             );
-            createRow = insertNewRowAt(tableId, rowCreateDTO.rowIndex());
+
+            if (!rowCreateDTO.duplicateFlag())
+                createdRow = insertNewRowAt(tableId, rowCreateDTO.rowIndex());
+            else {
+                createdRow = duplicateRow(tableId, rowCreateDTO.rowIndex());
+                List<Cell> cells = createdRow.getCells();
+
+                for (Cell cell : cells) {
+                    cellsValues.addLast(cell.getValue());
+                }
+            }
         }
 
         return new RowCreatedDTO(
-                createRow.getId(),
-                createRow.getMyTable(),
-                createRow.getRowIndex()
+                createdRow.getId(),
+                createdRow.getMyTable(),
+                createdRow.getRowIndex(),
+                cellsValues
         );
     }
 
-
+    /** append a new empty row */
     private ColumnProxy appendNewColumn(UUID tableID, int dataType) {
         return columnDAO.appendColumn(tableID, UUID.randomUUID(), dataType);
     }
 
-
+    /** insert a new empty row */
     private ColumnProxy insertColumnAt(UUID tableID, int dataType, int columnIndex) {
         return columnDAO.insertColumnAt(tableID, UUID.randomUUID(), dataType, columnIndex);
     }
 
+    @Transactional
+    protected ColumnProxy duplicateColumn(UUID tableId, int columnIndex) {
+        final ColumnProxy duplicatedColumn = columnDAO.findColumnByIndex(tableId, columnIndex);
+        final ColumnProxy insertedColumn = insertColumnAt(tableId, duplicatedColumn.getDataTypeId(), columnIndex);
+        columnDAO.changeColumnName(tableId, insertedColumn.getId(), duplicatedColumn.getName());
+        final List<Cell> duplicatedColumnCells = duplicatedColumn.getCells();
+
+        for (int i = 0; i < duplicatedColumnCells.size(); ++i) {
+            String duplicatedCellValue = duplicatedColumnCells.get(i).getValue();
+            cellDAO.setColumnCellValue(insertedColumn.getId(), i, duplicatedCellValue);
+        }
+
+        return columnDAO.findColumnByIndex(tableId, columnIndex);
+    }
 
     /**
      * Creates a new column in the specified table.
      *
      * <p>If {@code columnIndex} in {@link ColumnCreateDTO} is {@code null},
-     * the new column is appended as the last column. Otherwise, it is inserted
-     * at the specified index.</p>
+     * the new column is appended as the last column. Otherwise, it is
+     * inserted at the specified index. If {@code columnIndex} is non-null
+     * and {@code duplicateFlag} is {@code true}, the new column is instead
+     * a duplicate of the column currently at that index.</p>
      *
      * @param tableId         The UUID of the table in which the column is to be created.
-     * @param columnCreateDTO DTO containing the data type and optional column index.
+     * @param columnCreateDTO DTO containing the data type, optional index and duplication flag.
      * @return A {@link ColumnCreatedDTO} containing metadata of the newly created column.
      * @throws TableNotFoundException if no table exists for the given {@code tableId}.
+     * @throws IndexOutOfBoundsException if {@code ColumnCreateDTO.getColumnIndex()} is out of bounds.
      */
     @Transactional
     public ColumnCreatedDTO addNewColumn(UUID tableId, ColumnCreateDTO columnCreateDTO) {
@@ -334,6 +361,7 @@ public class TableService {
         ensureDataTypeExistsOrThrow(columnCreateDTO.dataTypeId());
 
         ColumnProxy createdColumn;
+        List<String> cellValues = new ArrayList<>();
 
         if (columnCreateDTO.columnIndex() == null)
             createdColumn = appendNewColumn(tableId, columnCreateDTO.dataTypeId());
@@ -341,17 +369,28 @@ public class TableService {
             ensureIndexIsWithinTheBoundsOrThrow(
                     columnCreateDTO.columnIndex(), 0, columnDAO.getColumnNumber(tableId)
             );
-            createdColumn = insertColumnAt(tableId, columnCreateDTO.dataTypeId(), columnCreateDTO.columnIndex());
+
+            if (!columnCreateDTO.duplicateFlag())
+                createdColumn = insertColumnAt(tableId, columnCreateDTO.dataTypeId(), columnCreateDTO.columnIndex());
+            else {
+                createdColumn = duplicateColumn(tableId, columnCreateDTO.columnIndex());
+                List<Cell> cells = createdColumn.getCells();
+
+                for (Cell cell : cells) {
+                    cellValues.addLast(cell.getValue());
+                }
+            }
         }
 
         return new ColumnCreatedDTO(
                 createdColumn.getId(),
                 createdColumn.getMyTable(),
                 createdColumn.getDataTypeId(),
-                createdColumn.getColumnIndex()
+                createdColumn.getColumnIndex(),
+                createdColumn.getName(),
+                cellValues
         );
     }
-
 
     /**
      * Applies partial updates to a column’s properties.
@@ -390,7 +429,6 @@ public class TableService {
                 patchDTO.dataTypeId()
         );
     }
-
 
     /**
      * Updates one or more cell values in bulk.
@@ -481,7 +519,6 @@ public class TableService {
         return cellsPatched;
     }
 
-
     /**
      * Delete a list of columns from the specified table within a transaction.
      *
@@ -510,7 +547,6 @@ public class TableService {
         return new ColumnsDeletedDTO(deletedColumnsIndexes);
     }
 
-
     /**
      * Delete a list of rows from the specified table within a transaction.
      *
@@ -538,7 +574,6 @@ public class TableService {
 
         return new RowsDeletedDTO(deletedRowsIndexes);
     }
-
 
     /**
      * Computes the individual index shifts required to move a single item
@@ -573,7 +608,6 @@ public class TableService {
         return indexesMoved;
     }
 
-
     /**
      * Sorts the list of indexes to move in the order in which they must be updated
      * to avoid conflicts during batch shifts.
@@ -601,7 +635,6 @@ public class TableService {
 
         return new ArrayList<>();
     }
-
 
     /**
      * Adjusts the raw shift delta to ensure that no moved index overflows the valid
@@ -637,7 +670,6 @@ public class TableService {
 
         return Math.clamp(rawDelta, minBounds - minIndex, maxBounds - 1 - maxIndex);
     }
-
 
     /**
      * Merges a new batch of moved index pairs into the overall update plan,
@@ -683,7 +715,6 @@ public class TableService {
         indexesToUpdate.addAll(newIndexesDiscovered);
     }
 
-
     /**
      * Builds a list of index‐pairs representing how each original index should be moved.
      * <p>
@@ -708,7 +739,6 @@ public class TableService {
         return indexesToUpdate;
     }
 
-
     /**
      * Validates whether a move operation from {@code fromIndex} to {@code toIndex}
      * is within the allowed range and not a no-op.
@@ -727,7 +757,6 @@ public class TableService {
 
         return fromIndex != toIndex;
     }
-
 
     /**
      * Moves rows within a table.
@@ -783,7 +812,6 @@ public class TableService {
 
         return new MovedRowsOrColumnsDTO(sortedRowsIndexesToMove, adjustedDelta);
     }
-
 
     /**
      * Moves columns within a table.

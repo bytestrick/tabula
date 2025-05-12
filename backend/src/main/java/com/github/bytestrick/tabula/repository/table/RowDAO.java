@@ -193,7 +193,7 @@ public class RowDAO implements IndexesSortedDAO {
                 ORDER BY row_index
             """)
                 .param("tableId", tableId)
-                .query(new MyRowMapper()).list();
+                .query(new TblRowMapper()).list();
     }
 
 
@@ -311,7 +311,6 @@ public class RowDAO implements IndexesSortedDAO {
                 .list();
     }
 
-
     /**
      * Retrieves the index of a single row by its UUID.
      *
@@ -334,8 +333,26 @@ public class RowDAO implements IndexesSortedDAO {
                 .single();
     }
 
+    /**
+     * Retrieves a row proxy by its zero-based index within a table.
+     *
+     * @param tableId  UUID of the table containing the row.
+     * @param rowIndex Zero-based index of the row to retrieve.
+     * @return The {@link RowProxy} representing the found row.
+     */
+    public RowProxy findRowByIndex(UUID tableId, int rowIndex) {
+        return jdbcClient.sql("""
+                SELECT *
+                FROM tbl_row
+                WHERE tbl_table = :tableId AND row_index = :rowIndex
+            """)
+                .param("tableId", tableId)
+                .param("rowIndex", rowIndex)
+                .query(new TblRowMapper())
+                .single();
+    }
 
-    private class MyRowMapper implements RowMapper<RowProxy> {
+    private class TblRowMapper implements RowMapper<RowProxy> {
 
         @Override
         public RowProxy mapRow(ResultSet rs, int rowNum) throws SQLException {
