@@ -2,7 +2,7 @@ import {inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {Pair} from '../model/pair';
-import {TableDTO} from '../model/dto/table/table-dto';
+import {TableContentDTO} from '../model/dto/table/table-content-dto';
 import {RowCreatedDTO, RowCreateDTO, RowsDeletedDTO, RowsDeleteDTO,} from '../model/dto/table/row-dto';
 import {
   ColumnCreatedDTO,
@@ -49,13 +49,13 @@ export class TableApiService {
    * @param tableId
    *   UUID of the table to fetch.
    * @returns
-   *   Observable emitting a {@link TableDTO} with `header` and `content`.
+   *   Observable emitting a {@link TableContentDTO} with `header` and `content`.
    */
-  getTable(tableId: string): Observable<TableDTO> {
+  getTable(tableId: string): Observable<TableContentDTO> {
     this._tableId = tableId;
     const url: string = `${this.BASE_URL}/${tableId}/content`;
 
-    return this.httpClient.get<TableDTO>(url);
+    return this.httpClient.get<TableContentDTO>(url);
   }
 
 
