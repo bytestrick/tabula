@@ -5,9 +5,8 @@ import {
   ElementRef,
   EnvironmentInjector,
   HostListener,
-  inject, NgIterable,
-  OnDestroy,
-  OnInit, TrackByFunction,
+  inject, OnDestroy,
+  OnInit, TrackByFunction, Type,
 } from '@angular/core';
 import {IDataType} from '../../model/data-types/i-data-type';
 import {NgForOf, NgIf} from '@angular/common';
@@ -35,6 +34,9 @@ import {TableService} from '../../services/table.service';
 import {CellCord} from '../../model/table/cell-cord';
 import {ActivatedRoute} from '@angular/router';
 import {Row} from '../../model/table/row';
+import {InputComponentFactoryService} from '../../services/input-component-factory.service';
+import {HeaderColumn} from '../../model/table/headerColumn';
+import {InputComponentConfiguration} from '../input-components/InputComponentConfiguration';
 
 @Component({
   selector: 'tbl-table',
@@ -65,54 +67,74 @@ export class TableComponent implements OnInit, OnDestroy {
   protected hoveredRowIndex: number = this.tableService.INVALID_CELL_INDEX;
   protected hoveredColIndex: number = this.tableService.INVALID_CELL_INDEX;
 
-  protected readonly INPUT_METHOD_POP_UP: string = 'inputMethod';
-  protected readonly DATA_TYPE_CHOOSER_POP_UP: string = 'dataTypeChooser';
-  protected readonly TABLE_CONTEXTUAL_MENU: string = 'contextualMenu';
+  protected previewLimit: number = 5; // Preview that appears when dragging rows and columns.
 
-  protected previewLimit: number = 5; // Preview che compare durante il drag di righe e colonne.
-
-  private tableRef: ElementRef = inject(ElementRef);
   private envInj: EnvironmentInjector = inject(EnvironmentInjector);
+  private tableRef: ElementRef = inject(ElementRef);
   private popUpManagerService: PopUpManagerService = inject(PopUpManagerService);
+  private inputComponentFactory: InputComponentFactoryService = inject(InputComponentFactoryService);
   private activatedRoute: ActivatedRoute = inject(ActivatedRoute);
+
+  private tableInputPopUp!: ComponentRef<PopUp>;
+  private tableContextualMenu!: ComponentRef<PopUp>;
 
   trackByRowId: TrackByFunction<Row> = (_index: number, item: Row): string => item.id;
 
 
   ngOnDestroy(): void {
-    this.popUpManagerService.deletePopUp(this.INPUT_METHOD_POP_UP);
-    this.popUpManagerService.deletePopUp(this.DATA_TYPE_CHOOSER_POP_UP);
-    this.popUpManagerService.deletePopUp(this.TABLE_CONTEXTUAL_MENU);
+    this.tableInputPopUp.destroy();
+    this.tableContextualMenu.destroy();
   }
 
 
   ngOnInit(): void {
-    this.createTableContextualMenu(this.tableService);
-    this.createDataTypeChooser();
+    this.tableInputPopUp = this.popUpManagerService.createPopUpWithoutContent()
+    this.tableContextualMenu = this.popUpManagerService.createPopUp(this.createTableContextualMenu(this.tableService));
 
     const tableId: string = this.activatedRoute.snapshot.paramMap.get('table-id') || '';
     this.tableService.init(tableId);
   }
 
 
-  private createTableContextualMenu(tableService: TableService): void {
+  private createTableContextualMenu(tableService: TableService): ComponentRef<TableContextualMenuComponent> {
     const tableContextualMenu: ComponentRef<TableContextualMenuComponent> = createComponent<TableContextualMenuComponent>(
       TableContextualMenuComponent,
       { environmentInjector: this.envInj }
     );
     tableContextualMenu.setInput('tableService', tableService);
 
-    this.popUpManagerService.createPopUp(this.TABLE_CONTEXTUAL_MENU, tableContextualMenu);
+    return tableContextualMenu;
   }
 
 
-  private createDataTypeChooser(): void {
-    const dataTypeChooser: ComponentRef<BaseInputComponent> = createComponent<BaseInputComponent>(
-      DataTypesChooserComponent,
-      { environmentInjector: this.envInj }
-    );
+  showDataTypeChooser(position: Pair<number, number>,
+                              doAfterInputConfirmation: (value: any) => void): void {
 
-    this.popUpManagerService.createPopUp(this.DATA_TYPE_CHOOSER_POP_UP, dataTypeChooser);
+    const dataTypeChooser: ComponentRef<DataTypesChooserComponent> =
+      this.inputComponentFactory.createInputComponent(
+        DataTypesChooserComponent,
+        {
+          popUpRef: this.tableInputPopUp,
+          doAfterInputConfirmation: doAfterInputConfirmation
+        }
+      );
+
+    this.tableInputPopUp.instance.changeContent(dataTypeChooser);
+    this.tableInputPopUp.instance.show(position);
+  }
+
+
+  showCellInputMethod<T extends BaseInputComponent>(position: Pair<number, number>,
+                                                    inputComponent: Type<T>,
+                                                    config: InputComponentConfiguration): void {
+
+    const dataTypeChooser: ComponentRef<T> =
+      this.inputComponentFactory.createInputComponent(
+        inputComponent, config
+      );
+
+    this.tableInputPopUp.instance.changeContent(dataTypeChooser);
+    this.tableInputPopUp.instance.show(position);
   }
 
 
@@ -130,33 +152,19 @@ export class TableComponent implements OnInit, OnDestroy {
 
 
   onDoubleClickedCell(event: MouseEvent, cord: CellCord): void {
-    this.showCellInputMethod(new Pair(event.x, event.y), cord);
-  }
-
-
-
-  showCellInputMethod(position: Pair<number, number>, cord: CellCord): void {
     const cell: Cell | null = this.tableService.getCellFromCoords(cord);
 
     if (cell == null)
       return;
 
-    const inputComponent: ComponentRef<BaseInputComponent> = createComponent<BaseInputComponent>(
-      cell.cellDataType.getInputComponent(),
-      { environmentInjector: this.envInj }
-    );
-    inputComponent.setInput('startingValue', cell.value);
-    inputComponent.setInput('doAfterInputDataTypeConfirmation', (value: any, dataTypeId: number): void => this.tableService.setCellsValue(cord, value, dataTypeId));
+    const config: InputComponentConfiguration = {
+      popUpRef: this.tableInputPopUp,
+      startingValue: cell.value,
+      doAfterInputDataTypeConfirmation: (value: string, dataTypeId: number): void =>
+        this.tableService.setCellsValue(cord, value, dataTypeId)
+    }
 
-    this.popUpManagerService.getOrCreatePopUp(this.INPUT_METHOD_POP_UP, inputComponent)?.instance.show(position);
-  }
-
-
-  showDataTypeChooser(position: Pair<number, number>, doAfterInputConfirmation: (value: any) => void): void {
-    const dataTypeChooserPopUpRef: ComponentRef<PopUp> | undefined = this.popUpManagerService.getPopUp(this.DATA_TYPE_CHOOSER_POP_UP);
-    dataTypeChooserPopUpRef?.instance.getContent()?.setInput('doAfterInputConfirmation', doAfterInputConfirmation);
-
-    dataTypeChooserPopUpRef?.instance.show(position);
+    this.showCellInputMethod(new Pair(event.x, event.y), cell.cellDataType.getInputComponent(), config);
   }
 
 
@@ -246,10 +254,7 @@ export class TableComponent implements OnInit, OnDestroy {
 
 
   protected canDisableCellHighlight(): boolean {
-    return (
-      !this.popUpManagerService.isPopUpShown(this.INPUT_METHOD_POP_UP) &&
-      !this.popUpManagerService.isPopUpShown(this.TABLE_CONTEXTUAL_MENU)
-    );
+    return !this.tableInputPopUp.instance.isVisible;
   }
 
 
@@ -264,9 +269,7 @@ export class TableComponent implements OnInit, OnDestroy {
       return;
 
     event.preventDefault();
-
-    const contextualMenuRef: ComponentRef<PopUp> | undefined = this.popUpManagerService.getPopUp(this.TABLE_CONTEXTUAL_MENU);
-    contextualMenuRef?.instance.getContent()?.setInput('cellCord', new Pair(this.hoveredRowIndex, this.hoveredColIndex));
-    contextualMenuRef?.instance.show(new Pair(event.x, event.y));
+    this.tableContextualMenu.instance.content?.setInput('cellCord', new Pair(this.hoveredRowIndex, this.hoveredColIndex));
+    this.tableContextualMenu.instance.show(new Pair(event.x, event.y));
   }
 }

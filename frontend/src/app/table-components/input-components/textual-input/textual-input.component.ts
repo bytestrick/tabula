@@ -20,7 +20,7 @@ export class TextualInputComponent extends BaseInputComponent {
   private readonly TEXTUAL_ID: number = DataTypeRegistryService.TEXTUAL_ID;
 
 
-  protected override beforeShowUp(): void {
+  protected override onPopUpShowUp(): void {
     this.grabFocus();
 
     this.input.nativeElement.value = this.startingValue || '';
@@ -48,12 +48,12 @@ export class TextualInputComponent extends BaseInputComponent {
   }
 
 
-  protected override onHiddenWithLeftClick(): void {
+  protected override onPopUpHiddenWithLeftClick(): void {
     this.confirmInputDataType(this.text, this.TEXTUAL_ID);
   }
 
 
-  protected override onHiddenWithRightClick(): void {
+  protected override onPopUpHiddenWithRightClick(): void {
     this.abortInput();
   }
 }

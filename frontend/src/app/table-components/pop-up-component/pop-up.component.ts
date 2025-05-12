@@ -1,47 +1,71 @@
 import {
-  AfterViewInit, ChangeDetectorRef,
-  Component, ComponentRef,
+  AfterViewInit,
+  Component,
+  ComponentRef,
   ElementRef,
-  EventEmitter, OnDestroy, OnInit,
-  Output,
+  inject,
+  OnDestroy,
+  OnInit,
   Renderer2,
-  ViewChild, ViewContainerRef
+  ViewChild,
+  ViewContainerRef
 } from '@angular/core';
 import {Pair} from '../../model/pair';
-import {IPopUpContent} from '../../model/i-pop-up-content';
+import {PopUpContent} from '../../model/pop-up-content';
+import {POPUP_CONTENT} from '../../services/pop-up-manager.service';
 
+/**
+ * Angular component for displaying a generic pop-up window.
+ * Handles dynamic positioning, visibility toggling, and lifecycle callbacks
+ * for external content components.
+ * Dynamically injects content and ensures cleanup: if the pop-up is destroyed
+ * or its content is replaced, any previously inserted content is removed.
+ */
 @Component({
   selector: 'tbl-pop-up',
-  standalone: true,
   imports: [],
   templateUrl: './pop-up.component.html',
   styleUrl: './pop-up.component.css',
 })
 export class PopUp implements OnInit, OnDestroy, AfterViewInit {
 
-  @ViewChild('popUpContainer', { static: true }) private popUpContainer!: ElementRef;
-  @ViewChild('contentContainer', { read: ViewContainerRef, static: true }) private contentContainer!: ViewContainerRef;
-  @ViewChild('root', { static: true }) private root!: ElementRef;
+  /**
+   * Container element wrapping the pop-up content.
+   * Used for size calculations and CSS transform adjustments.
+   */
+  @ViewChild('popUpCard') private popUpCard!: ElementRef;
+  /**
+   * Dynamic view container for inserting the external content component.
+   */
+  @ViewChild('contentContainer', { read: ViewContainerRef }) private contentContainer!: ViewContainerRef;
+  /**
+   * Root element of the component, observed for attribute changes.
+   */
+  @ViewChild('root') private root!: ElementRef;
 
-  @Output() hidden: EventEmitter<void> = new EventEmitter<void>();
-  @Output() shown: EventEmitter<void> = new EventEmitter<void>();
-
-  protected isVisible: boolean = false;
-  private content: ComponentRef<IPopUpContent> | null = null;
   private visibilityObserver!: MutationObserver;
-
-  private isInitialized: boolean = false;
-  private pendingCall: (() => void)[] = [];
   private popUpPosition: Pair<number, number> = new Pair(0, 0);
+
   private readonly OFFSET_TO_SCREEN_SIDES: number = 6;
 
-  readonly CLOSED_WITH_LEFT_CLICK: string = 'leftClick';
-  readonly CLOSED_WITH_RIGHT_CLICK: string = 'rightClick';
+  private popUpContent: ComponentRef<PopUpContent> | null = inject(POPUP_CONTENT);
+  private renderer: Renderer2 = inject(Renderer2);
+
+  /**
+   * Visibility flag bound in the template to show or hide the pop-up.
+   */
+  protected _isVisible: boolean = false;
+
+  // Type of click that triggered the closure.
+  static readonly CLOSED_WITH_LEFT_CLICK: string = 'leftClick';
+  static readonly CLOSED_WITH_RIGHT_CLICK: string = 'rightClick';
+
+  // Repeated here because it doesn't let you put static variables in the template
+  protected readonly closedWithLeftClick: string = PopUp.CLOSED_WITH_LEFT_CLICK;
+  protected readonly closedWithRightClick: string = PopUp.CLOSED_WITH_RIGHT_CLICK;
 
 
-  constructor(private renderer: Renderer2, private changeDetector: ChangeDetectorRef) {}
-
-
+  // Initialize the mutation observer to detect visibility changes
   ngOnInit(): void {
     this.visibilityObserver = new MutationObserver(mutations => {
       mutations.forEach(mutation => {
@@ -49,16 +73,21 @@ export class PopUp implements OnInit, OnDestroy, AfterViewInit {
           const currentlyHidden: boolean = this.root.nativeElement.hidden;
 
           if (!currentlyHidden) {
-            this.content?.instance.beforeContentShowUp();
-            this.updatePositionToFitScreen(); // Chiamata qui perché il content deve essere inserito prima di poter calcolare la posizione adatta.
-            this.shown.emit();
+            this.popUpContent?.instance.onShowUp();
+            this.setPopUpPosition(this.popUpPosition);
           }
-          else
-            this.hidden.emit();
         }
       });
     });
+  }
 
+
+  // After the view initializes, insert the content component into the container.
+  ngAfterViewInit(): void {
+    if (this.popUpContent)
+      this.changeContent(this.popUpContent);
+
+    // Observe only the 'hidden' attribute on the root element
     this.visibilityObserver.observe(this.root.nativeElement, {
       attributes: true,
       attributeFilter: ['hidden']
@@ -66,97 +95,112 @@ export class PopUp implements OnInit, OnDestroy, AfterViewInit {
   }
 
 
-  ngAfterViewInit(): void {
-    this.isInitialized = true;
-    this.pendingCall.forEach(callback => callback());
-  }
-
-
   ngOnDestroy(): void {
     this.visibilityObserver.disconnect();
+
+    if (this.popUpContent)
+      this.popUpContent.destroy();
   }
 
 
+  /**
+   * Calculate position to ensure it remains within the viewport,
+   * accounting for screen edges and configured <code>OFFSET_TO_SCREEN_SIDES</code>.
+   * @param position Initial pixel coordinates Pair(x, y).
+   * @returns Adjusted pixel coordinates Pair(x, y).
+   * @see Pair
+   */
+  private adjustPositionToFitScreen(position: Pair<number, number>): Pair<number, number> {
+    const viewportWidth: number = window.innerWidth;
+    const viewportHeight: number = window.innerHeight;
+    const popUpWidth: number = this.popUpCard.nativeElement.offsetWidth;
+    const popUpHeight: number = this.popUpCard.nativeElement.offsetHeight;
+
+    const minX: number = this.OFFSET_TO_SCREEN_SIDES;
+    const maxX: number = viewportWidth - popUpWidth - this.OFFSET_TO_SCREEN_SIDES;
+    const minY: number = this.OFFSET_TO_SCREEN_SIDES;
+    const maxY: number = viewportHeight - popUpHeight - this.OFFSET_TO_SCREEN_SIDES;
+
+    position.first = Math.min(Math.max(position.first,  minX), maxX);
+    position.second = Math.min(Math.max(position.second, minY), maxY);
+
+    return position;
+  }
+
+
+  /**
+   * Set the pop-up position and apply the CSS transform.
+   * @param position Pixel coordinates Pair(x, y).
+   * @see Pair
+   */
   setPopUpPosition(position: Pair<number, number>): void {
-    this.popUpPosition = position;
+    position = this.adjustPositionToFitScreen(position);
 
     this.renderer.setStyle(
-      this.popUpContainer.nativeElement,
+      this.popUpCard.nativeElement,
       'transform',
       `translate(${position.first}px, ${position.second}px)`
     );
   }
 
 
-  private updatePositionToFitScreen(): void {
-    const viewportWidth: number = window.innerWidth;
-    const viewportHeight: number = window.innerHeight;
-    const popUpWidth: number = this.popUpContainer.nativeElement.offsetWidth + this.OFFSET_TO_SCREEN_SIDES;
-    const popUpHeight: number = this.popUpContainer.nativeElement.offsetHeight + this.OFFSET_TO_SCREEN_SIDES;
-    const offScreenAmountX: number = (this.popUpPosition.first + popUpWidth) - viewportWidth;
-    const offScreenAmountY: number = (this.popUpPosition.second + popUpHeight) - viewportHeight;
-
-    if (offScreenAmountX > 0)
-      this.popUpPosition.first -= offScreenAmountX;
-
-    if (offScreenAmountY > 0)
-      this.popUpPosition.second -= offScreenAmountY;
-
-    this.renderer.setStyle(
-      this.popUpContainer.nativeElement,
-      'transform',
-      `translate(${this.popUpPosition.first}px, ${this.popUpPosition.second}px)`
-    );
-  }
-
-
-  setContent(content: ComponentRef<IPopUpContent>): void {
-    this.contentContainer.clear();
-    content.instance.popUpRef = this;
-    this.contentContainer.insert(content.hostView);
-    this.content = content;
-  }
-
-
-  getContent(): ComponentRef<IPopUpContent> | null {
-    return this.content;
-  }
-
-
-  private callAfterInit(callback: () => void): void {
-    if (this.isInitialized)
-      callback();
-    else
-      this.pendingCall.push(callback);
-  }
-
-
+  /**
+   * Show the pop-up at a given position.
+   * @param position Pixel coordinates Pair(x, y).
+   * @see Pair
+   */
   show(position: Pair<number, number>): void {
-    this.callAfterInit(
-      (): void => {
-        this.setPopUpPosition(position); // deve essere chiamata dopo che il content viene inserito
-        this.isVisible = true;
-        this.changeDetector.detectChanges();
-      }
-    );
+    this.popUpPosition = position;
+    this._isVisible = true;
   }
 
 
-  hasContent(content: ComponentRef<IPopUpContent> | null): boolean {
-    if (this.content === null || content === null)
-      return false;
-
-    return this.content.instance instanceof (content.instance.constructor);
-  }
-
-
+  /**
+   * Public method to hide the pop-up.
+   */
   hide(): void {
-    this.isVisible = false;
+    this._isVisible = false;
   }
 
 
-  onHidePopUp(action: string): void {
-    this.content?.instance.onHidden(action);
+  /**
+   * Handle clicks outside the pop-up area: hide the pop-up and notify content.
+   * @param action Type of click that triggered the closure:
+   *                <ul>
+   *                  <li><code>PopUp.CLOSED_WITH_LEFT_CLICK</code></li>
+   *                  <li><code>PopUp.CLOSED_WITH_RIGHT_CLICK</code></li>
+   *                </ul>
+   */
+  onOutsidePopUpClick(action: string): void {
     this.hide();
+    this.popUpContent?.instance?.onHidden(action);
+  }
+
+
+  /**
+   * Replace current injected content with a new component.
+   * Ensures previous content is removed before insertion.
+   * @param newContent - ComponentRef implementing {@link PopUpContent}
+   */
+  changeContent<T extends PopUpContent>(newContent: ComponentRef<T>): void {
+    this.contentContainer.clear();
+    this.contentContainer.insert(newContent.hostView);
+    this.popUpContent = newContent;
+  }
+
+
+  /**
+   * Visibility flag getter bound in template.
+   */
+  get isVisible(): boolean {
+    return this._isVisible;
+  }
+
+
+  /**
+   * Current injected content component reference.
+   */
+  get content(): ComponentRef<PopUpContent> | null {
+    return this.popUpContent;
   }
 }

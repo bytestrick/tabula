@@ -7,7 +7,6 @@ import {Component, ViewChild, ViewContainerRef, OnInit} from '@angular/core';
 import {PopUpManagerService} from './services/pop-up-manager.service';
 import {ConfirmDialogComponent} from './confirm-dialog/confirm-dialog.component';
 
-
 @Component({
   selector: 'tbl-root',
   standalone: true,
@@ -16,6 +15,8 @@ import {ConfirmDialogComponent} from './confirm-dialog/confirm-dialog.component'
   styleUrl: './app.component.css'
 })
 export class AppComponent implements OnInit {
+
+  private popUpManager: PopUpManagerService = inject(PopUpManagerService);
 
   _ = inject(ThemeService);
 
@@ -26,9 +27,6 @@ export class AppComponent implements OnInit {
     AppComponent.updateColorScheme();
     this.popUpManager.setPopUpContainer(this.popUpContainer);
   }
-
-
-  constructor(private popUpManager: PopUpManagerService) {}
 
 
   /**

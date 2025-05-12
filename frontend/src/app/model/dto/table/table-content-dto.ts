@@ -11,7 +11,7 @@ import {RowDTO} from './row-dto';
  * @property content
  *   Array of {@link RowDTO} containing the table rows and their cell values.
  */
-export interface TableDTO {
+export interface TableContentDTO {
   id: string,
   header: ColumnDTO[],
   content: RowDTO[]
