@@ -14,9 +14,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Repository
 public class CellDAO {
-
     private final JdbcClient jdbcClient;
-
 
     /**
      * Updates the value of a single cell identified by its row and column UUIDs.
@@ -37,7 +35,6 @@ public class CellDAO {
                 .update();
     }
 
-
     /**
      * Retrieves the IDs of all columns that have cells in the given row.
      *
@@ -56,7 +53,6 @@ public class CellDAO {
                 .query(UUID.class)
                 .list();
     }
-
 
     /**
      * Retrieves the IDs of all rows that have cells in the given column.
@@ -77,8 +73,6 @@ public class CellDAO {
                 .list();
     }
 
-
-
     /**
      * Retrieves all cells belonging to a specific row, ordered by their column index.
      *
@@ -96,7 +90,6 @@ public class CellDAO {
                 .param("rowId", rowId)
                 .query(new CellMapper()).list();
     }
-
 
     /**
      * Retrieves all cells belonging to a specific column, ordered by their row index.
@@ -116,7 +109,6 @@ public class CellDAO {
                 .query(new CellMapper()).list();
     }
 
-
     /**
      * Resets the value of all cells in a given column to the empty string.
      *
@@ -133,6 +125,47 @@ public class CellDAO {
                 .update();
     }
 
+    /**
+     * Updates the value of a cell in a specific row.
+     *
+     * @param rowId       UUID of the row containing the cell to update.
+     * @param columnIndex Zero-based index of the column within that row.
+     * @param value       New string value to set in the cell.
+     */
+    public void setRowCellValue(UUID rowId, int columnIndex, String value) {
+        jdbcClient.sql("""
+                UPDATE cell
+                SET value = :newValue
+                WHERE tbl_row = :rowId AND tbl_column = (SELECT id
+                                                         FROM tbl_column
+                                                         WHERE column_index = :columnIndex)
+            """)
+                .param("rowId", rowId)
+                .param("columnIndex", columnIndex)
+                .param("newValue", value)
+                .update();
+    }
+
+    /**
+     * Updates the value of a cell in a specific column.
+     *
+     * @param columnId UUID of the column containing the cell to update.
+     * @param rowIndex Zero-based index of the row within that column.
+     * @param value    New string value to set in the cell.
+     */
+    public void setColumnCellValue(UUID columnId, int rowIndex, String value) {
+        jdbcClient.sql("""
+                UPDATE cell
+                SET value = :newValue
+                WHERE tbl_column = :columnId AND tbl_row = (SELECT id
+                                                            FROM tbl_row
+                                                            WHERE row_index = :rowIndex)
+            """)
+                .param("columnId", columnId)
+                .param("rowIndex", rowIndex)
+                .param("newValue", value)
+                .update();
+    }
 
     private static class CellMapper implements RowMapper<Cell> {
 

@@ -20,7 +20,6 @@ export interface ColumnDTO {
   columnIndex: number
 }
 
-
 /**
  * Payload sent from the frontend to update column properties.
  *
@@ -38,7 +37,6 @@ export interface ColumnPatchDTO {
   columnIndex?: number,
   dataTypeId?: number
 }
-
 
 /**
  * Response returned by the backend after a successful column update.
@@ -59,20 +57,24 @@ export interface ColumnPatchedDTO {
   dataTypeId?: number
 }
 
-
 /**
  * Payload sent from the frontend to request creation of a new column.
  *
  * @property dataTypeId
  *   Data type code for the new column; must be ≥ 0.
  * @property columnIndex
- *   Zero-based position to insert the new column. Set to `null` to append at the end.
+ *   Zero-based position to insert or duplicate the new column.
+ *   Set to `null` to append at the end.
+ * @property duplicateFlag
+ *   When `true` and `columnIndex` is non-null, the new column
+ *   will be a duplicate of the existing column at that index.
+ *   Otherwise, an empty column is inserted there.
  */
 export interface ColumnCreateDTO {
   dataTypeId: number,
-  columnIndex: number | null
+  columnIndex: number | null,
+  duplicateFlag: boolean
 }
-
 
 /**
  * Response returned by the backend after successfully creating a column.
@@ -85,14 +87,19 @@ export interface ColumnCreateDTO {
  *   Data-type id of the new column.
  * @property columnIndex
  *   Zero-based position where the new column was inserted.
+ * @property columnName
+ *   The name of the column.
+ * @property cellsValues
+ *   List of cells' values for this column; empty if the column was created empty.
  */
 export interface ColumnCreatedDTO {
   id: string,
   tableId: string,
   dataTypeId: number,
-  columnIndex: number
+  columnIndex: number,
+  columnName: string,
+  cellsValues: string[]
 }
-
 
 /**
  * Payload sent from the frontend to delete columns on the backend.
@@ -102,7 +109,6 @@ export interface ColumnCreatedDTO {
 export interface ColumnsDeleteDTO {
   ids: string[]
 }
-
 
 /**
  * Response returned by the backend containing the indexes of columns deleted.
