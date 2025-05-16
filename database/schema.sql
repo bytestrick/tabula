@@ -35,7 +35,8 @@ CREATE TABLE data_type
 INSERT INTO data_type (name)
 VALUES ('Textual'),
        ('Numeric'),
-       ('Monetary');
+       ('Monetary'),
+       ('Maps');
 
 CREATE TABLE tbl_table
 (
