@@ -68,7 +68,7 @@ export abstract class BaseInputComponent implements PopUpContent {
    * @param value - The string value entered by the user
    * @param dataTypeId - Numeric identifier representing the chosen data type
    */
-  protected confirmInputDataType(value: any, dataTypeId: number): void {
+  protected confirmInputDataType(value: string, dataTypeId: number): void {
     if (this.doAfterInputDataTypeConfirmation)
       this.doAfterInputDataTypeConfirmation(value, dataTypeId);
 
