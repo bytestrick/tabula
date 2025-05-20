@@ -4,11 +4,11 @@ import * as L from 'leaflet';
 import {DataTypeRegistryService} from '../../../services/data-type-registry.service';
 
 @Component({
-  selector: 'tbl-maps-input',
+  selector: 'tbl-map-input',
   imports: [],
-  templateUrl: './maps-input.component.html',
+  templateUrl: './map-input.component.html',
 })
-export class MapsInputComponent extends BaseInputComponent implements AfterViewInit {
+export class MapInputComponent extends BaseInputComponent implements AfterViewInit {
   private map!: L.Map;
   private currentMarker?: L.Marker;
   private latitudeInput = viewChild.required<ElementRef<HTMLInputElement>>('latitudeInput');
@@ -108,9 +108,9 @@ export class MapsInputComponent extends BaseInputComponent implements AfterViewI
     const cord = this.getCurrentLongitudeLatitude();
 
     if (cord == this.longitudeLatitudeSeparator)
-      this.confirmInputDataType('', DataTypeRegistryService.MAPS_ID);
+      this.confirmInputDataType('', DataTypeRegistryService.MAP_ID);
     else if (cord && coordinateRegex.test(cord))
-      this.confirmInputDataType(cord, DataTypeRegistryService.MAPS_ID);
+      this.confirmInputDataType(cord, DataTypeRegistryService.MAP_ID);
     else
       this.abortInput();
   }
