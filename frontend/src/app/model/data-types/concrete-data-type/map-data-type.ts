@@ -1,39 +1,34 @@
-import { Type } from '@angular/core';
-import { BaseInputComponent } from '../../../table-components/input-components/base-input-component';
-import { BaseCellComponent } from '../../../table-components/table/cells/base-cell-component';
+import {Type} from '@angular/core';
+import {BaseInputComponent} from '../../../table-components/input-components/base-input-component';
+import {BaseCellComponent} from '../../../table-components/table/cells/base-cell-component';
 import {IDataType} from '../i-data-type';
 import {TextualCellComponent} from '../../../table-components/table/cells/textual-cell/textual-cell.component';
 import {DataTypeRegistryService} from '../../../services/data-type-registry.service';
-import {MapsInputComponent} from '../../../table-components/input-components/maps-input/maps-input.component';
+import {MapInputComponent} from '../../../table-components/input-components/map-input/map-input.component';
 
 
-export class MapsDataType implements IDataType {
-
+export class MapDataType implements IDataType {
   getDataTypeId(): number {
-    return DataTypeRegistryService.MAPS_ID;
+    return DataTypeRegistryService.MAP_ID;
   }
 
   getInputComponent(): Type<BaseInputComponent> {
-    return MapsInputComponent;
+    return MapInputComponent;
   }
-
 
   getNewDataType(): IDataType {
-    return new MapsDataType();
+    return new MapDataType();
   }
-
 
   getCellComponent(): Type<BaseCellComponent> {
     return TextualCellComponent;
   }
 
-
   getIconName(): string {
     return 'bi-geo-alt';
   }
 
-
   getDataTypeName(): string {
-    return 'Maps';
+    return 'Map';
   }
 }
