@@ -5,16 +5,24 @@ import {CellCord} from '../../../model/table/cell-cord';
 @Directive()
 export abstract class BaseCellComponent {
 
-  @Input() protected value: string | null = null;
+  private _value = '';
+
   @Input() protected cord!: CellCord;
+  @Input()
+    set value(value: string) {
+      this.setValue(value);
+    }
+    get value(): string {
+      return this.getValue();
+    }
 
 
-  setValue(value: string | null): void {
-    this.value = value
+  setValue(value: string): void {
+    this._value = value;
   }
 
 
-  getValue(): string | null {
-    return this.value;
+  getValue(): string {
+    return this._value;
   }
 }

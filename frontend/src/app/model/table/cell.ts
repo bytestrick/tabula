@@ -12,7 +12,7 @@ export class Cell {
   /** The data type logic that drives validation, formatting, and editing UI. */
   protected _cellDataType: IDataType;
   /** The current string value of the cell; `null` represents a blank cell. */
-  protected _value: string | null = null;
+  protected _value: string = '';
 
   /**
    * Constructs a new Cell instance.
@@ -20,9 +20,9 @@ export class Cell {
    * @param cellDataType  The IDataType instance defining how this cell’s data is handled.
    * @param value         The initial value for the cell; may be any type, but stored as string.
    */
-  constructor(cellDataType: IDataType, value: any) {
+  constructor(cellDataType: IDataType, value: string = '') {
     this._cellDataType = cellDataType;
-    this._value = value;
+    this.value = value;
   }
 
   /**
@@ -64,18 +64,18 @@ export class Cell {
   /**
    * Gets the current value of the cell.
    *
-   * @returns The cell’s string value, or `null` if blank.
+   * @returns The cell’s string value, or `''` if blank.
    */
-  get value(): string | null {
+  get value(): string {
     return this._value;
   }
 
   /**
    * Updates the cell’s value and notifies its component (if mounted).
    *
-   * @param value  The new value to set; `null` clears the cell.
+   * @param value  The new value to set; `''` clears the cell.
    */
-  set value(value: string | null) {
+  set value(value: string) {
     this._value = value;
     // If the cell component is rendered, update its displayed value
     this.cellRef?.instance.setValue(value);

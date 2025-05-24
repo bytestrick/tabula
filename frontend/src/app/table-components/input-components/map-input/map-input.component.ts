@@ -14,8 +14,9 @@ export class MapInputComponent extends BaseInputComponent implements AfterViewIn
   private latitudeInput = viewChild.required<ElementRef<HTMLInputElement>>('latitudeInput');
   private longitudeInput = viewChild.required<ElementRef<HTMLInputElement>>('longitudeInput');
 
-  protected longitudeLatitudeSeparator = ':';
-
+  static readonly lngLatSeparator = ':';
+  // template doesn't like static variables
+  protected separator = MapInputComponent.lngLatSeparator;
 
   ngAfterViewInit(): void {
     this.initMap();
@@ -33,14 +34,13 @@ export class MapInputComponent extends BaseInputComponent implements AfterViewIn
     this.map.on('click', this.onMapClick.bind(this));
   }
 
-  private setLongitudeLatitudeOnInput(lat: number, lng: number): void
-  {
+  private setLongitudeLatitudeOnInput(lat: number, lng: number): void {
     this.latitudeInput().nativeElement.value = lat.toString();
     this.longitudeInput().nativeElement.value = lng.toString();
   }
 
   private getCurrentLongitudeLatitude(): string {
-    return `${this.latitudeInput().nativeElement.value}${this.longitudeLatitudeSeparator}${this.longitudeInput().nativeElement.value}`;
+    return `${this.latitudeInput().nativeElement.value}${MapInputComponent.lngLatSeparator}${this.longitudeInput().nativeElement.value}`;
   }
 
   private setMapView(lat: number = 51.505, lng: number = -0.09): void {
@@ -95,7 +95,7 @@ export class MapInputComponent extends BaseInputComponent implements AfterViewIn
     if (!this.startingValue)
       this.locateUser();
     else {
-      const latLng: string[] = (this.startingValue as string).split(this.longitudeLatitudeSeparator);
+      const latLng: string[] = (this.startingValue as string).split(MapInputComponent.lngLatSeparator);
       const lat = Number(latLng[0]) || 0;
       const lng = Number(latLng[1]) || 0;
       this.setMapView(lat, lng);
@@ -107,7 +107,7 @@ export class MapInputComponent extends BaseInputComponent implements AfterViewIn
     const coordinateRegex: RegExp = /^(-?\d+(\.\d+)?):(-?\d+(\.\d+)?)$/;
     const cord = this.getCurrentLongitudeLatitude();
 
-    if (cord == this.longitudeLatitudeSeparator)
+    if (cord == MapInputComponent.lngLatSeparator)
       this.confirmInputDataType('', DataTypeRegistryService.MAP_ID);
     else if (cord && coordinateRegex.test(cord))
       this.confirmInputDataType(cord, DataTypeRegistryService.MAP_ID);

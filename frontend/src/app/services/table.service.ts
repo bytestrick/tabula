@@ -625,7 +625,7 @@ export class TableService {
         );
 
         for (let i: number = 0; i < this.getRowsNumber(); ++i) {
-          this.table[i].replaceCell(columnPatched.columnIndex, new Cell(newDataType, null));
+          this.table[i].replaceCell(columnPatched.columnIndex, new Cell(newDataType));
         }
       }
     );
@@ -804,7 +804,6 @@ export class TableService {
         this.dataTypeService.convertIntoIDataType(columnDTO.dataType || this.DEFAULT_DATA_TYPE_ID)
       );
       const column: HeaderColumn = new HeaderColumn(columnDTO.id, headerCell);
-
       this.header.push(column);
     }
 
