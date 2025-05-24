@@ -15,6 +15,7 @@ import {PrettyDatePipe} from '../pretty-date.pipe';
 import {Router} from '@angular/router';
 import {ToastService} from '../../toast/toast.service';
 import {ConfirmDialogService} from '../../confirm-dialog/confirm-dialog.service';
+import {NavbarComponent} from '../../navbar/navbar.component';
 
 @Component({
   selector: 'tbl-table-card',
@@ -147,5 +148,6 @@ export class TableCardComponent implements OnDestroy {
   onOpenCard(): void {
     this.router.navigate(['/tables', this.id])
       .catch(err => console.error(err));
+    NavbarComponent.setTableTitle(this.title);
   }
 }

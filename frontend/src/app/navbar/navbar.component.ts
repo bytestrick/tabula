@@ -20,6 +20,7 @@ import {ConfirmDialogService} from '../confirm-dialog/confirm-dialog.service';
 import {DeleteAccountComponent} from './delete-account/delete-account.component';
 import {ChangePasswordComponent} from './update-password/change-password.component';
 import {UpdateAccountDetailsComponent} from './update-account-details/update-account-details.component';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'tbl-navbar',
@@ -43,6 +44,12 @@ export class NavbarComponent implements OnInit {
   @Output() onSearchedTableCard: EventEmitter<TableCard[] | "noSearchContent"> = new EventEmitter;
   protected _userDetails: UserDetails = {name: '', surname: '', email: ''};
   private static searching = false;
+
+  private router = inject(Router)
+
+  private static tableTitle: string = '';
+  protected tableTitle: string = NavbarComponent.tableTitle;
+
 
   ngOnInit() {
     this.navbarService.retrievesUserInformation(this.authService.authentication!.email).subscribe({
@@ -115,5 +122,14 @@ export class NavbarComponent implements OnInit {
       },
       error: (err: any): any => console.debug(err)
     });
+  }
+
+  navigateToHome() {
+    NavbarComponent.setTableTitle('')
+    this.router.navigate(['/']);
+  }
+
+  static setTableTitle(title: string) {
+    NavbarComponent.tableTitle = title;
   }
 }
