@@ -25,7 +25,6 @@ public class TableController {
     @GetMapping("after/{tableId}")
     public ResponseEntity<List<TableCreatedDTO>> getTablesAfter(@PathVariable UUID tableId,
                                                                 @RequestParam int quantity) {
-
         return ResponseEntity.ok().body(tableService.getNextTables(tableId, quantity));
     }
 
@@ -45,7 +44,6 @@ public class TableController {
     @PutMapping("/{tableId}")
     public ResponseEntity<InformativeResponse> updateTableCard(@PathVariable UUID tableId,
                                              @Valid @RequestBody TablePutDTO tablePutDTO) {
-
         return ResponseEntity.ok().body(new InformativeResponse(tableService.updateTable(tableId, tablePutDTO)));
     }
 

@@ -8,9 +8,7 @@ import {TableCard} from './table-card/table-card.interface';
   providedIn: 'root'
 })
 export class HomeService {
-
   private readonly BASE_URL: string = '/tables';
-
   private http = inject(HttpClient);
 
 
