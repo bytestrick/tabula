@@ -1,0 +1,60 @@
+\documentclass{beamer}
+
+% \usepackage{inter}
+\usepackage{url}
+\usepackage[italian]{babel}
+%\usepackage{svg} % relies on inkscape
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usepackage{fontawesome}
+
+\hypersetup{
+  pdfpagemode=FullScreen,
+  colorlinks=true
+}
+
+\setbeamertemplate{navigation symbols}{} % remove navigation symbols
+
+\title{Tabula}
+\author{
+  Alfredo Carlino \quad \texttt{246025} \\
+  \and Giorgio Carlino \quad \texttt{246038} \\
+  \and Mario G. D'Andrea \quad \texttt{245940}}
+\institute{Corso di Web Applications \\ C.d.S. Informatica $\cdot$ DeMaCs \\ Università della Calabria}
+\titlegraphic{\includegraphics[width=2cm]{unical}}
+\date{Giugno 2025}
+
+\begin{document}
+\maketitle
+
+\begin{frame}
+  \includegraphics[width=\textwidth]{demo}
+  \centering  \href{https://github.com/bytestrick/tabula}{\faGithub\ github.com/bytestrick/tabula}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Tecnologie usate}
+  \begin{itemize}
+    \item[\faLeaf] Spring Boot
+    \item[\faDatabase] PostgreSQL
+    \item[\faHtml5] Angular 19
+    \item[\faCss3] Bootstrap
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Descrizione generale}
+
+  Tabula consente di organizzare dati in formato tabellare facilitando l'accesso e la modifica. Piuttosto che un foglio di calcolo, si può considerare l'app come una base di dati con cui si può interagire direttamente.
+
+  \vspace{10pt}
+
+  Ogni tabella in Tabula è composta da diverse colonne, ognuna con un \textbf{tipo} assegnato: numero, testo, data, posizione geografica, denaro, somma monetaria, ecc.
+
+  \vspace{10pt}
+
+  La facilità di utilizzo delle tabelle le rende uno strumento perfetto per tenere traccia delle letture, sia concluse che pianificate; oppure raggruppare in un unico punto i task pianificati (to-do) e aggregarli in classi usando il tipo \textit{tag}, corredandoli di una data e una posizione geografica opzionalmente; o ancora tracciare la performance di una squadra di calcio, derivando informazioni statistiche dagli esiti delle singole partite.
+
+\end{frame}
+\end{document}
