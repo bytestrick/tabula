@@ -3,7 +3,6 @@
 % \usepackage{inter}
 \usepackage{url}
 \usepackage[italian]{babel}
-%\usepackage{svg} % relies on inkscape
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{tikz}
@@ -18,9 +17,9 @@
 
 \title{Tabula}
 \author{
-  Alfredo Carlino \quad \texttt{246025} \\
-  \and Giorgio Carlino \quad \texttt{246038} \\
-  \and Mario G. D'Andrea \quad \texttt{245940}}
+  Alfredo Carlino \texttt{246025} \newline
+  \and Giorgio Carlino \texttt{246038} \newline
+  \and Mario G. D'Andrea \texttt{245940}}
 \institute{Corso di Web Applications \\ C.d.S. Informatica $\cdot$ DeMaCs \\ Università della Calabria}
 \titlegraphic{\includegraphics[width=2cm]{unical}}
 \date{Giugno 2025}
@@ -31,16 +30,6 @@
 \begin{frame}
   \includegraphics[width=\textwidth]{demo}
   \centering  \href{https://github.com/bytestrick/tabula}{\faGithub\ github.com/bytestrick/tabula}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Tecnologie usate}
-  \begin{itemize}
-    \item[\faLeaf] Spring Boot
-    \item[\faDatabase] PostgreSQL
-    \item[\faHtml5] Angular 19
-    \item[\faCss3] Bootstrap
-  \end{itemize}
 \end{frame}
 
 \begin{frame}
@@ -57,4 +46,45 @@
   La facilità di utilizzo delle tabelle le rende uno strumento perfetto per tenere traccia delle letture, sia concluse che pianificate; oppure raggruppare in un unico punto i task pianificati (to-do) e aggregarli in classi usando il tipo \textit{tag}, corredandoli di una data e una posizione geografica opzionalmente; o ancora tracciare la performance di una squadra di calcio, derivando informazioni statistiche dagli esiti delle singole partite.
 
 \end{frame}
+
+\begin{frame}
+  \frametitle{Tecnologie usate}
+
+  \begin{itemize}
+    \item[\faLeaf] Spring Boot
+    \item[\faEnvelope] Spring Email
+    \item[\faDatabase] PostgreSQL
+  \end{itemize}
+
+  \vspace{15pt}
+
+  \begin{itemize}
+    \item[\faHtml5] Angular
+    \item[\faCss3] Bootstrap
+  \end{itemize}
+
+  \vspace{18pt}
+
+  API esterne:
+  \begin{itemize}
+    \item[\faMapMarker] \href{https://www.openstreetmap.org/}{OpenStreetMap}
+    \item[\faMapSigns] \href{https://nominatim.openstreetmap.org/}{Nominatim}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Modello entità relazione}
+  \begin{figure}
+    % \includegraphics[width=\textwidth]{entity_relation_diagram}
+    \texttt{TODO: includere modello ER}
+  \end{figure}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Diagramma di classi (back-end)}
+  \begin{figure}
+    \includegraphics[height=8cm]{classes}
+  \end{figure}
+\end{frame}
+
 \end{document}
