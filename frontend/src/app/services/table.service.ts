@@ -302,7 +302,7 @@ export class TableService {
     if (rowIndex < 0 || rowIndex >= this.getRowsNumber())
       return;
 
-    this.selectedRows.selectOrUpdate(this.getRowId(rowIndex));
+    this.selectedRows.select(this.getRowId(rowIndex));
   }
 
   /**
@@ -326,7 +326,7 @@ export class TableService {
     if (columnIndex < 0 || columnIndex >= this.getColumnsNumber())
       return;
 
-    this.selectedColumns.selectOrUpdate(this.getHeaderColumnId(columnIndex));
+    this.selectedColumns.select(this.getHeaderColumnId(columnIndex));
   }
 
   /**
@@ -452,11 +452,11 @@ export class TableService {
    */
   deleteSelectedRows(): void {
     const rowsIdsToDelete: string[] = this.selectedRows.getSelectedIds();
+    this.selectedRows.deselectAll();
 
     this.tableAPI.deleteRows(rowsIdsToDelete).subscribe(
       rowsDeleted => {
         const rowsIndexesToDelete: number[] = rowsDeleted.indexes.sort((a: number, b: number): number => b - a);
-
         for (const rowIndex of rowsIndexesToDelete)
           this._deleteRow(rowIndex);
       }
@@ -522,6 +522,7 @@ export class TableService {
    */
   deleteSelectedColumns(): void {
     const columnsIdsToDelete: string[] = this.selectedColumns.getSelectedIds();
+    this.selectedColumns.deselectAll();
 
     this.tableAPI.deleteColumns(columnsIdsToDelete).subscribe(
       columnDeleted => {

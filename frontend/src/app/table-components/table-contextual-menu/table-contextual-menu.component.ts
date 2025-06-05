@@ -12,7 +12,6 @@ import {TableService} from '../../services/table.service';
 
 @Component({
   selector: 'tbl-contextual-menu',
-  standalone: true,
   templateUrl: './table-contextual-menu.component.html',
   styleUrl: './table-contextual-menu.component.css'
 })
