@@ -35,7 +35,6 @@ import {CellCord} from '../../model/table/cell-cord';
 import {ActivatedRoute} from '@angular/router';
 import {Row} from '../../model/table/row';
 import {InputComponentFactoryService} from '../../services/input-component-factory.service';
-import {HeaderColumn} from '../../model/table/headerColumn';
 import {InputComponentConfiguration} from '../input-components/InputComponentConfiguration';
 
 @Component({
@@ -114,7 +113,6 @@ export class TableComponent implements OnInit, OnDestroy {
       this.inputComponentFactory.createInputComponent(
         DataTypesChooserComponent,
         {
-          popUpRef: this.tableInputPopUp,
           doAfterInputConfirmation: doAfterInputConfirmation
         }
       );
@@ -158,7 +156,6 @@ export class TableComponent implements OnInit, OnDestroy {
       return;
 
     const config: InputComponentConfiguration = {
-      popUpRef: this.tableInputPopUp,
       startingValue: cell.value,
       doAfterInputDataTypeConfirmation: (value: string, dataTypeId: number): void =>
         this.tableService.setCellsValue(cord, value, dataTypeId)

@@ -1,5 +1,5 @@
-import {PopUp} from '../pop-up-component/pop-up.component';
-import {ComponentRef, InjectionToken} from '@angular/core';
+import {InjectionToken} from '@angular/core';
+import { BaseInputComponent } from './base-input-component';
 
 /**
  * Injection token used to provide configuration data to dynamically created input components.
@@ -10,8 +10,6 @@ export const INPUT_COMPONENT_CONFIG = new InjectionToken<InputComponentConfigura
 /**
  * Configuration interface for input components.
  *
- * @property {ComponentRef<PopUp>} popUpRef
- *   Reference to the PopUp instance that hosts this input component.
  * @property {any} startingValue
  *   Initial value for the input component.
  * @property {function(value: string, dataTypeId: number):void} [doAfterInputDataTypeConfirmation]
@@ -24,7 +22,6 @@ export const INPUT_COMPONENT_CONFIG = new InjectionToken<InputComponentConfigura
  *   {@link BaseInputComponent.confirmInput}. Receives the confirmed input value.
  */
 export interface InputComponentConfiguration {
-  popUpRef: ComponentRef<PopUp>
   doAfterInputDataTypeConfirmation?: (value: string, dataTypeId: number) => void;
   doAfterInputConfirmation?: (value: any) => void;
   startingValue?: any;

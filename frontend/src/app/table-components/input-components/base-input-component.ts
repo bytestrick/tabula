@@ -27,7 +27,7 @@ export abstract class BaseInputComponent implements PopUpContent {
    */
   private readonly doAfterInputConfirmation?: (value: any) => void;
 
-  popUpRef: ComponentRef<PopUp>;
+  popUpRef!: PopUp;
 
   private inputComponentConfiguration: InputComponentConfiguration = inject(INPUT_COMPONENT_CONFIG);
 
@@ -39,7 +39,6 @@ export abstract class BaseInputComponent implements PopUpContent {
     this.startingValue = this.inputComponentConfiguration.startingValue;
     this.doAfterInputConfirmation = this.inputComponentConfiguration.doAfterInputConfirmation;
     this.doAfterInputDataTypeConfirmation = this.inputComponentConfiguration.doAfterInputDataTypeConfirmation;
-    this.popUpRef = this.inputComponentConfiguration.popUpRef;
   }
 
 
@@ -58,7 +57,7 @@ export abstract class BaseInputComponent implements PopUpContent {
     if (this.doAfterInputConfirmation)
       this.doAfterInputConfirmation(value);
 
-    this.popUpRef.instance.hide();
+    this.popUpRef.hide();
   }
 
 
@@ -72,7 +71,7 @@ export abstract class BaseInputComponent implements PopUpContent {
     if (this.doAfterInputDataTypeConfirmation)
       this.doAfterInputDataTypeConfirmation(value, dataTypeId);
 
-    this.popUpRef.instance.hide();
+    this.popUpRef.hide();
   }
 
 
@@ -81,7 +80,7 @@ export abstract class BaseInputComponent implements PopUpContent {
    * Use this to handle cancellation scenarios.
    */
   protected abortInput(): void {
-    this.popUpRef.instance.hide();
+    this.popUpRef.hide();
   }
 
 
