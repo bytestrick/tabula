@@ -1,0 +1,25 @@
+<div class="d-flex flex-column responsive-map">
+  <div class="input-group mb-2 d-flex justify-content-between">
+    <input
+      #latitudeInput
+      type="text"
+      class="form-control flex-fill"
+      placeholder="latitude"
+      aria-label="latitude"
+      aria-describedby="basic-addon1"
+      (input)="onLatitudeLongitudeChange(latitudeInput.value, longitudeInput.value)"
+    >
+    <span class="input-group-text">{{ separator }}</span>
+    <input
+      #longitudeInput
+      type="text"
+      class="form-control flex-fill"
+      placeholder="longitude"
+      aria-label="longitude"
+      aria-describedby="basic-addon1"
+      (input)="onLatitudeLongitudeChange(latitudeInput.value, longitudeInput.value)"
+    >
+    <button class="btn btn-primary" type="button" (click)="onPositionConfirmed()">Confirm</button>
+  </div>
+  <div id="map" class="rounded-1 responsive-map"></div>
+</div>

@@ -1,6 +1,6 @@
 import {
   AfterViewInit,
-  Component,
+  Component, ComponentRef,
   ElementRef, inject, Input,
   Renderer2, ViewChild,
 } from '@angular/core';
@@ -12,7 +12,6 @@ import {TableService} from '../../services/table.service';
 
 @Component({
   selector: 'tbl-contextual-menu',
-  standalone: true,
   templateUrl: './table-contextual-menu.component.html',
   styleUrl: './table-contextual-menu.component.css'
 })
@@ -21,8 +20,6 @@ export class TableContextualMenuComponent implements PopUpContent, AfterViewInit
   readonly TARGET_ROW: string = 'row';
   readonly TARGET_COLUMN: string = 'column';
 
-  popUpRef?: PopUp | undefined;
-
   @ViewChild('defaultActionTarget') defaultActionTarget!: ElementRef;
 
   protected currentActionTarget: string = this.TARGET_ROW;
@@ -30,23 +27,22 @@ export class TableContextualMenuComponent implements PopUpContent, AfterViewInit
   private toastService: ToastService = inject(ToastService);
   private renderer: Renderer2 = inject(Renderer2);
 
+  popUpRef!: PopUp;
+
   @Input() tableService!: TableService;
   @Input() cellCord!: Pair<number, number>;
 
 
   onHidden(_action: string): void {}
 
-
   ngAfterViewInit(): void {
     this.renderer.setAttribute(this.defaultActionTarget.nativeElement,'checked', '');
   }
 
-
   onShowUp(): void {}
 
-
   onDelete(): void {
-    this.popUpRef?.hide();
+    this.popUpRef.hide();
 
     switch (this.currentActionTarget) {
       case this.TARGET_ROW: {
@@ -100,9 +96,8 @@ export class TableContextualMenuComponent implements PopUpContent, AfterViewInit
     }
   }
 
-
   onDuplicate(): void {
-    this.popUpRef?.hide();
+    this.popUpRef.hide();
 
     switch (this.currentActionTarget) {
       case this.TARGET_ROW: {
@@ -129,7 +124,6 @@ export class TableContextualMenuComponent implements PopUpContent, AfterViewInit
       }
     }
   }
-
 
   onActionTargetChanged(newTarget: string): void {
     this.currentActionTarget = newTarget;

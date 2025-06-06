@@ -90,7 +90,7 @@ public class TableService {
                 .title(tableCreateDTO.title())
                 .description(tableCreateDTO.description())
                 .creationDate(tableCreateDTO.creationDate())
-                .lastEditDate(tableCreateDTO.lastEditDate())
+                .lastEditDate(tableCreateDTO.creationDate()) // la data di modifica combacia con quella di creazione
                 .userId(getAuthUser().getId())
                 .build();
 
@@ -109,7 +109,7 @@ public class TableService {
                 .id(tableId)
                 .title(tablePutDTO.title())
                 .description(tablePutDTO.description())
-                .lastEditDate(tablePutDTO.lastEditTime())
+                .lastEditDate(tablePutDTO.lastEditDate())
                 .build();
 
         tableDAO.update(table);
