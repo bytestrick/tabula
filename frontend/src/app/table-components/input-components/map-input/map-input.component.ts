@@ -96,6 +96,10 @@ export class MapInputComponent extends BaseInputComponent implements OnInit {
           this.confirmInputDataType(cord, DataTypeRegistryService.MAP_ID);
         }
       );
+
+      // shows '...' until the converted coordinate is loaded.
+      const cord = `${latS}${this.separator}${lngS}${this.separator}...`;
+      this.confirmInputDataType(cord, DataTypeRegistryService.MAP_ID);
     }
     else
       this.abortInput();
