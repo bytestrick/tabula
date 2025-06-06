@@ -1,5 +1,7 @@
 # Tabula
 
+![Demo image](docs/demo.png)
+
 This repository contains two subprojects, one is the backend of the app which is a Java-SpringBoot-PostgreSQL-Gradle
 application, while the other is the frontend of the app which is a TypeScript-Angular-NPM app.
 
