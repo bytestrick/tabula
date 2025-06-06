@@ -13,7 +13,7 @@ export class Row {
   }
 
 
-  public appendNewCell(newDataType: IDataType, value: any = null): void {
+  public appendNewCell(newDataType: IDataType, value: string = ''): void {
       this.row.push(new Cell(newDataType, value));
   }
 
@@ -23,7 +23,7 @@ export class Row {
   }
 
 
-  insertNewCellAt(index: number, newDataType: IDataType, value: any = null): void {
+  insertNewCellAt(index: number, newDataType: IDataType, value: string = ''): void {
     this.row.splice(index, 0, new Cell(newDataType, value));
   }
 

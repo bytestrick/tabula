@@ -67,6 +67,9 @@ export class PopUp implements OnInit, OnDestroy, AfterViewInit {
 
   // Initialize the mutation observer to detect visibility changes
   ngOnInit(): void {
+    if (this.popUpContent)
+      this.popUpContent.instance.popUpRef = this;
+
     this.visibilityObserver = new MutationObserver(mutations => {
       mutations.forEach(mutation => {
         if (mutation.attributeName === 'hidden') {
@@ -186,6 +189,7 @@ export class PopUp implements OnInit, OnDestroy, AfterViewInit {
     this.contentContainer.clear();
     this.contentContainer.insert(newContent.hostView);
     this.popUpContent = newContent;
+    this.popUpContent.instance.popUpRef = this;
   }
 
 

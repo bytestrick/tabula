@@ -1,0 +1,11 @@
+.responsive-map {
+  width: 550px;
+  min-height: 350px;
+}
+
+@media (max-width: 768px) {
+  .responsive-map {
+    width: 300px;
+    min-height: 250px;
+  }
+}

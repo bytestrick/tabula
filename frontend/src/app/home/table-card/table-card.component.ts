@@ -12,14 +12,20 @@ import {TableCard} from './table-card.interface';
 import {Subscription} from 'rxjs';
 import {DatePipe} from '@angular/common';
 import {PrettyDatePipe} from '../pretty-date.pipe';
-import {Router, RouterOutlet} from '@angular/router';
+import {Router} from '@angular/router';
 import {ToastService} from '../../toast/toast.service';
 import {ConfirmDialogService} from '../../confirm-dialog/confirm-dialog.service';
+import {NavbarComponent} from '../../navbar/navbar.component';
 
 @Component({
   selector: 'tbl-table-card',
   imports: [DatePipe, PrettyDatePipe],
   templateUrl: './table-card.component.html',
+  styles: `
+    .card:active {
+      border-color: var(--bs-btn-active-border-color)
+    }
+  `
 })
 export class TableCardComponent implements OnDestroy {
   @Output('editTableCard') editTableCard: EventEmitter<TableCardComponent> = new EventEmitter;
@@ -142,5 +148,6 @@ export class TableCardComponent implements OnDestroy {
   onOpenCard(): void {
     this.router.navigate(['/tables', this.id])
       .catch(err => console.error(err));
+    NavbarComponent.setTableTitle(this.title);
   }
 }
