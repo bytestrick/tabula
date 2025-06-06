@@ -1,7 +1,8 @@
-import {AfterViewInit, Component, ElementRef, viewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, inject, viewChild} from '@angular/core';
 import {BaseInputComponent} from '../base-input-component';
 import * as L from 'leaflet';
 import {DataTypeRegistryService} from '../../../services/data-type-registry.service';
+import {MapService} from '../../../services/map.service';
 
 @Component({
   selector: 'tbl-map-input',
@@ -13,24 +14,14 @@ export class MapInputComponent extends BaseInputComponent implements AfterViewIn
   private currentMarker?: L.Marker;
   private latitudeInput = viewChild.required<ElementRef<HTMLInputElement>>('latitudeInput');
   private longitudeInput = viewChild.required<ElementRef<HTMLInputElement>>('longitudeInput');
+  private mapService = inject(MapService);
 
-  static readonly lngLatSeparator = ':';
-  // template doesn't like static variables
-  protected separator = MapInputComponent.lngLatSeparator;
+  static readonly SEPARATOR = ':';
+  readonly separator = MapInputComponent.SEPARATOR; // for template
+
 
   ngAfterViewInit(): void {
-    this.initMap();
-  }
-
-  private initMap(): void {
-    this.map = L.map('map');
-    this.setMapView();
-
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    }).addTo(this.map);
-
+    this.map = this.mapService.getNewMap();
     this.map.on('click', this.onMapClick.bind(this));
   }
 
@@ -39,43 +30,9 @@ export class MapInputComponent extends BaseInputComponent implements AfterViewIn
     this.longitudeInput().nativeElement.value = lng.toString();
   }
 
-  private getCurrentLongitudeLatitude(): string {
-    return `${this.latitudeInput().nativeElement.value}${MapInputComponent.lngLatSeparator}${this.longitudeInput().nativeElement.value}`;
-  }
-
   private setMapView(lat: number = 51.505, lng: number = -0.09): void {
     this.setLongitudeLatitudeOnInput(lat, lng);
     this.map.setView([lat, lng], 13);
-  }
-
-  private locateUser(): void {
-    if (!navigator.geolocation) {
-      console.warn('Geolocation is not supported by the browser');
-      this.setMapView();
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      pos => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-
-        this.setMapView(lat, lng);
-
-        this.currentMarker = L.marker([lat, lng])
-          .addTo(this.map)
-          .bindPopup('You\'re here!')
-          .openPopup();
-      },
-      err => {
-        console.error('Error in position detection:', err.message);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 5000,
-        maximumAge: 0
-      }
-    );
   }
 
   private setMarker(lat: number, lng: number): void {
@@ -92,10 +49,12 @@ export class MapInputComponent extends BaseInputComponent implements AfterViewIn
   }
 
   protected override onPopUpShowUp(): void {
-    if (!this.startingValue)
-      this.locateUser();
+    if (!this.startingValue) {
+      if (!this.mapService.locateUser(this.map))
+        this.setMapView(); // set default view
+    }
     else {
-      const latLng: string[] = (this.startingValue as string).split(MapInputComponent.lngLatSeparator);
+      const latLng: string[] = (this.startingValue as string).split(this.separator);
       const lat = Number(latLng[0]) || 0;
       const lng = Number(latLng[1]) || 0;
       this.setMapView(lat, lng);
@@ -104,13 +63,39 @@ export class MapInputComponent extends BaseInputComponent implements AfterViewIn
   }
 
   private applyInput(): void {
-    const coordinateRegex: RegExp = /^(-?\d+(\.\d+)?):(-?\d+(\.\d+)?)$/;
-    const cord = this.getCurrentLongitudeLatitude();
+    const coordinateRegex: RegExp = /^(-?\d+(\.\d+)?)$/;
+    const lat = Number(this.latitudeInput().nativeElement.value);
+    const lng = Number(this.longitudeInput().nativeElement.value);
 
-    if (cord == MapInputComponent.lngLatSeparator)
-      this.confirmInputDataType('', DataTypeRegistryService.MAP_ID);
-    else if (cord && coordinateRegex.test(cord))
-      this.confirmInputDataType(cord, DataTypeRegistryService.MAP_ID);
+    if (!lat || !lng) {
+      this.abortInput();
+      return;
+    }
+
+    const latS = String(lat);
+    const lngS = String(lng);
+
+    if (coordinateRegex.test(latS) && coordinateRegex.test(lngS)) {
+      this.mapService.getConvertedCords(lat, lng).subscribe(
+        value => {
+          const name = value.name;
+          const type = value.type;
+          let prettyCord: string;
+
+          if (name && type)
+            prettyCord = `${ value.name } (${ value.type })`;
+          else if (name && !type)
+            prettyCord = `${ value.name }`;
+          else if (!name && type)
+            prettyCord = `location unknown (${ value.type })`;
+          else
+            prettyCord = 'location unknown (unknown)';
+
+          const cord = `${latS}${this.separator}${lngS}${this.separator}${prettyCord}`;
+          this.confirmInputDataType(cord, DataTypeRegistryService.MAP_ID);
+        }
+      );
+    }
     else
       this.abortInput();
   }
