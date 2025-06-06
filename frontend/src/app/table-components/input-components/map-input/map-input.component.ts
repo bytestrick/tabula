@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef, inject, viewChild} from '@angular/core';
+import {OnInit, Component, ElementRef, inject, viewChild} from '@angular/core';
 import {BaseInputComponent} from '../base-input-component';
 import * as L from 'leaflet';
 import {DataTypeRegistryService} from '../../../services/data-type-registry.service';
@@ -8,8 +8,9 @@ import {MapService} from '../../../services/map.service';
   selector: 'tbl-map-input',
   imports: [],
   templateUrl: './map-input.component.html',
+  styleUrl: 'map-input.component.css'
 })
-export class MapInputComponent extends BaseInputComponent implements AfterViewInit {
+export class MapInputComponent extends BaseInputComponent implements OnInit {
   private map!: L.Map;
   private currentMarker?: L.Marker;
   private latitudeInput = viewChild.required<ElementRef<HTMLInputElement>>('latitudeInput');
@@ -20,7 +21,7 @@ export class MapInputComponent extends BaseInputComponent implements AfterViewIn
   readonly separator = MapInputComponent.SEPARATOR; // for template
 
 
-  ngAfterViewInit(): void {
+  ngOnInit(): void {
     this.map = this.mapService.getNewMap();
     this.map.on('click', this.onMapClick.bind(this));
   }
