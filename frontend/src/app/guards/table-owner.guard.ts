@@ -1,18 +1,18 @@
 import {CanActivateFn, Router} from '@angular/router';
 import {inject} from '@angular/core';
-import {HomeService} from '../home/home.service';
-import {catchError, of} from 'rxjs';
+import {TableApiService} from '../services/table-api.service';
+import {catchError, map, of} from 'rxjs';
 
-
-// TODO: valutare se implementarla
 export const tableOwnerGuard: CanActivateFn = (route, _) => {
-  // const tableId: string = route.paramMap.get('table-id') || '';
-  // const router: Router = inject(Router);
-  //
-  // return inject(HomeService).currentUserHasTable(tableId).pipe(
-  //   catchError(() =>
-  //     of(router.createUrlTree([`/tables/${tableId}`]))
-  //   )
-  // );
-  return true;
+  const tableId = route.url[route.url.length - 1].toString();
+  const tableApi = inject(TableApiService);
+  const router = inject(Router);
+
+  return tableApi.getTable(tableId).pipe(
+    map(() => true),
+    catchError((_) => {
+      router.navigate([`${ tableId }`]).then();
+       return of(false);
+    })
+  );
 }
