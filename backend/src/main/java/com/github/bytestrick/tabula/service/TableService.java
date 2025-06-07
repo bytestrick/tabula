@@ -145,7 +145,7 @@ public class TableService {
      * @throws TableNotFoundException If no table exists for the given {@code tableId}.
      */
     private void ensureTableExistsOrThrow(UUID tableId) {
-        if (!tableDAO.tableExists(tableId)) {
+        if (!tableDAO.tableExists(tableId, getAuthUser().getId())) {
             throw new TableNotFoundException(tableId);
         }
     }
