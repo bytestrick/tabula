@@ -103,7 +103,7 @@ public class TableService {
 
     @Transactional
     public String updateTable(UUID tableId, TablePutDTO tablePutDTO) {
-        ensureTableExistsOrThrow(tableId);
+        ensureTableExistsForAuthUserOrThrow(tableId);
 
         Table table = Table.builder()
                 .id(tableId)
@@ -139,13 +139,13 @@ public class TableService {
     }
 
     /**
-     * Verifies that a table with the given UUID exists; otherwise throws.
+     * Verifies that a table with the given UUID exists and belongs to auth user; otherwise throws.
      *
      * @param tableId The UUID of the table to check.
      * @throws TableNotFoundException If no table exists for the given {@code tableId}.
      */
-    private void ensureTableExistsOrThrow(UUID tableId) {
-        if (!tableDAO.tableExists(tableId, getAuthUser().getId())) {
+    private void ensureTableExistsForAuthUserOrThrow(UUID tableId) {
+        if (!tableDAO.tableExistsForUser(tableId, getAuthUser().getId())) {
             throw new TableNotFoundException(tableId);
         }
     }
@@ -204,7 +204,7 @@ public class TableService {
      */
     @Transactional
     public TableContentDTO getTable(UUID tableId) {
-        ensureTableExistsOrThrow(tableId);
+        ensureTableExistsForAuthUserOrThrow(tableId);
 
         TableProxy table = tableDAO.findTableById(tableId);
         List<RowDTO> content = new ArrayList<>();
@@ -237,7 +237,7 @@ public class TableService {
      */
     @Transactional
     public String deleteTable(UUID tableId) {
-        ensureTableExistsOrThrow(tableId);
+        ensureTableExistsForAuthUserOrThrow(tableId);
         tableDAO.deleteTable(tableId);
         return "Table deleted successfully";
     }
@@ -283,7 +283,7 @@ public class TableService {
      */
     @Transactional
     public RowCreatedDTO addNewRow(UUID tableId, RowCreateDTO rowCreateDTO) {
-        ensureTableExistsOrThrow(tableId);
+        ensureTableExistsForAuthUserOrThrow(tableId);
 
         RowProxy createdRow;
         List<String> cellsValues = new ArrayList<>();
@@ -357,7 +357,7 @@ public class TableService {
      */
     @Transactional
     public ColumnCreatedDTO addNewColumn(UUID tableId, ColumnCreateDTO columnCreateDTO) {
-        ensureTableExistsOrThrow(tableId);
+        ensureTableExistsForAuthUserOrThrow(tableId);
         ensureDataTypeExistsOrThrow(columnCreateDTO.dataTypeId());
 
         ColumnProxy createdColumn;
@@ -410,7 +410,7 @@ public class TableService {
      */
     @Transactional
     public ColumnPatchedDTO patchHeaderColumn(UUID tableId, UUID columnId, ColumnPatchDTO patchDTO) {
-        ensureTableExistsOrThrow(tableId);
+        ensureTableExistsForAuthUserOrThrow(tableId);
         ensureColumnExistsOrThrow(tableId, columnId);
 
         if (patchDTO.dataTypeId() != null) {
@@ -450,7 +450,7 @@ public class TableService {
      */
     @Transactional
     public List<CellPatchedDTO> updateCellValue(UUID tableId, List<CellPatchDTO> cellsPatchDTO) {
-        ensureTableExistsOrThrow(tableId);
+        ensureTableExistsForAuthUserOrThrow(tableId);
 
         List<CellPatchedDTO> cellsPatched = new ArrayList<>();
 
@@ -532,7 +532,7 @@ public class TableService {
      */
     @Transactional
     public ColumnsDeletedDTO deleteColumns(UUID tableId, ColumnsDeleteDTO columnsDeleteDTO) {
-        ensureTableExistsOrThrow(tableId);
+        ensureTableExistsForAuthUserOrThrow(tableId);
 
         if ((columnDAO.getColumnNumber(tableId) - columnsDeleteDTO.ids().size()) <= 0)
             throw new AtLeastOneRowAndOneColumn();
@@ -560,7 +560,7 @@ public class TableService {
      */
     @Transactional
     public RowsDeletedDTO deleteRows(UUID tableId, RowsDeleteDTO rowsDeleteDTO) {
-        ensureTableExistsOrThrow(tableId);
+        ensureTableExistsForAuthUserOrThrow(tableId);
 
         if ((rowDAO.getRowsNumber(tableId) - rowsDeleteDTO.ids().size()) <= 0)
             throw new AtLeastOneRowAndOneColumn();
@@ -785,7 +785,7 @@ public class TableService {
      */
     @Transactional
     public MovedRowsOrColumnsDTO moveRowsIndexes(UUID tableId, MovesRowsOrColumnsDTO moveRowsDTO) {
-        ensureTableExistsOrThrow(tableId);
+        ensureTableExistsForAuthUserOrThrow(tableId);
 
         int rowsAmount = rowDAO.getRowsNumber(tableId);
 
@@ -840,7 +840,7 @@ public class TableService {
      */
     @Transactional
     public MovedRowsOrColumnsDTO moveColumnsIndexes(UUID tableId, MovesRowsOrColumnsDTO moveColumnsDTO) {
-        ensureTableExistsOrThrow(tableId);
+        ensureTableExistsForAuthUserOrThrow(tableId);
 
         int columnsAmount = columnDAO.getColumnNumber(tableId);
 
