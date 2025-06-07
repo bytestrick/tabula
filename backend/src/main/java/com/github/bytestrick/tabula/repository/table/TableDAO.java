@@ -85,20 +85,23 @@ public class TableDAO {
 
 
     /**
-     * Check to see if the table exists.
+     * Checks whether a table with the given ID exists and belongs to the specified user.
      *
-     * @param tableId Id to check.
-     * @return Returns {@code true} if the {@code tableId} is associated with a table.
+     * @param tableId UUID of the table to check.
+     * @param userId  UUID of the user who should own the table.
+     * @return {@code true} if a row exists in {@code tbl_table} with {@code id = tableId}
+     *         and {@code user_id = userId}; {@code false} otherwise.
      */
-    public boolean tableExists(UUID tableId) {
+    public boolean tableExistsForUser(UUID tableId, UUID userId) {
         return jdbcClient.sql("""
                 SELECT EXISTS(
                     SELECT 1
                     FROM tbl_table
-                    WHERE id = :tableId
+                    WHERE id = :tableId and user_id = :userId
                 )
             """)
                 .param("tableId", tableId)
+                .param("userId", userId)
                 .query(Boolean.class)
                 .single();
     }
