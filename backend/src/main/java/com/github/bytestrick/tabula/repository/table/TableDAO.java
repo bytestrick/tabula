@@ -2,7 +2,6 @@ package com.github.bytestrick.tabula.repository.table;
 
 import com.github.bytestrick.tabula.model.table.Table;
 import com.github.bytestrick.tabula.repository.proxy.table.TableProxy;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -93,7 +92,7 @@ public class TableDAO {
      * @return {@code true} if a row exists in {@code tbl_table} with {@code id = tableId}
      *         and {@code user_id = userId}; {@code false} otherwise.
      */
-    public boolean tableExists(UUID tableId, UUID userId) {
+    public boolean tableExistsForUser(UUID tableId, UUID userId) {
         return jdbcClient.sql("""
                 SELECT EXISTS(
                     SELECT 1
