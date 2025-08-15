@@ -5,7 +5,8 @@
 This repository contains two subprojects, one is the backend of the app which is a Java-SpringBoot-PostgreSQL-Gradle
 application, while the other is the frontend of the app which is a TypeScript-Angular-NPM app.
 
-To run the project you will first need to [setup the `env` file](#secrets-and-the-env-file) with the database configuration. Then you can run it with
+To run the project you will first need to [setup the `env` file](#secrets-and-the-env-file) with the database
+configuration. Then you can run it with
 
 ```sh
 git clone https://github.com/bytestrick/tabula.git
@@ -15,23 +16,43 @@ cd tabula
 
 ### How does authentication work?
 
-We use Spring Security and JSON Web Tokens to authenticate users. Initially a client sends a `POST` request to the
-`/api/v1/auth/sign-in` endpoint with username, password in clear text (we assume the use of TLS) and a flag to remember
-the session. It is the responsibility of the `AuthenticationManager` to authenticate the user credentials in the form of
-a `UsernamePasswordAuthenticationToken`. To do this it uses a `DaoAuthenticationProvider` which in turn obtains the
-stored user data from a `DaoUserDetailsService`. The `DaoUserDetailsService` retrieves the user data from the underlying
-database through the `UserDao`. If the `AuthenticationManager` can retrieve the `UserDetails` then it will compare them
-with the ones from the sign-in request with a `BCryptPasswordEncoder`. If the authentication is successful we store the
-`UserDetails` in the `SecurityContext`, this will be the `Principal`, then we use the `JwtProvider` to generate a new
-token which is sent back as the response to the sign-in request. The client will store the token in the `localStorage`.
+We use Spring Security and JSON Web Tokens to authenticate users. Here is the authentication flow
+
+1. Initially a client sends a `POST` request to the `/api/v1/auth/sign-in` endpoint with email and password in clear
+   text(we assume the use of TLS).
+2. It is the responsibility of the `AuthenticationManager` to authenticate the user credentials in the form of a
+   `UsernamePasswordAuthenticationToken`. To do this it uses a `DaoAuthenticationProvider` which in turn obtains the
+   stored user data from a `DaoUserDetailsService`. The `DaoUserDetailsService` retrieves the user data from the
+   underlying database through the `UserDao`. If the `AuthenticationManager` can retrieve the `UserDetails` then it
+   will compare them with the ones from the sign in request with a `BCryptPasswordEncoder`.
+3. If the authentication is successful we store the `UserDetails` in the `SecurityContext`, this will be the
+   `Principal`, then we use the `JwtProvider` to generate a new token which is sent back as the response to the sign-in
+   request. The client will store the token in the `localStorage`.
+
+```mermaid
+flowchart LR
+
+1([API client]) -- "POST /auth/sign-in with email and password" --> 2([API server])
+2 <-- Compare credentials against database record --> 3[(Database)]
+2 -- 200 with the newly issued JWT --> 1
+```
 
 All subsequent requests to the server will have the `Authorization` header set to `Bearer <token>`, this is done by the
-`authInterceptor`. On the server side the `JwtAuthenticationFilter` will intercept all requests that need authorization,
-extract the JWT from them and verify it with the `JwtProvider`. If the verification is successful the request is
-accepted otherwise it is rejected.
+`authInterceptor` in the frontend. On the server side the `JwtAuthenticationFilter` will intercept all requests that
+need authorization, extract the JWT from them and verify it with the `JwtProvider`. If the verification is successful
+the request is accepted otherwise the server responds with HTTP 401.
 
-`JwtProvider` uses a `SecretKey` to sign the JWT, this key is generated every time from a high entropy secret stored in
-`application.properties`.
+```mermaid
+flowchart LR
+1([API client]) -- "GET /resource
+Authorization: Bearer {JWT}" --> 2([API server])
+2 -- Verifies token in request header --> 3[JwtProvider]
+2 -- OK if JWT is valid,
+else 401 --> 1
+```
+
+`JwtProvider` uses a Message Authentication (MAC) signer to sign the JWT and MAC verifier to verify it. These are
+created using a high entropy secret that is provided throuh an environment variable and is not to be exposed.
 
 ### Secrets and the `.env` file
 
